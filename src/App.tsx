@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { ResultPage } from './pages/ResultPage'
 import { SciencePage } from './pages/SciencePage'
+import { StatisticsPage } from './pages/StatisticsPage'
 
 export function AppRoutes(): React.JSX.Element {
   return (
@@ -20,6 +21,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/result" element={<ResultPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/statistics" element={<StatisticsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
