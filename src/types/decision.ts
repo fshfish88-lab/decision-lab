@@ -87,9 +87,20 @@ export interface DecisionResult {
   details?: DecisionResultDetails
 }
 
-export type DecisionHistoryItem = DecisionResult
+export interface DecisionBehavior {
+  regrettedAt?: string
+  shareCount: number
+  lastSharedAt?: string
+}
+
+export type DecisionHistoryItem = DecisionResult & DecisionBehavior
 
 export interface HistoryStoreV1 {
   version: 1
+  items: DecisionResult[]
+}
+
+export interface HistoryStoreV2 {
+  version: 2
   items: DecisionHistoryItem[]
 }
