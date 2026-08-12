@@ -1,15 +1,11 @@
-import { ArrowLeft, History, PencilLine, RefreshCw, RotateCcw, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { MetricRing } from '../components/MetricRing'
+import { RandomResult } from '../components/results/RandomResult'
+import { ResultShell } from '../components/results/ResultShell'
 import { useDecision } from '../state/DecisionContext'
-
-const MODE_LABELS = {
-  random: '随机模式',
-  scientific: '科学模式',
-  mystic: '玄学模式',
-} as const
 
 export function ResultPage(): React.JSX.Element {
   const navigate = useNavigate()
@@ -34,19 +30,8 @@ export function ResultPage(): React.JSX.Element {
     navigate(rerunPath)
   }
 
-  return (
-    <main className="result-page">
-      <div className="result-toolbar">
-        <button className="back-button" type="button" onClick={() => navigate('/')}><ArrowLeft size={17} />返回首页</button>
-        <span>{MODE_LABELS[result.mode]} · {new Date(result.createdAt).toLocaleString('zh-CN', { hour12: false })}</span>
-      </div>
-
-      <header className="page-heading result-heading">
-        <span className="section-index">DECISION COMPLETE / NO APPEAL REQUIRED</span>
-        <h1>决策结果</h1>
-        <p>{result.question}</p>
-      </header>
-
+  const legacyResult = (
+    <>
       <section className="result-hero">
         <motion.div
           className={`winner-card winner-card--${result.mode}`}
@@ -89,13 +74,16 @@ export function ResultPage(): React.JSX.Element {
         <div className="explanation-card__label"><span /><small>SYSTEM NOTE</small></div>
         <div><h2 id="explanation-heading">系统解释</h2><p>{result.explanation}</p>{result.disclaimer && <small>{result.disclaimer}</small>}</div>
       </section>
+    </>
+  )
 
-      <div className="result-actions">
-        <button className="primary-action" type="button" onClick={rerun}><RefreshCw size={18} /><span>再来一次</span></button>
-        <button className="secondary-action" type="button" onClick={() => navigate('/')}><RotateCcw size={18} />换一种模式</button>
-        <button className="secondary-action" type="button" onClick={() => navigate('/')}><PencilLine size={18} />修改选项</button>
-        <Link className="secondary-action" to="/history"><History size={18} />查看记录</Link>
-      </div>
-    </main>
+  return (
+    <ResultShell
+      result={result}
+      onRerun={rerun}
+      onReturnHome={() => navigate('/')}
+    >
+      {result.mode === 'random' ? <RandomResult result={result} /> : legacyResult}
+    </ResultShell>
   )
 }
