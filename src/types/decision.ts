@@ -27,6 +27,49 @@ export interface DecisionMetric {
   inverse?: boolean
 }
 
+export interface RandomResultDetails {
+  type: 'random'
+  sample: number
+  winningIndex: number
+  seed: string
+  drawNumber: string
+  probability: number
+}
+
+export interface ScientificContribution {
+  criterionId: string
+  name: string
+  weight: number
+  score: number
+  contribution: number
+}
+
+export interface ScientificResultDetails {
+  type: 'scientific'
+  criteria: Criterion[]
+  scores: ScientificScoreMap
+  contributions: ScientificContribution[]
+}
+
+export interface MysticEvidence {
+  key: string
+  title: string
+  description: string
+  reading: string
+}
+
+export interface MysticResultDetails {
+  type: 'mystic'
+  evidence: MysticEvidence[]
+  favorable: string
+  avoid: string
+}
+
+export type DecisionResultDetails =
+  | RandomResultDetails
+  | ScientificResultDetails
+  | MysticResultDetails
+
 export interface DecisionResult {
   id: string
   createdAt: string
@@ -39,6 +82,7 @@ export interface DecisionResult {
   metrics: DecisionMetric[]
   ranking?: ScientificRanking[]
   disclaimer?: string
+  details?: DecisionResultDetails
 }
 
 export type DecisionHistoryItem = DecisionResult

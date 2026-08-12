@@ -4,10 +4,17 @@ export function cleanOptions(options: string[]): string[] {
     .filter(Boolean)
 }
 
-export function chooseRandomOption(
+export interface RandomDraw {
+  winner: string
+  sample: number
+  winningIndex: number
+  optionCount: number
+}
+
+export function drawRandomOption(
   options: string[],
   random: () => number = Math.random,
-): string {
+): RandomDraw {
   const validOptions = cleanOptions(options)
 
   if (validOptions.length < 2) {
@@ -19,5 +26,18 @@ export function chooseRandomOption(
     throw new Error('随机源必须返回 [0, 1) 区间内的数值')
   }
 
-  return validOptions[Math.floor(sample * validOptions.length)]
+  const winningIndex = Math.floor(sample * validOptions.length)
+  return {
+    winner: validOptions[winningIndex],
+    sample,
+    winningIndex,
+    optionCount: validOptions.length,
+  }
+}
+
+export function chooseRandomOption(
+  options: string[],
+  random: () => number = Math.random,
+): string {
+  return drawRandomOption(options, random).winner
 }

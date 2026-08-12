@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { chooseRandomOption, cleanOptions } from './random'
+import { chooseRandomOption, cleanOptions, drawRandomOption } from './random'
 
 describe('cleanOptions', () => {
   it('trims values, collapses repeated whitespace, and removes blank options', () => {
@@ -27,5 +27,16 @@ describe('chooseRandomOption', () => {
     expect(chooseRandomOption(['火锅', '烧烤', '日料'], () => 0.999)).toBe(
       '日料',
     )
+  })
+})
+
+describe('drawRandomOption', () => {
+  it('returns the exact sample and landing index used by the draw', () => {
+    expect(drawRandomOption(['火锅', '日料', '烧烤'], () => 0.7)).toEqual({
+      winner: '烧烤',
+      sample: 0.7,
+      winningIndex: 2,
+      optionCount: 3,
+    })
   })
 })

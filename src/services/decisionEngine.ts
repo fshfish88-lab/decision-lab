@@ -1,10 +1,11 @@
 import { createMysticDecision } from '../algorithms/mystic'
-import { chooseRandomOption } from '../algorithms/random'
+import { drawRandomOption } from '../algorithms/random'
 import { rankScientificOptions } from '../algorithms/scientific'
 import type {
   Criterion,
   DecisionOption,
   DecisionResult,
+  MysticEvidence,
   ScientificScoreMap,
 } from '../types/decision'
 
@@ -41,12 +42,56 @@ function baseResult(
   }
 }
 
+function formatRandomSeed(sample: number): string {
+  const encoded = Math.floor(sample * 0xffffffff)
+    .toString(16)
+    .toUpperCase()
+    .padStart(8, '0')
+  return `${encoded.slice(0, 4)}-${encoded.slice(4)}`
+}
+
+function formatDrawNumber(sample: number): string {
+  const number = Math.floor(sample * 999999) + 1
+  return `#${String(number).padStart(6, '0')}`
+}
+
+function buildMysticEvidence(
+  input: RandomResultInput,
+  winner: DecisionOption,
+  confidence: number,
+): MysticEvidence[] {
+  const inputPosition = input.options.findIndex((option) => option.id === winner.id) + 1
+  const resonance = ((winner.label.trim().length * 137 + confidence) % 1000) / 1000
+  const timelines = Math.min(9999, confidence * 100 + winner.label.trim().length * 7)
+
+  return [
+    {
+      key: 'input-order',
+      title: '输入顺序效应',
+      description: `你把「${winner.label}」放在第 ${inputPosition} 个位置，系统认为这绝非偶然。`,
+      reading: `POSITION / ${String(inputPosition).padStart(2, '0')}`,
+    },
+    {
+      key: 'character-resonance',
+      title: '字符共振',
+      description: `当前时间与「${winner.label}」的字符长度产生了异常稳定的相关性。`,
+      reading: `RESONANCE / ${resonance.toFixed(3)}`,
+    },
+    {
+      key: 'parallel-timelines',
+      title: '平行时间线',
+      description: `在 10,000 条模拟时间线中，有 ${timelines.toLocaleString('zh-CN')} 个你最终选择了「${winner.label}」。`,
+      reading: `TIMELINES / ${timelines}`,
+    },
+  ]
+}
+
 export function createRandomResult(input: RandomResultInput): DecisionResult {
-  const winnerLabel = chooseRandomOption(
+  const draw = drawRandomOption(
     input.options.map((option) => option.label),
     input.random,
   )
-  const winner = input.options.find((option) => option.label.trim() === winnerLabel)
+  const winner = input.options.find((option) => option.label.trim() === draw.winner)
   if (!winner) throw new Error('随机结果无法映射到候选项')
 
   return {
@@ -60,6 +105,14 @@ export function createRandomResult(input: RandomResultInput): DecisionResult {
       { key: 'coverage', label: '候选覆盖率', value: 100 },
       { key: 'bias', label: '人为偏置', value: 0, inverse: true },
     ],
+    details: {
+      type: 'random',
+      sample: draw.sample,
+      winningIndex: draw.winningIndex,
+      seed: formatRandomSeed(draw.sample),
+      drawNumber: formatDrawNumber(draw.sample),
+      probability: 1 / draw.optionCount,
+    },
   }
 }
 
@@ -79,6 +132,12 @@ export function createMysticResult(input: RandomResultInput): DecisionResult {
     confidence: mystic.confidence,
     metrics: mystic.metrics,
     disclaimer: mystic.disclaimer,
+    details: {
+      type: 'mystic',
+      evidence: buildMysticEvidence(input, winner, mystic.confidence),
+      favorable: `今日宜：${winner.label}`,
+      avoid: '今日忌：重新打开选项继续纠结',
+    },
   }
 }
 
@@ -88,7 +147,21 @@ export function createScientificResult(input: ScientificResultInput): DecisionRe
   const winner = input.options.find((option) => option.id === leader.optionId)
   if (!winner) throw new Error('科学结果无法映射到候选项')
 
-  const mostImportant = [...input.criteria].sort((a, b) => b.weight - a.weight)[0]
+  const contributions = input.criteria.map((criterion) => {
+    const score = input.scores[winner.id][criterion.id]
+    return {
+      criterionId: criterion.id,
+      name: criterion.name,
+      weight: criterion.weight,
+      score,
+      contribution: score * criterion.weight / 100,
+    }
+  })
+  const strongest = [...contributions].sort(
+    (left, right) => right.contribution - left.contribution,
+  )[0]
+  const runnerUp = ranking[1]
+  const gap = runnerUp ? leader.score - runnerUp.score : leader.score
   const metrics = input.criteria.slice(0, 4).map((criterion) => ({
     key: criterion.id,
     label: criterion.name,
@@ -99,9 +172,20 @@ export function createScientificResult(input: ScientificResultInput): DecisionRe
     ...baseResult(input),
     mode: 'scientific',
     winner,
-    explanation: `「${winner.label}」的综合加权得分为 ${leader.score.toFixed(2)}，并在权重最高的“${mostImportant.name}”等指标下取得当前最优排名。`,
+    explanation: `「${winner.label}」的综合加权得分为 ${leader.score.toFixed(2)}，在“${strongest.name}”上获得本轮最高贡献 ${strongest.contribution.toFixed(2)} 分，并以 ${gap.toFixed(2)} 分的综合优势胜出。`,
     confidence: Math.round(leader.score * 10),
     metrics,
     ranking,
+    details: {
+      type: 'scientific',
+      criteria: input.criteria.map((criterion) => ({ ...criterion })),
+      scores: Object.fromEntries(
+        Object.entries(input.scores).map(([optionId, scoreMap]) => [
+          optionId,
+          { ...scoreMap },
+        ]),
+      ),
+      contributions,
+    },
   }
 }
