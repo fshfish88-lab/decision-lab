@@ -41,6 +41,16 @@ export function ResultPage(): React.JSX.Element {
     navigate(rerunPath)
   }
 
+  function changeMode(): void {
+    dispatch({ type: 'prepare-mode-selection' })
+    navigate('/', { state: { focusTarget: 'mode' } })
+  }
+
+  function editOptions(): void {
+    dispatch({ type: 'clear-result' })
+    navigate('/', { state: { focusTarget: 'input' } })
+  }
+
   function regret(): void {
     const updated = markHistoryItemRegretted(decisionResult.id)
     if (updated?.regrettedAt) setRegretted(true)
@@ -63,6 +73,8 @@ export function ResultPage(): React.JSX.Element {
       result={decisionResult}
       onRerun={rerun}
       onReturnHome={() => navigate('/')}
+      onChangeMode={changeMode}
+      onEditOptions={editOptions}
       onRegret={regret}
       onCopy={copyResult}
       onDownload={downloadShareCard}

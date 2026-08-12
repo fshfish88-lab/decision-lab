@@ -1,6 +1,6 @@
 import { ArrowRight, BarChart3, Bot, Dices, Orbit } from 'lucide-react'
-import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { DecisionMachine } from '../components/DecisionMachine'
 import { ModeCard } from '../components/ModeCard'
@@ -17,6 +17,7 @@ const CTA_LABELS: Record<DecisionMode, string> = {
 
 export function HomePage(): React.JSX.Element {
   const navigate = useNavigate()
+  const location = useLocation()
   const { state, dispatch } = useDecision()
   const validCount = useMemo(
     () => state.options.filter((option) => option.label.trim()).length,
@@ -24,6 +25,21 @@ export function HomePage(): React.JSX.Element {
   )
   const canStart = validCount >= 2 && state.mode !== null
   const ctaLabel = state.mode ? CTA_LABELS[state.mode] : '选择一种决策方式'
+
+  useEffect(() => {
+    const focusTarget = (location.state as { focusTarget?: 'input' | 'mode' } | null)?.focusTarget
+    if (!focusTarget) return
+
+    const target = document.getElementById(focusTarget === 'mode' ? 'mode-selection' : 'decision-input')
+    if (!target) return
+
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+
+    if (focusTarget === 'input') {
+      target.querySelector<HTMLInputElement>('.option-row input')?.focus({ preventScroll: true })
+    }
+  }, [location.key, location.state])
 
   function selectMode(mode: DecisionMode): void {
     dispatch({ type: 'set-mode', mode })
@@ -54,7 +70,7 @@ export function HomePage(): React.JSX.Element {
         <DecisionMachine />
       </section>
 
-      <section className="decision-workbench" aria-labelledby="workbench-title">
+      <section id="decision-input" className="decision-workbench" aria-labelledby="workbench-title">
         <div className="workbench-heading">
           <div>
             <span className="section-index">01 / INPUT</span>
@@ -84,7 +100,7 @@ export function HomePage(): React.JSX.Element {
             <p className="field-hint">至少 2 项、最多 10 项；按 Enter 可以继续添加。</p>
           </div>
 
-          <div className="mode-panel">
+          <div id="mode-selection" className="mode-panel">
             <div className="mode-panel__heading">
               <span className="section-index">02 / METHOD</span>
               <h2>选择决策模式</h2>

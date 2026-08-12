@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -18,6 +18,10 @@ describe('DECISION LAB flow', () => {
         removeEventListener: vi.fn(),
       }),
     )
+    Object.defineProperty(Element.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: vi.fn(),
+    })
   })
 
   afterEach(() => {
@@ -133,6 +137,60 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByText('成就解锁：初次见面')).toBeInTheDocument()
     expect(screen.getByText('系统已如实记录').previousElementSibling).toHaveTextContent('1')
     expect(screen.getByText('决定之后没有反悔').previousElementSibling).toHaveTextContent('0.0%')
+  })
+
+  it('keeps the draft but clears the selected mode when changing mode from a result', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByPlaceholderText('例如：今晚吃什么？'), '周末去哪儿？')
+    await user.type(screen.getByLabelText('选项 1'), '逛博物馆')
+    await user.type(screen.getByLabelText('选项 2'), '去公园')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+    await screen.findByRole('heading', { name: '决策结果' })
+
+    await user.click(screen.getByRole('button', { name: '换一种模式' }))
+
+    expect(screen.getByPlaceholderText('例如：今晚吃什么？')).toHaveValue('周末去哪儿？')
+    expect(screen.getByLabelText('选项 1')).toHaveValue('逛博物馆')
+    expect(screen.getByLabelText('选项 2')).toHaveValue('去公园')
+    expect(screen.getByRole('button', { name: /随机模式/ })).toHaveAttribute('aria-pressed', 'false')
+    await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalled())
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.instances.at(-1)).toHaveAttribute('id', 'mode-selection')
+  })
+
+  it('keeps the selected mode when editing options from a result', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByPlaceholderText('例如：今晚吃什么？'), '周末去哪儿？')
+    await user.type(screen.getByLabelText('选项 1'), '逛博物馆')
+    await user.type(screen.getByLabelText('选项 2'), '去公园')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+    await screen.findByRole('heading', { name: '决策结果' })
+
+    await user.click(screen.getByRole('button', { name: '修改选项' }))
+
+    expect(screen.getByPlaceholderText('例如：今晚吃什么？')).toHaveValue('周末去哪儿？')
+    expect(screen.getByLabelText('选项 1')).toHaveValue('逛博物馆')
+    expect(screen.getByLabelText('选项 2')).toHaveValue('去公园')
+    expect(screen.getByRole('button', { name: /随机模式/ })).toHaveAttribute('aria-pressed', 'true')
+    await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalled())
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.instances.at(-1)).toHaveAttribute('id', 'decision-input')
   })
 
   it('resets the scroll position when the route changes', async () => {

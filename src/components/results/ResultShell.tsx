@@ -16,6 +16,8 @@ interface ResultShellProps {
   children: React.ReactNode
   onRerun: () => void
   onReturnHome: () => void
+  onChangeMode: () => void
+  onEditOptions: () => void
   onRegret: () => void
   onCopy: () => Promise<void>
   onDownload: () => Promise<void>
@@ -27,6 +29,8 @@ export function ResultShell({
   children,
   onRerun,
   onReturnHome,
+  onChangeMode,
+  onEditOptions,
   onRegret,
   onCopy,
   onDownload,
@@ -106,10 +110,10 @@ export function ResultShell({
         <button className="primary-action" type="button" onClick={onRerun}>
           <RefreshCw size={18} /><span>再来一次</span>
         </button>
-        <button className="secondary-action" type="button" onClick={onReturnHome}>
+        <button className="secondary-action" type="button" onClick={onChangeMode}>
           <RotateCcw size={18} />换一种模式
         </button>
-        <button className="secondary-action" type="button" onClick={onReturnHome}>
+        <button className="secondary-action" type="button" onClick={onEditOptions}>
           <PencilLine size={18} />修改选项
         </button>
         <Link className="secondary-action" to="/history">

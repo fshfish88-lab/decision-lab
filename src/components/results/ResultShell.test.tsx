@@ -26,6 +26,8 @@ function renderShell(overrides: Partial<React.ComponentProps<typeof ResultShell>
     result,
     onRerun: vi.fn(),
     onReturnHome: vi.fn(),
+    onChangeMode: vi.fn(),
+    onEditOptions: vi.fn(),
     onRegret: vi.fn(),
     onCopy: vi.fn().mockResolvedValue(undefined),
     onDownload: vi.fn().mockResolvedValue(undefined),
@@ -68,5 +70,17 @@ describe('ResultShell V1.5 actions', () => {
 
     expect(await screen.findByText('复制失败，请检查浏览器权限')).toBeInTheDocument()
     expect(screen.getByText('结果内容')).toBeInTheDocument()
+  })
+
+  it('routes mode changes and option edits through distinct actions', async () => {
+    const user = userEvent.setup()
+    const props = renderShell()
+
+    await user.click(screen.getByRole('button', { name: '换一种模式' }))
+    await user.click(screen.getByRole('button', { name: '修改选项' }))
+
+    expect(props.onChangeMode).toHaveBeenCalledTimes(1)
+    expect(props.onEditOptions).toHaveBeenCalledTimes(1)
+    expect(props.onReturnHome).not.toHaveBeenCalled()
   })
 })
