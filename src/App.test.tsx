@@ -39,7 +39,7 @@ describe('DECISION LAB flow', () => {
     await user.type(screen.getByLabelText('选项 2'), '日料')
     await user.type(screen.getByPlaceholderText('例如：今晚吃什么？'), '今晚吃什么？')
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
-    await user.click(screen.getByRole('button', { name: '开始决策' }))
+    await user.click(screen.getByRole('button', { name: '开始做法' }))
 
     expect(screen.getByRole('heading', { name: '正在进行决策分析' })).toBeInTheDocument()
 
@@ -65,7 +65,7 @@ describe('DECISION LAB flow', () => {
     await user.type(screen.getByLabelText('选项 1'), '火锅')
     await user.type(screen.getByLabelText('选项 2'), '日料')
     await user.click(screen.getByRole('button', { name: /科学模式/ }))
-    await user.click(screen.getByRole('button', { name: '开始决策' }))
+    await user.click(screen.getByRole('button', { name: '开始计算' }))
 
     expect(screen.getByRole('heading', { name: '科学模式' })).toBeInTheDocument()
     expect(screen.getByText('当前权重总和')).toBeInTheDocument()

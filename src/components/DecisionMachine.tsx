@@ -1,20 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
-const TICKETS = ['火锅', '去散步', '买吧', '睡觉', '不去了', '再想五分钟'] as const
-const TICKET_INTERVAL_MS = 4200
-
-export function getNextTicketIndex(
-  currentIndex: number,
-  ticketCount: number,
-  randomValue = Math.random(),
-): number {
-  if (ticketCount <= 1) return 0
-
-  const normalizedRandom = Math.min(Math.max(randomValue, 0), 0.999999)
-  const offset = Math.floor(normalizedRandom * (ticketCount - 1)) + 1
-  return (currentIndex + offset) % ticketCount
-}
+import {
+  DECISION_MACHINE_TICKET_INTERVAL_MS,
+  DECISION_MACHINE_TICKETS,
+  getNextTicketIndex,
+} from './decisionMachineTickets'
 
 export function DecisionMachine(): React.JSX.Element {
   const reducedMotion = useReducedMotion()
@@ -23,10 +14,10 @@ export function DecisionMachine(): React.JSX.Element {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setTicket((current) => ({
-        index: getNextTicketIndex(current.index, TICKETS.length),
+        index: getNextTicketIndex(current.index, DECISION_MACHINE_TICKETS.length),
         serial: current.serial + 1,
       }))
-    }, TICKET_INTERVAL_MS)
+    }, DECISION_MACHINE_TICKET_INTERVAL_MS)
 
     return () => window.clearInterval(intervalId)
   }, [])
@@ -43,7 +34,7 @@ export function DecisionMachine(): React.JSX.Element {
       <div className="decision-machine__orbit decision-machine__orbit--one" />
       <div className="decision-machine__orbit decision-machine__orbit--two" />
       <motion.div
-        className="decision-machine__body"
+        className="decision-machine__body-motion"
         animate={
           reducedMotion || ticket.serial === 1
             ? undefined
@@ -51,6 +42,7 @@ export function DecisionMachine(): React.JSX.Element {
         }
         transition={{ duration: 0.42, ease: 'easeInOut' }}
       >
+        <div className="decision-machine__body">
         <div className="decision-machine__screen">
           <span>DECIDE</span>
           <span>FOR YOU</span>
@@ -64,9 +56,10 @@ export function DecisionMachine(): React.JSX.Element {
           transition={{ duration: reducedMotion ? 0 : 0.58, ease: [0.22, 1, 0.36, 1] }}
         >
           <span>RESULT NO. {String(ticket.serial).padStart(4, '0')}</span>
-          <strong>{TICKETS[ticket.index]}</strong>
+          <strong>{DECISION_MACHINE_TICKETS[ticket.index]}</strong>
           <i />
         </motion.div>
+        </div>
       </motion.div>
       <span className="decision-machine__status">SYSTEM READY</span>
     </motion.div>
