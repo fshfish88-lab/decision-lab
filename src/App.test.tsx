@@ -108,6 +108,33 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByRole('heading', { name: '所有候选项概率' })).toBeInTheDocument()
   })
 
+  it('records regret and reflects the real decision in V1.5 statistics and achievements', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText('选项 1'), '马上出门')
+    await user.type(screen.getByLabelText('选项 2'), '再躺十分钟')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+    await screen.findByRole('heading', { name: '决策结果' })
+
+    await user.click(screen.getByRole('button', { name: '我后悔了' }))
+    expect(screen.getByText('反悔已记录，系统表示并不意外')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: '统计分析' }))
+
+    expect(screen.getByRole('heading', { name: '统计分析' })).toBeInTheDocument()
+    expect(screen.getByText('成就解锁：初次见面')).toBeInTheDocument()
+    expect(screen.getByText('系统已如实记录').previousElementSibling).toHaveTextContent('1')
+    expect(screen.getByText('决定之后没有反悔').previousElementSibling).toHaveTextContent('0.0%')
+  })
+
   it('resets the scroll position when the route changes', async () => {
     const user = userEvent.setup()
     const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)

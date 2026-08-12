@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { DecisionHistoryItem } from '../types/decision'
+import type { DecisionResult } from '../types/decision'
 import {
   HISTORY_STORAGE_KEY,
   clearHistory,
   deleteHistoryItem,
+  incrementHistoryItemShare,
+  markHistoryItemRegretted,
   readHistory,
   saveHistoryItem,
 } from './history'
@@ -37,7 +39,7 @@ class MemoryStorage implements Storage {
   }
 }
 
-function createItem(id: string): DecisionHistoryItem {
+function createItem(id: string): DecisionResult {
   return {
     id,
     createdAt: new Date(Date.UTC(2026, 7, 12, 12, Number(id.replace(/\D/g, '')) || 0)).toISOString(),
@@ -65,7 +67,36 @@ describe('decision history storage', () => {
     saveHistoryItem(createItem('2'), storage)
 
     expect(readHistory(storage).map((item) => item.id)).toEqual(['2', '1'])
-    expect(JSON.parse(storage.getItem(HISTORY_STORAGE_KEY) ?? '{}').version).toBe(1)
+    expect(JSON.parse(storage.getItem(HISTORY_STORAGE_KEY) ?? '{}').version).toBe(2)
+  })
+
+  it('reads V1 records and writes them back as V2 without losing the decision', () => {
+    const storage = new MemoryStorage()
+    storage.setItem(
+      HISTORY_STORAGE_KEY,
+      JSON.stringify({ version: 1, items: [createItem('1')] }),
+    )
+
+    expect(readHistory(storage)[0]).toMatchObject({ id: '1', shareCount: 0 })
+
+    saveHistoryItem(readHistory(storage)[0], storage)
+    expect(JSON.parse(storage.getItem(HISTORY_STORAGE_KEY) ?? '{}').version).toBe(2)
+  })
+
+  it('records regret once and counts successful shares', () => {
+    const storage = new MemoryStorage()
+    saveHistoryItem(createItem('1'), storage)
+
+    markHistoryItemRegretted('1', '2026-08-13T08:00:00.000Z', storage)
+    markHistoryItemRegretted('1', '2026-08-13T09:00:00.000Z', storage)
+    incrementHistoryItemShare('1', '2026-08-13T10:00:00.000Z', storage)
+    incrementHistoryItemShare('1', '2026-08-13T11:00:00.000Z', storage)
+
+    expect(readHistory(storage)[0]).toMatchObject({
+      regrettedAt: '2026-08-13T08:00:00.000Z',
+      shareCount: 2,
+      lastSharedAt: '2026-08-13T11:00:00.000Z',
+    })
   })
 
   it('keeps only the 50 most recent records', () => {
@@ -99,5 +130,15 @@ describe('decision history storage', () => {
 
     storage.setItem(HISTORY_STORAGE_KEY, JSON.stringify({ version: 99, items: [] }))
     expect(readHistory(storage)).toEqual([])
+  })
+
+  it('keeps valid records when the stored list also contains invalid entries', () => {
+    const storage = new MemoryStorage()
+    storage.setItem(
+      HISTORY_STORAGE_KEY,
+      JSON.stringify({ version: 2, items: [{ id: 'broken' }, createItem('1')] }),
+    )
+
+    expect(readHistory(storage).map((item) => item.id)).toEqual(['1'])
   })
 })

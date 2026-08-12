@@ -60,4 +60,42 @@ describe('decisionReducer', () => {
     expect(cleared.result).toBeNull()
     expect(cleared.options).toHaveLength(2)
   })
+
+  it('restores a historical draft while clearing stale scores and result', () => {
+    const populated = {
+      ...initialDecisionState,
+      scores: { 'option-1': { taste: 9 } },
+      result: {
+        id: 'old-result',
+        createdAt: '2026-08-12T12:00:00.000Z',
+        question: '旧问题',
+        options: initialDecisionState.options,
+        mode: 'random' as const,
+        winner: initialDecisionState.options[0],
+        explanation: '旧结果',
+        confidence: 100,
+        metrics: [],
+      },
+    }
+
+    const restored = decisionReducer(populated, {
+      type: 'restore-draft',
+      draft: {
+        question: '今晚吃什么？',
+        options: [
+          { id: 'hotpot', label: '火锅' },
+          { id: 'sushi', label: '日料' },
+        ],
+        mode: 'random',
+      },
+    })
+
+    expect(restored).toMatchObject({
+      question: '今晚吃什么？',
+      mode: 'random',
+      scores: {},
+      result: null,
+    })
+    expect(restored.options.map((option) => option.label)).toEqual(['火锅', '日料'])
+  })
 })
