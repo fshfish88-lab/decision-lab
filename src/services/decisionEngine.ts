@@ -33,16 +33,17 @@ function defaultId(): string {
 
 function baseResult(
   input: ResultMetadata,
+  createdAt = (input.now ?? (() => new Date()))(),
 ): Pick<DecisionResult, 'id' | 'createdAt' | 'question' | 'options'> {
   return {
     id: (input.makeId ?? defaultId)(),
-    createdAt: (input.now ?? (() => new Date()))().toISOString(),
+    createdAt: createdAt.toISOString(),
     question: input.question.trim() || '这次决定',
     options: input.options,
   }
 }
 
-function formatRandomSeed(sample: number): string {
+function formatRandomFingerprint(sample: number): string {
   const encoded = Math.floor(sample * 0xffffffff)
     .toString(16)
     .toUpperCase()
@@ -59,9 +60,16 @@ function buildMysticEvidence(
   input: RandomResultInput,
   winner: DecisionOption,
   confidence: number,
+  currentTime: Date,
 ): MysticEvidence[] {
   const inputPosition = input.options.findIndex((option) => option.id === winner.id) + 1
-  const resonance = ((winner.label.trim().length * 137 + confidence) % 1000) / 1000
+  const currentHour = currentTime.getHours()
+  const currentMinute = currentTime.getMinutes()
+  const timeLabel = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`
+  const resonance = (
+    (winner.label.trim().length * 137 + confidence + currentHour * 31 + currentMinute * 17)
+    % 1000
+  ) / 1000
   const timelines = Math.min(9999, confidence * 100 + winner.label.trim().length * 7)
 
   return [
@@ -74,7 +82,7 @@ function buildMysticEvidence(
     {
       key: 'character-resonance',
       title: '字符共振',
-      description: `当前时间与「${winner.label}」的字符长度产生了异常稳定的相关性。`,
+      description: `当前时间 ${timeLabel} 与「${winner.label}」的字符长度产生了异常稳定的共振。`,
       reading: `RESONANCE / ${resonance.toFixed(3)}`,
     },
     {
@@ -109,7 +117,7 @@ export function createRandomResult(input: RandomResultInput): DecisionResult {
       type: 'random',
       sample: draw.sample,
       winningIndex: draw.winningIndex,
-      seed: formatRandomSeed(draw.sample),
+      fingerprint: formatRandomFingerprint(draw.sample),
       drawNumber: formatDrawNumber(draw.sample),
       probability: 1 / draw.optionCount,
     },
@@ -117,6 +125,7 @@ export function createRandomResult(input: RandomResultInput): DecisionResult {
 }
 
 export function createMysticResult(input: RandomResultInput): DecisionResult {
+  const currentTime = (input.now ?? (() => new Date()))()
   const mystic = createMysticDecision(
     input.options.map((option) => option.label),
     input.random,
@@ -125,7 +134,7 @@ export function createMysticResult(input: RandomResultInput): DecisionResult {
   if (!winner) throw new Error('玄学结果无法映射到候选项')
 
   return {
-    ...baseResult(input),
+    ...baseResult(input, currentTime),
     mode: 'mystic',
     winner,
     explanation: mystic.explanation,
@@ -134,7 +143,7 @@ export function createMysticResult(input: RandomResultInput): DecisionResult {
     disclaimer: mystic.disclaimer,
     details: {
       type: 'mystic',
-      evidence: buildMysticEvidence(input, winner, mystic.confidence),
+      evidence: buildMysticEvidence(input, winner, mystic.confidence, currentTime),
       favorable: `今日宜：${winner.label}`,
       avoid: '今日忌：重新打开选项继续纠结',
     },

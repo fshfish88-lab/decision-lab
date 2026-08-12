@@ -101,6 +101,8 @@ describe('RandomResult', () => {
     expect(screen.getByRole('heading', { name: '命运落点' })).toBeInTheDocument()
     expect(screen.getAllByText('50.00%')).toHaveLength(3)
     expect(screen.getByText('0000-0000')).toBeInTheDocument()
+    expect(screen.getByText('RANDOM FINGERPRINT / 本轮随机指纹')).toBeInTheDocument()
+    expect(screen.queryByText(/RANDOM SEED|随机种子/)).not.toBeInTheDocument()
     expect(
       screen.getByText('这次没有任何科学依据，但至少你不用继续纠结。'),
     ).toBeInTheDocument()

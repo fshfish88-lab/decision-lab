@@ -19,7 +19,7 @@ const ANALYSIS_CONFIG: Record<DecisionMode, {
     eyebrow: 'RANDOM MODE / SHUFFLING',
     title: '正在启动命运抽签',
     description: '没有偏好，没有暗箱，只有一次诚实的等概率落点。',
-    steps: ['正在洗牌候选项', '正在生成随机种子', '正在排除人为干预', '正在确认命运落点'],
+    steps: ['正在洗牌候选项', '正在生成随机指纹', '正在排除人为干预', '正在确认命运落点'],
     conclusion: '命运确认。',
   },
   scientific: {

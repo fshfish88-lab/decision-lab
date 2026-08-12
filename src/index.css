@@ -1737,7 +1737,7 @@ select:focus-visible {
 .random-meta-grid article span { color: var(--muted); font-size: 10px; }
 .random-meta-grid article strong { grid-column: 1 / -1; font-size: 22px; }
 
-.random-seed-card {
+.random-fingerprint-card {
   margin-top: 10px;
   min-height: 76px;
   padding: 15px 18px;
@@ -1750,11 +1750,11 @@ select:focus-visible {
   background: #17192b;
 }
 
-.random-seed-card > svg { color: #afa9ff; }
-.random-seed-card div { display: grid; gap: 4px; }
-.random-seed-card span,
-.random-seed-card small { color: #aeb0be; font-size: 9px; }
-.random-seed-card strong { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.08em; }
+.random-fingerprint-card > svg { color: #afa9ff; }
+.random-fingerprint-card div { display: grid; gap: 4px; }
+.random-fingerprint-card span,
+.random-fingerprint-card small { color: #aeb0be; font-size: 9px; }
+.random-fingerprint-card strong { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.08em; }
 
 .probability-list { display: grid; gap: 15px; }
 .probability-row { display: grid; gap: 8px; }
@@ -1865,7 +1865,7 @@ select:focus-visible {
 
 .mystic-result__report h2 { margin: 17px 0 8px; color: #b64e66; font-size: 21px; }
 .mystic-result__report p { max-width: 450px; margin: 0; color: #725c61; line-height: 1.7; }
-.mystic-result__winner { min-height: 210px; padding: 28px; display: flex; flex-direction: column; justify-content: center; border: 1px solid rgb(232 121 145 / 22%); border-radius: 50% 45% 48% 42%; background: rgb(255 255 255 / 68%); box-shadow: 0 22px 55px rgb(176 75 96 / 12%); }
+.mystic-result__winner { min-height: 210px; padding: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgb(232 121 145 / 22%); border-radius: 50% 45% 48% 42%; background: rgb(255 255 255 / 68%); box-shadow: 0 22px 55px rgb(176 75 96 / 12%); text-align: center; }
 .mystic-result__winner > span,
 .mystic-result__winner small { color: #916773; font-size: 9px; }
 .mystic-result__winner h3 { margin: 10px 0 14px; font-size: clamp(38px, 6vw, 64px); line-height: 1; letter-spacing: -0.05em; }
@@ -2346,11 +2346,11 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .random-seed-card {
+  .random-fingerprint-card {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .random-seed-card > small {
+  .random-fingerprint-card > small {
     grid-column: 1 / -1;
   }
 

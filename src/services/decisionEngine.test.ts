@@ -30,7 +30,7 @@ describe('decisionEngine', () => {
       type: 'random',
       sample: 0,
       winningIndex: 0,
-      seed: '0000-0000',
+      fingerprint: '0000-0000',
       drawNumber: '#000001',
       probability: 0.5,
     })
@@ -52,6 +52,35 @@ describe('decisionEngine', () => {
     ])
     expect(result.details.favorable).toContain(result.winner.label)
     expect(result.details.avoid).toContain('重新')
+  })
+
+  it('uses the current hour and minute in the mystic resonance reading', () => {
+    const morning = createMysticResult({
+      ...metadata,
+      options,
+      now: () => new Date(2026, 7, 13, 9, 15),
+      random: () => 0.5,
+    })
+    const evening = createMysticResult({
+      ...metadata,
+      options,
+      now: () => new Date(2026, 7, 13, 21, 45),
+      random: () => 0.5,
+    })
+
+    if (morning.details?.type !== 'mystic' || evening.details?.type !== 'mystic') {
+      throw new Error('玄学详情缺失')
+    }
+    const morningResonance = morning.details.evidence.find(
+      (item) => item.key === 'character-resonance',
+    )
+    const eveningResonance = evening.details.evidence.find(
+      (item) => item.key === 'character-resonance',
+    )
+
+    expect(morningResonance?.reading).not.toBe(eveningResonance?.reading)
+    expect(morningResonance?.description).toContain('09:15')
+    expect(eveningResonance?.description).toContain('21:45')
   })
 
   it('builds a scientific result with a full ranking', () => {

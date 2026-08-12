@@ -31,7 +31,9 @@ export interface RandomResultDetails {
   type: 'random'
   sample: number
   winningIndex: number
-  seed: string
+  fingerprint?: string
+  /** @deprecated 兼容旧版历史记录。 */
+  seed?: string
   drawNumber: string
   probability: number
 }

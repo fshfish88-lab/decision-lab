@@ -11,7 +11,7 @@ export function RandomResult({ result }: RandomResultProps): React.JSX.Element {
   const details = result.details?.type === 'random' ? result.details : undefined
   const probability = details?.probability ?? 1 / result.options.length
   const probabilityLabel = `${(probability * 100).toFixed(2)}%`
-  const seed = details?.seed ?? 'LEGACY-RESULT'
+  const fingerprint = details?.fingerprint ?? details?.seed ?? 'LEGACY-RESULT'
   const drawNumber = details?.drawNumber ?? '#------'
   const winningIndex = details?.winningIndex ?? Math.max(
     0,
@@ -65,9 +65,9 @@ export function RandomResult({ result }: RandomResultProps): React.JSX.Element {
           <article><Dices size={20} /><span>理论概率</span><strong>{probabilityLabel}</strong></article>
           <article><Hash size={20} /><span>抽签编号</span><strong>{drawNumber}</strong></article>
         </div>
-        <article className="random-seed-card">
+        <article className="random-fingerprint-card">
           <Fingerprint size={22} />
-          <div><span>RANDOM SEED / 本轮随机种子</span><strong>{seed}</strong></div>
+          <div><span>RANDOM FINGERPRINT / 本轮随机指纹</span><strong>{fingerprint}</strong></div>
           <small>用于标记本轮样本，不代表密码学随机证明。</small>
         </article>
       </section>

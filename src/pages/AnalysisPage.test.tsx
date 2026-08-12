@@ -49,7 +49,7 @@ describe('AnalysisPage mode experiences', () => {
     renderAnalysis('random')
 
     expect(screen.getByRole('heading', { name: '正在启动命运抽签' })).toBeInTheDocument()
-    expect(screen.getByText('正在生成随机种子')).toBeInTheDocument()
+    expect(screen.getByText('正在生成随机指纹')).toBeInTheDocument()
   })
 
   it('shows scientific calculation language', () => {
