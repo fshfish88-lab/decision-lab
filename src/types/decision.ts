@@ -119,24 +119,6 @@ export interface DecisionBehavior {
   lastSharedAt?: string
 }
 
-export interface AiDecisionRequest {
-  question: string
-  options: DecisionOption[]
-  requirements: string
-}
-
-export interface AiCriterionSuggestion {
-  id: string
-  name: string
-  weight: number
-  reason: string
-}
-
-export interface AiDecisionSuggestion {
-  constraints: string[]
-  criteria: AiCriterionSuggestion[]
-}
-
 export type DecisionHistoryItem = DecisionResult & DecisionBehavior
 
 export interface HistoryStoreV1 {

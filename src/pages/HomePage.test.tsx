@@ -41,6 +41,9 @@ describe('HomePage', () => {
 
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
     expect(screen.getByRole('button', { name: '开始做法' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /AI 模式/ }))
+    expect(screen.getByRole('button', { name: '让 AI 替我决定' })).toBeInTheDocument()
   })
 
   it('gives every mode a restrained personality line', () => {
@@ -60,6 +63,6 @@ describe('HomePage', () => {
 
     expect(screen.getByLabelText('选项 3')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /AI 模式/ })).toBeEnabled()
-    expect(screen.getByText('API 待接入')).toBeInTheDocument()
+    expect(screen.getByText('在线顾问')).toBeInTheDocument()
   })
 })

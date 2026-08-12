@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Criterion, DecisionOption, ScientificScoreMap } from '../types/decision'
 import {
+  createAiResult,
   createMysticResult,
   createRandomResult,
   createScientificResult,
@@ -19,6 +20,49 @@ const metadata = {
 }
 
 describe('decisionEngine', () => {
+  it('builds a direct AI result from an existing option', () => {
+    const result = createAiResult({
+      ...metadata,
+      options,
+      context: '很累，想吃肉。',
+      advice: {
+        recommended_option: '火锅',
+        confidence: 89,
+        verdict: '今晚更适合火锅。',
+        core_reasons: ['满足感优先'],
+        main_tradeoff: '预算略高',
+        conditions_to_reconsider: ['预算不足'],
+        action_plan: ['现在去订位'],
+      },
+    })
+
+    expect(result).toMatchObject({
+      id: 'decision-1',
+      mode: 'ai',
+      winner: { label: '火锅' },
+      confidence: 89,
+      explanation: '今晚更适合火锅。',
+      details: { type: 'ai', context: '很累，想吃肉。' },
+    })
+  })
+
+  it('rejects an AI recommendation outside the current options', () => {
+    expect(() => createAiResult({
+      ...metadata,
+      options,
+      context: '很累。',
+      advice: {
+        recommended_option: '烧烤',
+        confidence: 80,
+        verdict: '建议烧烤。',
+        core_reasons: [],
+        main_tradeoff: '距离较远',
+        conditions_to_reconsider: [],
+        action_plan: [],
+      },
+    })).toThrow('AI 推荐项无法映射到候选项')
+  })
+
   it('builds a complete random result from an equal-probability draw', () => {
     const result = createRandomResult({ ...metadata, options, random: () => 0 })
 

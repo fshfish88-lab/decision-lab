@@ -12,7 +12,7 @@ const CTA_LABELS: Record<DecisionMode, string> = {
   random: '交给命运',
   scientific: '开始计算',
   mystic: '开始做法',
-  ai: '交给 AI 理解',
+  ai: '让 AI 替我决定',
 }
 
 export function HomePage(): React.JSX.Element {
@@ -142,9 +142,9 @@ export function HomePage(): React.JSX.Element {
               <ModeCard
                 mode="ai"
                 title="AI 模式"
-                description="先理解需求，再辅助分析。"
+                description="理解你的情况，直接给出建议。"
                 aside="这次可能真的有用"
-                tag="API 待接入"
+                tag="在线顾问"
                 icon={Bot}
                 tone="ai"
                 selected={state.mode === 'ai'}
