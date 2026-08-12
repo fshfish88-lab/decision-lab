@@ -45,6 +45,8 @@ describe('DECISION LAB flow', () => {
 
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '命运星盘' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '玄学证据' })).toBeInTheDocument()
     expect(screen.getByText(/仅供娱乐/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: '决策记录' }))
@@ -80,7 +82,30 @@ describe('DECISION LAB flow', () => {
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '完整排名' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '指标贡献' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '方案评分对比' })).toBeInTheDocument()
     expect(screen.getAllByText('9.00').length).toBeGreaterThan(0)
+  })
+
+  it('runs an equal-probability random draw and exposes the draw landing', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText('选项 1'), '火锅')
+    await user.type(screen.getByLabelText('选项 2'), '日料')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+
+    expect(screen.getByRole('heading', { name: '正在启动命运抽签' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '命运落点' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '所有候选项概率' })).toBeInTheDocument()
   })
 
   it('resets the scroll position when the route changes', async () => {
