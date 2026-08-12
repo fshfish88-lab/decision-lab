@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { MysticResult } from '../components/results/MysticResult'
+import { AiDeepAnalysisPanel } from '../components/results/AiDeepAnalysisPanel'
 import { RandomResult } from '../components/results/RandomResult'
 import { ResultShell } from '../components/results/ResultShell'
 import { ScientificResult } from '../components/results/ScientificResult'
@@ -80,13 +81,16 @@ export function ResultPage(): React.JSX.Element {
       onDownload={downloadShareCard}
       regretted={regretted}
     >
-      {decisionResult.mode === 'random' ? (
-        <RandomResult result={decisionResult} />
-      ) : decisionResult.mode === 'scientific' ? (
-        <ScientificResult result={decisionResult} />
-      ) : (
-        <MysticResult result={decisionResult} />
-      )}
+      <>
+        {decisionResult.mode === 'random' ? (
+          <RandomResult result={decisionResult} />
+        ) : decisionResult.mode === 'scientific' ? (
+          <ScientificResult result={decisionResult} />
+        ) : (
+          <MysticResult result={decisionResult} />
+        )}
+        <AiDeepAnalysisPanel result={decisionResult} />
+      </>
     </ResultShell>
   )
 }

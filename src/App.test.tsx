@@ -112,6 +112,46 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByRole('heading', { name: '所有候选项概率' })).toBeInTheDocument()
   })
 
+  it('adds optional AI analysis without replacing a local random result', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        type: 'deep-analysis',
+        data: {
+          overview: '这次抽签值得接受。',
+          key_factors: ['你看到火锅时没有反对'],
+          risks: ['预算可能略高'],
+          hidden_conflicts: ['省钱和满足感正在开会'],
+          scenarios: ['疲惫时直接接受更省心'],
+          next_steps: ['关掉第二个外卖软件'],
+        },
+      }),
+    } as Response))
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText('选项 1'), '火锅')
+    await user.type(screen.getByLabelText('选项 2'), '日料')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+    await screen.findByRole('heading', { name: '决策结果' })
+
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: 'AI 深度分析' }))
+
+    expect(await screen.findByText('这次抽签值得接受。')).toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+    expect(screen.getByText('命运选择了它').nextElementSibling).toHaveTextContent('火锅')
+  })
+
   it('records regret and reflects the real decision in V1.5 statistics and achievements', async () => {
     const user = userEvent.setup()
     render(
