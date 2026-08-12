@@ -67,10 +67,36 @@ export interface MysticResultDetails {
   avoid: string
 }
 
+export interface AiDeepAnalysisData {
+  overview: string
+  key_factors: string[]
+  risks: string[]
+  hidden_conflicts: string[]
+  scenarios: string[]
+  next_steps: string[]
+}
+
+export interface AiDecisionData {
+  recommended_option: string
+  confidence: number
+  verdict: string
+  core_reasons: string[]
+  main_tradeoff: string
+  conditions_to_reconsider: string[]
+  action_plan: string[]
+}
+
+export interface AiResultDetails {
+  type: 'ai'
+  context: string
+  advice: AiDecisionData
+}
+
 export type DecisionResultDetails =
   | RandomResultDetails
   | ScientificResultDetails
   | MysticResultDetails
+  | AiResultDetails
 
 export interface DecisionResult {
   id: string
