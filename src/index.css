@@ -1548,8 +1548,13 @@ select:focus-visible {
 
 /* Mode-specific result experiences */
 .mode-result {
+  min-width: 0;
   display: grid;
   gap: 18px;
+}
+
+.mode-result > * {
+  min-width: 0;
 }
 
 .mode-result__section,
