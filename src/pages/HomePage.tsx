@@ -8,6 +8,12 @@ import { OptionEditor } from '../components/OptionEditor'
 import { useDecision } from '../state/DecisionContext'
 import type { DecisionMode } from '../types/decision'
 
+const CTA_LABELS: Record<DecisionMode, string> = {
+  random: '交给命运',
+  scientific: '开始计算',
+  mystic: '开始做法',
+}
+
 export function HomePage(): React.JSX.Element {
   const navigate = useNavigate()
   const { state, dispatch } = useDecision()
@@ -16,6 +22,7 @@ export function HomePage(): React.JSX.Element {
     [state.options],
   )
   const canStart = validCount >= 2 && state.mode !== null
+  const ctaLabel = state.mode ? CTA_LABELS[state.mode] : '选择一种决策方式'
 
   function selectMode(mode: DecisionMode): void {
     dispatch({ type: 'set-mode', mode })
@@ -86,6 +93,7 @@ export function HomePage(): React.JSX.Element {
                 mode="random"
                 title="随机模式"
                 description="掷骰子，听天由命。"
+                aside="系统不承担后果"
                 tag="等概率"
                 icon={Dices}
                 tone="random"
@@ -96,6 +104,7 @@ export function HomePage(): React.JSX.Element {
                 mode="scientific"
                 title="科学模式"
                 description="多指标评分，认真计算。"
+                aside="看起来相当严谨"
                 tag="加权法"
                 icon={BarChart3}
                 tone="scientific"
@@ -106,6 +115,7 @@ export function HomePage(): React.JSX.Element {
                 mode="mystic"
                 title="玄学模式"
                 description="一本正经地胡说八道。"
+                aside="可信度：随缘"
                 tag="纯娱乐"
                 icon={Orbit}
                 tone="mystic"
@@ -115,6 +125,7 @@ export function HomePage(): React.JSX.Element {
               <ModeCard
                 title="AI 模式"
                 description="先理解需求，再辅助分析。"
+                aside="这次可能真的有用"
                 tag="V1.5"
                 icon={Bot}
                 tone="ai"
@@ -130,7 +141,7 @@ export function HomePage(): React.JSX.Element {
           disabled={!canStart}
           onClick={startDecision}
         >
-          <span>开始决策</span>
+          <span>{ctaLabel}</span>
           <ArrowRight size={19} />
         </button>
       </section>

@@ -21,7 +21,7 @@ describe('HomePage', () => {
     const user = userEvent.setup()
     renderHome()
 
-    const start = screen.getByRole('button', { name: '开始决策' })
+    const start = screen.getByRole('button', { name: '选择一种决策方式' })
     expect(start).toBeDisabled()
 
     await user.type(screen.getByLabelText('选项 1'), '火锅')
@@ -29,6 +29,27 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: /随机模式/ }))
 
     expect(start).toBeEnabled()
+    expect(start).toHaveAccessibleName('交给命运')
+  })
+
+  it('matches the primary action copy to the selected decision mode', async () => {
+    const user = userEvent.setup()
+    renderHome()
+
+    await user.click(screen.getByRole('button', { name: /科学模式/ }))
+    expect(screen.getByRole('button', { name: '开始计算' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /玄学模式/ }))
+    expect(screen.getByRole('button', { name: '开始做法' })).toBeInTheDocument()
+  })
+
+  it('gives every mode a restrained personality line', () => {
+    renderHome()
+
+    expect(screen.getByText('系统不承担后果')).toBeInTheDocument()
+    expect(screen.getByText('看起来相当严谨')).toBeInTheDocument()
+    expect(screen.getByText('可信度：随缘')).toBeInTheDocument()
+    expect(screen.getByText('这次可能真的有用')).toBeInTheDocument()
   })
 
   it('adds an option with Enter and keeps AI marked unavailable', async () => {

@@ -6,6 +6,7 @@ interface ModeCardProps {
   mode?: DecisionMode
   title: string
   description: string
+  aside: string
   tag: string
   icon: LucideIcon
   tone: 'random' | 'scientific' | 'mystic' | 'ai'
@@ -18,6 +19,7 @@ export function ModeCard({
   mode,
   title,
   description,
+  aside,
   tag,
   icon: Icon,
   tone,
@@ -42,6 +44,7 @@ export function ModeCard({
           <span className="mode-card__tag">{tag}</span>
         </span>
         <span>{description}</span>
+        <span className="mode-card__aside">{aside}</span>
       </span>
     </button>
   )
