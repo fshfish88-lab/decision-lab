@@ -112,6 +112,89 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByRole('heading', { name: '所有候选项概率' })).toBeInTheDocument()
   })
 
+  it('adds optional AI analysis without replacing a local random result', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        type: 'deep-analysis',
+        data: {
+          overview: '这次抽签值得接受。',
+          key_factors: ['你看到火锅时没有反对'],
+          risks: ['预算可能略高'],
+          hidden_conflicts: ['省钱和满足感正在开会'],
+          scenarios: ['疲惫时直接接受更省心'],
+          next_steps: ['关掉第二个外卖软件'],
+        },
+      }),
+    } as Response))
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText('选项 1'), '火锅')
+    await user.type(screen.getByLabelText('选项 2'), '日料')
+    await user.click(screen.getByRole('button', { name: /随机模式/ }))
+    await user.click(screen.getByRole('button', { name: '交给命运' }))
+    await screen.findByRole('heading', { name: '决策结果' })
+
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: 'AI 深度分析' }))
+
+    expect(await screen.findByText('这次抽签值得接受。')).toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+    expect(screen.getByText('命运选择了它').nextElementSibling).toHaveTextContent('火锅')
+  })
+
+  it('gets a direct AI decision, renders its own result, and stores it in history', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        type: 'decision',
+        data: {
+          recommended_option: '火锅',
+          confidence: 89,
+          verdict: '今天已经够累了，别再把晚饭做成第二份工作。',
+          core_reasons: ['满足感更高', '不用继续比较菜单'],
+          main_tradeoff: '会比日料多花一点时间。',
+          conditions_to_reconsider: ['预算突然收紧'],
+          action_plan: ['现在订位', '十分钟内出门'],
+        },
+      }),
+    } as Response))
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <DecisionProvider>
+          <AppRoutes />
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText('选项 1'), '火锅')
+    await user.type(screen.getByLabelText('选项 2'), '日料')
+    await user.type(screen.getByPlaceholderText('例如：今晚吃什么？'), '今晚吃什么？')
+    await user.click(screen.getByRole('button', { name: /AI 模式/ }))
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+    await user.type(screen.getByLabelText('补充你的真实情况'), '预算 100 元，今天很累。')
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+
+    expect(await screen.findByRole('heading', { name: 'AI 最终建议' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'AI 深度分析' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: '决策记录' }))
+    expect(screen.getByText('今晚吃什么？')).toBeInTheDocument()
+    expect(screen.getByText('火锅')).toBeInTheDocument()
+  })
+
   it('records regret and reflects the real decision in V1.5 statistics and achievements', async () => {
     const user = userEvent.setup()
     render(

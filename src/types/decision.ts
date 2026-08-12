@@ -67,10 +67,36 @@ export interface MysticResultDetails {
   avoid: string
 }
 
+export interface AiDeepAnalysisData {
+  overview: string
+  key_factors: string[]
+  risks: string[]
+  hidden_conflicts: string[]
+  scenarios: string[]
+  next_steps: string[]
+}
+
+export interface AiDecisionData {
+  recommended_option: string
+  confidence: number
+  verdict: string
+  core_reasons: string[]
+  main_tradeoff: string
+  conditions_to_reconsider: string[]
+  action_plan: string[]
+}
+
+export interface AiResultDetails {
+  type: 'ai'
+  context: string
+  advice: AiDecisionData
+}
+
 export type DecisionResultDetails =
   | RandomResultDetails
   | ScientificResultDetails
   | MysticResultDetails
+  | AiResultDetails
 
 export interface DecisionResult {
   id: string
@@ -91,24 +117,6 @@ export interface DecisionBehavior {
   regrettedAt?: string
   shareCount: number
   lastSharedAt?: string
-}
-
-export interface AiDecisionRequest {
-  question: string
-  options: DecisionOption[]
-  requirements: string
-}
-
-export interface AiCriterionSuggestion {
-  id: string
-  name: string
-  weight: number
-  reason: string
-}
-
-export interface AiDecisionSuggestion {
-  constraints: string[]
-  criteria: AiCriterionSuggestion[]
 }
 
 export type DecisionHistoryItem = DecisionResult & DecisionBehavior
