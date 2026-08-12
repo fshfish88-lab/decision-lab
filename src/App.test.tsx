@@ -80,7 +80,7 @@ describe('DECISION LAB flow', () => {
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '完整排名' })).toBeInTheDocument()
-    expect(screen.getByText('9.00')).toBeInTheDocument()
+    expect(screen.getAllByText('9.00').length).toBeGreaterThan(0)
   })
 
   it('resets the scroll position when the route changes', async () => {

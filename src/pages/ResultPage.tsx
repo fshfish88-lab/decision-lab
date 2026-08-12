@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { MetricRing } from '../components/MetricRing'
 import { RandomResult } from '../components/results/RandomResult'
 import { ResultShell } from '../components/results/ResultShell'
+import { ScientificResult } from '../components/results/ScientificResult'
 import { useDecision } from '../state/DecisionContext'
 
 export function ResultPage(): React.JSX.Element {
@@ -83,7 +84,11 @@ export function ResultPage(): React.JSX.Element {
       onRerun={rerun}
       onReturnHome={() => navigate('/')}
     >
-      {result.mode === 'random' ? <RandomResult result={result} /> : legacyResult}
+      {result.mode === 'random' ? (
+        <RandomResult result={result} />
+      ) : result.mode === 'scientific' ? (
+        <ScientificResult result={result} />
+      ) : legacyResult}
     </ResultShell>
   )
 }
