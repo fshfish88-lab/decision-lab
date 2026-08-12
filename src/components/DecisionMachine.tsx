@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 import {
@@ -8,7 +8,9 @@ import {
 } from './decisionMachineTickets'
 
 export function DecisionMachine(): React.JSX.Element {
-  const reducedMotion = useReducedMotion()
+  const [reducedMotion] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  )
   const [ticket, setTicket] = useState({ index: 0, serial: 1 })
 
   useEffect(() => {
