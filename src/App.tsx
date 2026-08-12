@@ -1,0 +1,28 @@
+import { Route, Routes } from 'react-router-dom'
+
+import { AppShell } from './components/AppShell'
+import { ScrollToTop } from './components/ScrollToTop'
+import { AboutPage } from './pages/AboutPage'
+import { AnalysisPage } from './pages/AnalysisPage'
+import { HistoryPage } from './pages/HistoryPage'
+import { HomePage } from './pages/HomePage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { ResultPage } from './pages/ResultPage'
+import { SciencePage } from './pages/SciencePage'
+
+export function AppRoutes(): React.JSX.Element {
+  return (
+    <AppShell>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/science" element={<SciencePage />} />
+        <Route path="/analysis" element={<AnalysisPage />} />
+        <Route path="/result" element={<ResultPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AppShell>
+  )
+}

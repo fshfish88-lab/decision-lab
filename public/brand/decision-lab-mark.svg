@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">DECISION LAB orbital mark</title>
+  <defs>
+    <linearGradient id="disc" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7268F2"/>
+      <stop offset="1" stop-color="#B9B4FF"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="13" fill="url(#disc)"/>
+  <ellipse cx="32" cy="32" rx="27" ry="14" fill="none" stroke="#14151A" stroke-width="3" transform="rotate(-28 32 32)"/>
+  <circle cx="52" cy="18" r="4" fill="#F2D98B" stroke="#14151A" stroke-width="2"/>
+</svg>
