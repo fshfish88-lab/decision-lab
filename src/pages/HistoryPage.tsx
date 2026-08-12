@@ -6,7 +6,7 @@ import { useDecision } from '../state/DecisionContext'
 import { clearHistory, deleteHistoryItem, readHistory } from '../storage/history'
 import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
-const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学' } as const
+const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学', ai: 'AI' } as const
 
 export function HistoryPage(): React.JSX.Element {
   const navigate = useNavigate()
@@ -50,7 +50,7 @@ export function HistoryPage(): React.JSX.Element {
       </header>
 
       <div className="history-toolbar">
-        <label><Filter size={16} /><span>筛选模式</span><select value={filter} onChange={(event) => setFilter(event.target.value as 'all' | DecisionMode)}><option value="all">全部模式</option><option value="random">随机模式</option><option value="scientific">科学模式</option><option value="mystic">玄学模式</option></select></label>
+        <label><Filter size={16} /><span>筛选模式</span><select value={filter} onChange={(event) => setFilter(event.target.value as 'all' | DecisionMode)}><option value="all">全部模式</option><option value="random">随机模式</option><option value="scientific">科学模式</option><option value="mystic">玄学模式</option><option value="ai">AI 模式</option></select></label>
         <button className="text-button text-button--danger" type="button" disabled={!history.length} onClick={clearAll}><Trash2 size={16} />清空记录</button>
       </div>
 

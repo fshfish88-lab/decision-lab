@@ -11,6 +11,7 @@ const MODE_LABELS: Record<DecisionMode, string> = {
   random: '随机模式',
   scientific: '科学模式',
   mystic: '玄学模式',
+  ai: 'AI 模式',
 }
 
 interface StatisticsPageProps {

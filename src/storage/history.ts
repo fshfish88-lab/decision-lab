@@ -26,7 +26,7 @@ function isIsoDate(value: unknown): value is string {
 }
 
 function isDecisionMode(value: unknown): value is DecisionMode {
-  return value === 'random' || value === 'scientific' || value === 'mystic'
+  return value === 'random' || value === 'scientific' || value === 'mystic' || value === 'ai'
 }
 
 function normalizeOption(value: unknown): DecisionOption | undefined {

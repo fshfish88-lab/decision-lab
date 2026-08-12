@@ -12,6 +12,7 @@ const CTA_LABELS: Record<DecisionMode, string> = {
   random: '交给命运',
   scientific: '开始计算',
   mystic: '开始做法',
+  ai: '交给 AI 理解',
 }
 
 export function HomePage(): React.JSX.Element {
@@ -31,7 +32,7 @@ export function HomePage(): React.JSX.Element {
   function startDecision(): void {
     if (!canStart || !state.mode) return
     dispatch({ type: 'clear-result' })
-    navigate(state.mode === 'scientific' ? '/science' : '/analysis')
+    navigate(state.mode === 'scientific' ? '/science' : state.mode === 'ai' ? '/ai' : '/analysis')
   }
 
   return (
@@ -123,13 +124,15 @@ export function HomePage(): React.JSX.Element {
                 onSelect={selectMode}
               />
               <ModeCard
+                mode="ai"
                 title="AI 模式"
                 description="先理解需求，再辅助分析。"
                 aside="这次可能真的有用"
-                tag="V1.5"
+                tag="API 待接入"
                 icon={Bot}
                 tone="ai"
-                disabled
+                selected={state.mode === 'ai'}
+                onSelect={selectMode}
               />
             </div>
           </div>

@@ -8,6 +8,7 @@ const MODE_LABELS = {
   random: '随机模式',
   scientific: '科学模式',
   mystic: '玄学模式',
+  ai: 'AI 模式',
 } as const
 
 interface ResultShellProps {

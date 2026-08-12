@@ -1,6 +1,6 @@
 import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
-const MODES: DecisionMode[] = ['random', 'scientific', 'mystic']
+const MODES: DecisionMode[] = ['random', 'scientific', 'mystic', 'ai']
 
 export interface StatisticsSummary {
   totalCount: number
