@@ -57,6 +57,7 @@ describe('StatisticsPage', () => {
     expect(within(screen.getByLabelText('核心统计')).getByText('50.0%')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: '8/13：2 次决策' })).toBeInTheDocument()
     expect(screen.getByText('随机模式 · 1 次')).toBeInTheDocument()
+    expect(screen.getByText('成就解锁：初次见面')).toBeInTheDocument()
 
     for (const title of [
       '初次见面',

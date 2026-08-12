@@ -39,7 +39,7 @@ export function HomePage(): React.JSX.Element {
     <main className="home-page">
       <section className="hero-grid" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <span className="eyebrow">选择困难症终结器 · V1.0</span>
+          <span className="eyebrow">选择困难症终结器 · V1.5</span>
           <h1 id="hero-title">
             今天，
             <br />

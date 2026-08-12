@@ -1,8 +1,10 @@
 import { Award, BarChart3, CalendarDays, RotateCcw, TrendingUp } from 'lucide-react'
-import { useMemo } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { evaluateAchievements } from '../achievements/achievements'
+import { consumeNewlyUnlocked } from '../achievements/unlockState'
 import { calculateStatistics } from '../analytics/statistics'
 import { readHistory } from '../storage/history'
 import type { DecisionMode } from '../types/decision'
@@ -22,6 +24,8 @@ export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React
   const history = useMemo(() => readHistory(), [])
   const summary = useMemo(() => calculateStatistics(history, now), [history, now])
   const achievements = useMemo(() => evaluateAchievements(history), [history])
+  const [newlyUnlocked] = useState(() => consumeNewlyUnlocked(achievements))
+  const reducedMotion = useReducedMotion()
   const trendMaximum = Math.max(1, ...summary.trend.map((entry) => entry.count))
 
   return (
@@ -38,6 +42,22 @@ export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React
           <strong>{summary.totalCount}</strong>
         </div>
       </header>
+
+      {newlyUnlocked[0] ? (
+        <motion.aside
+          className="achievement-unlock"
+          role="status"
+          initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <span className="achievement-unlock__icon"><Award size={18} /></span>
+          <div>
+            <strong>成就解锁：{newlyUnlocked[0].title}</strong>
+            <p>{newlyUnlocked[0].description}</p>
+          </div>
+        </motion.aside>
+      ) : null}
 
       {history.length === 0 ? (
         <section className="empty-state empty-state--embedded statistics-empty">
@@ -125,15 +145,21 @@ export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React
           <small>{achievements.filter((item) => item.unlocked).length} / {achievements.length} 已解锁</small>
         </div>
         <div className="achievement-grid">
-          {achievements.map((item) => (
-            <article className={`achievement-card${item.unlocked ? ' is-unlocked' : ''}`} key={item.id}>
+          {achievements.map((item, index) => (
+            <motion.article
+              className={`achievement-card${item.unlocked ? ' is-unlocked' : ''}`}
+              key={item.id}
+              initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
+            >
               <span className="achievement-card__icon"><Award size={20} /></span>
               <div><h3>{item.title}</h3><p>{item.description}</p></div>
               <div className="achievement-card__progress">
                 <span><i style={{ width: `${(item.progress / item.target) * 100}%` }} /></span>
                 <small>{item.unlocked ? '已解锁' : `${item.progress} / ${item.target}`}</small>
               </div>
-            </article>
+            </motion.article>
           ))}
         </div>
       </section>
