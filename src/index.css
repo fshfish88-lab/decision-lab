@@ -445,6 +445,11 @@ select:focus-visible {
   border-radius: var(--radius-xl);
 }
 
+#decision-input,
+#mode-selection {
+  scroll-margin-top: 96px;
+}
+
 .workbench-heading,
 .science-card__heading,
 .section-heading-row,

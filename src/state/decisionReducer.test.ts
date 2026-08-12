@@ -61,6 +61,39 @@ describe('decisionReducer', () => {
     expect(cleared.options).toHaveLength(2)
   })
 
+  it('prepares mode reselection without erasing the question or options', () => {
+    const populated = {
+      ...initialDecisionState,
+      question: '周末去哪儿？',
+      options: [
+        { id: 'museum', label: '逛博物馆' },
+        { id: 'park', label: '去公园' },
+      ],
+      mode: 'random' as const,
+      result: {
+        id: 'decision-1',
+        createdAt: '2026-08-13T08:00:00.000Z',
+        question: '周末去哪儿？',
+        options: [
+          { id: 'museum', label: '逛博物馆' },
+          { id: 'park', label: '去公园' },
+        ],
+        mode: 'random' as const,
+        winner: { id: 'museum', label: '逛博物馆' },
+        explanation: '系统已经替你决定。',
+        confidence: 100,
+        metrics: [],
+      },
+    }
+
+    const prepared = decisionReducer(populated, { type: 'prepare-mode-selection' })
+
+    expect(prepared.question).toBe('周末去哪儿？')
+    expect(prepared.options.map((option) => option.label)).toEqual(['逛博物馆', '去公园'])
+    expect(prepared.mode).toBeNull()
+    expect(prepared.result).toBeNull()
+  })
+
   it('restores a historical draft while clearing stale scores and result', () => {
     const populated = {
       ...initialDecisionState,
