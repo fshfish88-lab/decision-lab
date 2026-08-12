@@ -1,16 +1,26 @@
 import { ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { MysticResult } from '../components/results/MysticResult'
 import { RandomResult } from '../components/results/RandomResult'
 import { ResultShell } from '../components/results/ResultShell'
 import { ScientificResult } from '../components/results/ScientificResult'
+import { buildShareText, downloadBlob, renderShareCardBlob } from '../sharing/shareCard'
 import { useDecision } from '../state/DecisionContext'
+import {
+  incrementHistoryItemShare,
+  markHistoryItemRegretted,
+  readHistory,
+} from '../storage/history'
 
 export function ResultPage(): React.JSX.Element {
   const navigate = useNavigate()
   const { state, dispatch } = useDecision()
   const result = state.result
+  const [regretted, setRegretted] = useState(() => (
+    result ? Boolean(readHistory().find((item) => item.id === result.id)?.regrettedAt) : false
+  ))
 
   if (!result) {
     return (
@@ -23,25 +33,47 @@ export function ResultPage(): React.JSX.Element {
     )
   }
 
-  const rerunPath = result.mode === 'scientific' ? '/science' : '/analysis'
+  const decisionResult = result
+  const rerunPath = decisionResult.mode === 'scientific' ? '/science' : '/analysis'
 
   function rerun(): void {
     dispatch({ type: 'clear-result' })
     navigate(rerunPath)
   }
 
+  function regret(): void {
+    const updated = markHistoryItemRegretted(decisionResult.id)
+    if (updated?.regrettedAt) setRegretted(true)
+  }
+
+  async function copyResult(): Promise<void> {
+    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable')
+    await navigator.clipboard.writeText(buildShareText(decisionResult))
+    incrementHistoryItemShare(decisionResult.id)
+  }
+
+  async function downloadShareCard(): Promise<void> {
+    const blob = await renderShareCardBlob(decisionResult)
+    downloadBlob(blob, `decision-lab-${decisionResult.id}.png`)
+    incrementHistoryItemShare(decisionResult.id)
+  }
+
   return (
     <ResultShell
-      result={result}
+      result={decisionResult}
       onRerun={rerun}
       onReturnHome={() => navigate('/')}
+      onRegret={regret}
+      onCopy={copyResult}
+      onDownload={downloadShareCard}
+      regretted={regretted}
     >
-      {result.mode === 'random' ? (
-        <RandomResult result={result} />
-      ) : result.mode === 'scientific' ? (
-        <ScientificResult result={result} />
+      {decisionResult.mode === 'random' ? (
+        <RandomResult result={decisionResult} />
+      ) : decisionResult.mode === 'scientific' ? (
+        <ScientificResult result={decisionResult} />
       ) : (
-        <MysticResult result={result} />
+        <MysticResult result={decisionResult} />
       )}
     </ResultShell>
   )
