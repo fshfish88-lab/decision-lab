@@ -11,7 +11,7 @@
     "test": "vitest --configLoader runner",
     "test:run": "vitest run --configLoader runner",
     "test:pages": "npm run build && node scripts/verify-pages.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview --configLoader runner"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
