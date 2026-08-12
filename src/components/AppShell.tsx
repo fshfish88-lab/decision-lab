@@ -11,13 +11,14 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false)
+  const brandMarkUrl = `${import.meta.env.BASE_URL}brand/decision-lab-mark.svg`
 
   return (
     <div className="app-shell">
       <header className="site-header">
         <div className="site-header__inner">
           <NavLink className="brand" to="/" onClick={() => setMenuOpen(false)}>
-            <img src="/brand/decision-lab-mark.svg" alt="" width="32" height="32" />
+            <img src={brandMarkUrl} alt="" width="32" height="32" />
             <span>
               <strong>DECISION LAB</strong>
               <small>HUMAN CHOICE SYSTEM</small>
