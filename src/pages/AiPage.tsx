@@ -149,7 +149,15 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
             {submitting ? <BrainCircuit size={18} /> : <Sparkles size={18} />}
             <span>{submitting ? THINKING_STEPS[thinkingIndex] : '让 AI 替我决定'}</span>
           </button>
-          <p className="ai-form-status" aria-live="polite">{status}</p>
+          {submitting ? (
+            <div className="ai-thinking-console" role="status">
+              <BrainCircuit size={17} />
+              <span>{THINKING_STEPS[thinkingIndex]}</span>
+              <i aria-hidden="true"><b /><b /><b /></i>
+            </div>
+          ) : (
+            <p className="ai-form-status" aria-live="polite">{status}</p>
+          )}
         </form>
 
         <aside className="ai-status-card">

@@ -61,7 +61,7 @@ describe('AiDeepAnalysisPanel', () => {
     resolveRequest(analysis)
 
     expect(await screen.findByRole('heading', { name: 'AI 分析总览' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'AI 深度分析结果' })).toHaveClass('ai-deep-analysis__grid')
+    expect(screen.getByRole('region', { name: 'AI 深度分析结果' })).toHaveClass('ai-deep-analysis')
     expect(screen.getByRole('heading', { name: '现实风险' })).toBeInTheDocument()
     expect(screen.getByText('关掉第二个外卖软件')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '重新分析' })).toBeEnabled()

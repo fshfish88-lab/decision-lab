@@ -60,7 +60,11 @@ export function AiDeepAnalysisPanel({
   }
 
   return (
-    <section className={'ai-deep-analysis ai-deep-analysis--' + result.mode}>
+    <section
+      className={'ai-deep-analysis ai-deep-analysis--' + result.mode}
+      role={analysis ? 'region' : undefined}
+      aria-label={analysis ? 'AI 深度分析结果' : undefined}
+    >
       <div className="ai-deep-analysis__heading">
         <div>
           <span className="section-index">AI LAYER / OPTIONAL</span>
@@ -81,11 +85,7 @@ export function AiDeepAnalysisPanel({
       <p className="ai-form-status" aria-live="polite">{status}</p>
 
       {analysis ? (
-        <div
-          className="ai-deep-analysis__grid"
-          role="region"
-          aria-label="AI 深度分析结果"
-        >
+        <div className="ai-deep-analysis__grid">
           <article className="ai-deep-analysis__overview">
             <span><Sparkles size={19} /></span>
             <h3>AI 分析总览</h3>

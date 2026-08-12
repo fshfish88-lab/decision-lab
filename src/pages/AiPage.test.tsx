@@ -64,6 +64,8 @@ describe('AiPage', () => {
     await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
 
     expect(screen.getByRole('button', { name: '正在理解你的纠结' })).toBeDisabled()
+    expect(screen.getByRole('main')).toHaveClass('ai-page')
+    expect(screen.getByRole('status')).toHaveTextContent('正在理解你的纠结')
     expect(decide).toHaveBeenCalledTimes(1)
     resolveDecision(advice)
 
