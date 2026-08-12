@@ -8,12 +8,13 @@ const MODE_LABELS: Record<DecisionMode, string> = {
 }
 
 export function buildShareText(result: DecisionResult): string {
+  const confidenceLabel = result.mode === 'ai' ? '推荐强度' : '可信度'
   return [
     'DECISION LAB',
     result.question,
     `系统最终决定：${result.winner.label}`,
     `决策模式：${MODE_LABELS[result.mode]}`,
-    `可信度：${result.confidence.toFixed(1)}%`,
+    `${confidenceLabel}：${result.confidence.toFixed(1)}%`,
     '不要再纠结了。',
     '结果仅供个人决策参考。',
   ].join('\n')
@@ -59,7 +60,8 @@ export function renderShareCardBlob(
 
   context.fillStyle = '#111527'
   context.font = '600 30px sans-serif'
-  context.fillText(`${MODE_LABELS[result.mode]} · 可信度 ${result.confidence.toFixed(1)}%`, 540, 850)
+  const confidenceLabel = result.mode === 'ai' ? '推荐强度' : '可信度'
+  context.fillText(`${MODE_LABELS[result.mode]} · ${confidenceLabel} ${result.confidence.toFixed(1)}%`, 540, 850)
 
   context.fillStyle = '#747782'
   context.font = '400 34px sans-serif'

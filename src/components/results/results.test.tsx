@@ -5,6 +5,7 @@ import type { DecisionResult } from '../../types/decision'
 import { RandomResult } from './RandomResult'
 import { ScientificResult } from './ScientificResult'
 import { MysticResult } from './MysticResult'
+import { AiResult } from './AiResult'
 
 const randomResult: DecisionResult = {
   id: 'random-1',
@@ -93,6 +94,34 @@ const mysticResult: DecisionResult = {
   },
 }
 
+const aiResult: DecisionResult = {
+  id: 'ai-1',
+  createdAt: '2026-08-13T00:00:00.000Z',
+  question: '今晚吃什么？',
+  options: [
+    { id: 'hotpot', label: '火锅' },
+    { id: 'sushi', label: '日料' },
+  ],
+  mode: 'ai',
+  winner: { id: 'hotpot', label: '火锅' },
+  explanation: '今天已经够累了，别再把晚饭做成第二份工作。',
+  confidence: 89,
+  metrics: [],
+  details: {
+    type: 'ai',
+    context: '预算 100 元，今天很累。',
+    advice: {
+      recommended_option: '火锅',
+      confidence: 89,
+      verdict: '今天已经够累了，别再把晚饭做成第二份工作。',
+      core_reasons: ['满足感更高', '不用继续比较菜单'],
+      main_tradeoff: '会比日料多花一点时间。',
+      conditions_to_reconsider: ['预算突然收紧'],
+      action_plan: ['现在订位', '十分钟内出门'],
+    },
+  },
+}
+
 describe('RandomResult', () => {
   it('presents an honest random landing instead of analysis metrics', () => {
     render(<RandomResult result={randomResult} />)
@@ -161,5 +190,26 @@ describe('MysticResult', () => {
     expect(screen.getAllByText(/证据 0[1-3]/)).toHaveLength(3)
     expect(screen.getByText('METRIC / 88')).toBeInTheDocument()
     expect(screen.getByText('今日宜：火锅')).toBeInTheDocument()
+  })
+})
+
+describe('AiResult', () => {
+  it('renders a direct-advice Bento instead of local-mode analysis', () => {
+    render(<AiResult result={aiResult} />)
+
+    expect(screen.getByRole('heading', { name: 'AI 最终建议' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
+    expect(screen.getByText('推荐强度 89%')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '为什么推荐' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '需要接受' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '重新考虑条件' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '下一步行动' })).toBeInTheDocument()
+    expect(screen.queryByText('AI 深度分析')).not.toBeInTheDocument()
+  })
+
+  it('does not invent missing AI details for legacy data', () => {
+    render(<AiResult result={{ ...aiResult, details: undefined }} />)
+
+    expect(screen.getByText('AI 结果详情不完整，本次不展示推测内容。')).toBeInTheDocument()
   })
 })

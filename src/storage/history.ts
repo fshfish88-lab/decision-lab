@@ -1,4 +1,5 @@
 import type {
+  AiResultDetails,
   DecisionHistoryItem,
   DecisionMode,
   DecisionOption,
@@ -36,6 +37,42 @@ function normalizeOption(value: unknown): DecisionOption | undefined {
   return { id: value.id, label: value.label }
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string')
+}
+
+function normalizeAiDetails(value: unknown): AiResultDetails | undefined {
+  if (!isRecord(value) || value.type !== 'ai' || typeof value.context !== 'string') return undefined
+  const advice = value.advice
+  if (
+    !isRecord(advice) ||
+    typeof advice.recommended_option !== 'string' ||
+    typeof advice.confidence !== 'number' ||
+    !Number.isFinite(advice.confidence) ||
+    advice.confidence < 0 ||
+    advice.confidence > 100 ||
+    typeof advice.verdict !== 'string' ||
+    !isStringArray(advice.core_reasons) ||
+    typeof advice.main_tradeoff !== 'string' ||
+    !isStringArray(advice.conditions_to_reconsider) ||
+    !isStringArray(advice.action_plan)
+  ) return undefined
+
+  return {
+    type: 'ai',
+    context: value.context,
+    advice: {
+      recommended_option: advice.recommended_option,
+      confidence: advice.confidence,
+      verdict: advice.verdict,
+      core_reasons: [...advice.core_reasons],
+      main_tradeoff: advice.main_tradeoff,
+      conditions_to_reconsider: [...advice.conditions_to_reconsider],
+      action_plan: [...advice.action_plan],
+    },
+  }
+}
+
 function normalizeHistoryItem(value: unknown): DecisionHistoryItem | undefined {
   if (!isRecord(value)) return undefined
 
@@ -67,6 +104,9 @@ function normalizeHistoryItem(value: unknown): DecisionHistoryItem | undefined {
     return undefined
   }
 
+  const aiDetails = value.mode === 'ai' ? normalizeAiDetails(value.details) : undefined
+  if (value.mode === 'ai' && !aiDetails) return undefined
+
   const shareCount = typeof value.shareCount === 'number' && Number.isInteger(value.shareCount)
     ? Math.max(0, value.shareCount)
     : 0
@@ -74,6 +114,7 @@ function normalizeHistoryItem(value: unknown): DecisionHistoryItem | undefined {
     ...(value as unknown as DecisionResult),
     options,
     winner,
+    ...(aiDetails ? { details: aiDetails } : {}),
     shareCount,
   }
 

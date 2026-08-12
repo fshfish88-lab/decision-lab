@@ -31,6 +31,11 @@ describe('share card service', () => {
     ].join('\n'))
   })
 
+  it('labels AI confidence as recommendation strength', () => {
+    expect(buildShareText({ ...result, mode: 'ai', confidence: 89 })).toContain('推荐强度：89.0%')
+    expect(buildShareText({ ...result, mode: 'ai', confidence: 89 })).not.toContain('可信度：')
+  })
+
   it('renders a 1080 by 1350 PNG blob', async () => {
     const canvas = document.createElement('canvas')
     const context = {

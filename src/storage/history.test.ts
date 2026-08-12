@@ -56,6 +56,28 @@ function createItem(id: string): DecisionResult {
   }
 }
 
+function createAiItem(): DecisionResult {
+  return {
+    ...createItem('ai-1'),
+    id: 'ai-1',
+    mode: 'ai',
+    confidence: 89,
+    details: {
+      type: 'ai',
+      context: '预算 100 元，今天很累。',
+      advice: {
+        recommended_option: '火锅',
+        confidence: 89,
+        verdict: '别把晚饭做成第二份工作。',
+        core_reasons: ['更符合今天的体力'],
+        main_tradeoff: '可能稍贵。',
+        conditions_to_reconsider: ['预算收紧'],
+        action_plan: ['现在下单'],
+      },
+    },
+  }
+}
+
 describe('decision history storage', () => {
   it('returns an empty list when no history exists', () => {
     expect(readHistory(new MemoryStorage())).toEqual([])
@@ -81,6 +103,32 @@ describe('decision history storage', () => {
 
     saveHistoryItem(readHistory(storage)[0], storage)
     expect(JSON.parse(storage.getItem(HISTORY_STORAGE_KEY) ?? '{}').version).toBe(2)
+  })
+
+  it('round-trips validated AI advice details', () => {
+    const storage = new MemoryStorage()
+    saveHistoryItem(createAiItem(), storage)
+
+    expect(readHistory(storage)[0]).toMatchObject({
+      mode: 'ai',
+      details: {
+        type: 'ai',
+        context: '预算 100 元，今天很累。',
+        advice: {
+          recommended_option: '火锅',
+          confidence: 89,
+          action_plan: ['现在下单'],
+        },
+      },
+    })
+  })
+
+  it('rejects AI history with incomplete structured advice', () => {
+    const storage = new MemoryStorage()
+    const broken = { ...createAiItem(), details: { type: 'ai', context: '很累' } }
+    storage.setItem(HISTORY_STORAGE_KEY, JSON.stringify({ version: 2, items: [broken] }))
+
+    expect(readHistory(storage)).toEqual([])
   })
 
   it('records regret once and counts successful shares', () => {

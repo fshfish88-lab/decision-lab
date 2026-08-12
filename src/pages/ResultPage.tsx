@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { MysticResult } from '../components/results/MysticResult'
 import { AiDeepAnalysisPanel } from '../components/results/AiDeepAnalysisPanel'
+import { AiResult } from '../components/results/AiResult'
 import { RandomResult } from '../components/results/RandomResult'
 import { ResultShell } from '../components/results/ResultShell'
 import { ScientificResult } from '../components/results/ScientificResult'
@@ -35,7 +36,11 @@ export function ResultPage(): React.JSX.Element {
   }
 
   const decisionResult = result
-  const rerunPath = decisionResult.mode === 'scientific' ? '/science' : '/analysis'
+  const rerunPath = decisionResult.mode === 'scientific'
+    ? '/science'
+    : decisionResult.mode === 'ai'
+      ? '/ai'
+      : '/analysis'
 
   function rerun(): void {
     dispatch({ type: 'clear-result' })
@@ -86,10 +91,12 @@ export function ResultPage(): React.JSX.Element {
           <RandomResult result={decisionResult} />
         ) : decisionResult.mode === 'scientific' ? (
           <ScientificResult result={decisionResult} />
-        ) : (
+        ) : decisionResult.mode === 'mystic' ? (
           <MysticResult result={decisionResult} />
+        ) : (
+          <AiResult result={decisionResult} />
         )}
-        <AiDeepAnalysisPanel result={decisionResult} />
+        {decisionResult.mode !== 'ai' ? <AiDeepAnalysisPanel result={decisionResult} /> : null}
       </>
     </ResultShell>
   )
