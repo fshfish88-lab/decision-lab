@@ -1046,6 +1046,127 @@ select:focus-visible {
   line-height: 1.7;
 }
 
+.analysis-console--scientific .analysis-console__mark,
+.analysis-console--scientific .analysis-steps > div > span {
+  color: var(--science);
+  background: var(--science-soft);
+}
+
+.analysis-console--mystic .analysis-console__mark,
+.analysis-console--mystic .analysis-steps > div > span {
+  color: var(--mystic);
+  background: var(--mystic-soft);
+}
+
+.analysis-mode-visual {
+  position: relative;
+  width: min(100%, 320px);
+  height: 90px;
+  margin: 24px auto 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.analysis-mode-visual--random {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--random-soft);
+}
+
+.analysis-shuffle-card {
+  width: 46px;
+  height: 58px;
+  border: 1px solid rgb(114 104 242 / 32%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 82%);
+  box-shadow: 0 8px 16px rgb(64 54 155 / 9%);
+  animation: analysis-shuffle 1.2s var(--ease-out) infinite alternate;
+}
+
+.analysis-shuffle-card:nth-child(2) { animation-delay: -0.4s; }
+.analysis-shuffle-card:nth-child(3) { animation-delay: -0.8s; }
+
+@keyframes analysis-shuffle {
+  from { transform: translateX(-7px) rotate(-4deg); }
+  to { transform: translateX(7px) rotate(4deg); }
+}
+
+.analysis-mode-visual--scientific {
+  padding: 18px 22px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  background: var(--science-soft);
+}
+
+.analysis-data-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--science), #edc66b);
+  transform-origin: left;
+  animation: analysis-data 1.4s var(--ease-out) infinite alternate;
+}
+
+.analysis-data-bar:nth-child(1) { width: 86%; }
+.analysis-data-bar:nth-child(2) { width: 64%; animation-delay: -0.4s; }
+.analysis-data-bar:nth-child(3) { width: 74%; animation-delay: -0.8s; }
+
+@keyframes analysis-data {
+  from { transform: scaleX(0.18); opacity: 0.45; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+.analysis-mode-visual--mystic {
+  background: var(--mystic-soft);
+}
+
+.analysis-mode-visual--mystic::before,
+.analysis-mode-visual--mystic::after {
+  content: '';
+  position: absolute;
+  inset: 15px 86px;
+  border: 1px solid rgb(232 121 145 / 34%);
+  border-radius: 50%;
+  animation: analysis-orbit 4s linear infinite;
+}
+
+.analysis-mode-visual--mystic::after {
+  inset: 24px 70px;
+  transform: rotate(24deg);
+  animation-direction: reverse;
+}
+
+.analysis-orbit-core,
+.analysis-orbit-dot {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.analysis-orbit-core {
+  width: 34px;
+  height: 34px;
+  inset: 27px calc(50% - 17px);
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 8px 20px rgb(151 72 90 / 12%);
+}
+
+.analysis-orbit-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--mystic);
+  animation: analysis-pulse 1.5s ease-in-out infinite alternate;
+}
+
+.analysis-orbit-dot:nth-of-type(1) { top: 20px; left: 98px; }
+.analysis-orbit-dot:nth-of-type(2) { right: 92px; bottom: 19px; animation-delay: -0.5s; }
+.analysis-orbit-dot:nth-of-type(3) { top: 40px; right: 64px; animation-delay: -1s; }
+
+@keyframes analysis-orbit { to { transform: rotate(360deg); } }
+@keyframes analysis-pulse { to { transform: scale(1.7); opacity: 0.45; } }
+
 .analysis-progress {
   height: 7px;
   margin: 34px 0;
@@ -1060,6 +1181,14 @@ select:focus-visible {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--random), #a69ffa);
   animation: analysis-progress 2s var(--ease-out) forwards;
+}
+
+.analysis-console--scientific .analysis-progress span {
+  background: linear-gradient(90deg, var(--science), #edc66b);
+}
+
+.analysis-console--mystic .analysis-progress span {
+  background: linear-gradient(90deg, var(--mystic), #bd87ea);
 }
 
 @keyframes analysis-progress {
@@ -1110,6 +1239,14 @@ select:focus-visible {
   color: var(--muted);
   font-size: 8px;
   letter-spacing: 0.1em;
+}
+
+.analysis-console .analysis-conclusion {
+  margin-top: 18px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .result-page {

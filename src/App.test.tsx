@@ -41,7 +41,7 @@ describe('DECISION LAB flow', () => {
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
     await user.click(screen.getByRole('button', { name: '开始做法' }))
 
-    expect(screen.getByRole('heading', { name: '正在进行决策分析' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '正在连接命运频道' })).toBeInTheDocument()
 
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
