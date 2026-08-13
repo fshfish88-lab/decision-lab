@@ -44,6 +44,13 @@ npm.cmd run dev
 
 浏览器访问 Vite 输出的本地地址，通常为 `http://localhost:5173`。
 
+## 生产部署
+
+- 正式地址：`https://decision.fshfish.com/`
+- Vite 生产基址固定为 `/`，构建产物不依赖旧的 `/decision-lab/` 子路径。
+- 路由继续使用 HashRouter，静态托管无需额外的 SPA 重写规则。
+- GitHub Pages 通过 `.github/workflows/deploy-pages.yml` 发布 `dist/`；自定义域名在仓库 Pages 设置中维护。
+
 ## 验证
 
 ```powershell
