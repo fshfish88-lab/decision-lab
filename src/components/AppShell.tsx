@@ -77,7 +77,7 @@ export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
             target="_blank"
             rel="noopener noreferrer"
           >
-            浙ICP备2026067685号
+            浙ICP备2026067685号-1
           </a>
         </div>
       </footer>

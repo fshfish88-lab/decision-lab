@@ -14,7 +14,7 @@ describe('AppShell', () => {
       </MemoryRouter>,
     )
 
-    const filingLink = screen.getByRole('link', { name: '浙ICP备2026067685号' })
+    const filingLink = screen.getByRole('link', { name: '浙ICP备2026067685号-1' })
 
     expect(filingLink).toHaveAttribute('href', 'https://beian.miit.gov.cn/')
     expect(filingLink).toHaveAttribute('target', '_blank')
