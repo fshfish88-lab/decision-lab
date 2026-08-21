@@ -221,7 +221,7 @@ select:focus-visible {
   font-size: 12px;
 }
 
-.site-footer div {
+.site-footer__brand {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -231,8 +231,27 @@ select:focus-visible {
   letter-spacing: 0.08em;
 }
 
+.site-footer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
 .site-footer p {
   margin: 0;
+}
+
+.site-footer__filing {
+  color: inherit;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.site-footer__filing:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 
 .hero-grid {
@@ -2248,6 +2267,11 @@ select:focus-visible {
   .page-heading--split,
   .site-footer {
     align-items: stretch;
+    flex-direction: column;
+  }
+
+  .site-footer__meta {
+    align-items: flex-start;
     flex-direction: column;
   }
 
