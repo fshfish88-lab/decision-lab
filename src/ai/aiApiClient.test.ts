@@ -64,6 +64,54 @@ describe('createAiApiClient', () => {
     )
   })
 
+  it('normalizes the flattened structured deep-analysis response used by production', async () => {
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        type: 'deep-analysis',
+        overview: '烧烤已经被命运点名。',
+        key_factors: [{ name: '玄学共振强度', impact: 'high', reason: '宇宙在递烤串。' }],
+        risks: [{ risk: '容易烤焦', level: 'medium', mitigation: '避开焦黑部分。' }],
+        hidden_conflicts: ['爽快与丰富之间仍有拉扯。'],
+        scenarios: [{ name: '完美烧烤夜', outcome: '大家吃得很开心。', trigger: '无需排队。' }],
+        next_steps: ['现在去订位。'],
+      }),
+    } as Response)
+
+    await expect(createAiApiClient(fetcher).deepAnalyze('完整上下文')).resolves.toEqual({
+      overview: '烧烤已经被命运点名。',
+      key_factors: ['玄学共振强度（高影响）：宇宙在递烤串。'],
+      risks: ['容易烤焦（中风险）；应对：避开焦黑部分。'],
+      hidden_conflicts: ['爽快与丰富之间仍有拉扯。'],
+      scenarios: ['完美烧烤夜：大家吃得很开心。；触发条件：无需排队。'],
+      next_steps: ['现在去订位。'],
+    })
+  })
+
+  it('accepts flattened camelCase aliases from the decision endpoint', async () => {
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        type: 'decision',
+        recommendedOption: '火锅',
+        confidence: 89,
+        verdict: '今晚更适合火锅。',
+        coreReasons: ['满足感优先'],
+        mainTradeoff: '预算略高',
+        conditionsToReconsider: ['预算不足'],
+        actionPlan: ['现在去订位'],
+      }),
+    } as Response)
+
+    await expect(createAiApiClient(fetcher).decide('用户背景')).resolves.toEqual(
+      decisionPayload.data,
+    )
+  })
+
   it('maps HTTP 429 to a rate-limited error', async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 429 } as Response)
 
