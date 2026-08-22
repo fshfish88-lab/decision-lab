@@ -188,9 +188,13 @@ function buildTarotMapping(
   winner: DecisionOption,
 ): TarotDecisionMapping[] {
   const actions = TAROT_MAPPING_ACTIONS[decisionStyle]
+  const normalizedLabel = winner.label.trim()
+  const quotedWinner = normalizedLabel.startsWith('「') && normalizedLabel.endsWith('」')
+    ? normalizedLabel
+    : `「${normalizedLabel}」`
   return keywords.map((keyword, index) => ({
     keyword,
-    description: `让「${winner.label}」${actions[index] ?? actions[actions.length - 1]}。`,
+    description: `让${quotedWinner}${actions[index] ?? actions[actions.length - 1]}。`,
   }))
 }
 

@@ -2354,6 +2354,7 @@ select:focus-visible {
   color: #d2cbbb;
   font-size: 11px;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .tarot-decision-panel__verdict {
@@ -2368,7 +2369,10 @@ select:focus-visible {
   color: #fff;
   font-size: clamp(24px, 3vw, 36px);
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
+
+.tarot-result__winner h3 { overflow-wrap: anywhere; }
 
 .tarot-decision-panel__verdict p { color: #c9c1b0; font-size: 10px; line-height: 1.65; }
 .tarot-result__legacy-note {

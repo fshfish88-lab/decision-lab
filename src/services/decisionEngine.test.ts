@@ -152,6 +152,24 @@ describe('decisionEngine', () => {
     expect(result.explanation).toContain(tarot?.message)
   })
 
+  it('does not double-wrap an option label that already uses book-title marks', () => {
+    const markedOptions = [
+      { id: 'sushi', label: '「日料」' },
+      { id: 'hotpot', label: '火锅' },
+    ]
+    const spread = createTarotSpread(markedOptions, () => 0)
+    const result = createTarotResult({
+      ...metadata,
+      options: markedOptions,
+      selection: { ...spread.cards[0], winner: markedOptions[0] },
+      deckFingerprint: spread.fingerprint,
+    })
+    const tarot = result.details?.type === 'mystic' ? result.details.tarot : undefined
+
+    expect(tarot?.mapping?.every((item) => !/[「]{2}|[」]{2}/.test(item.description))).toBe(true)
+    expect(tarot?.mapping?.every((item) => item.description.includes('「日料」'))).toBe(true)
+  })
+
   it('builds a scientific result with a full ranking', () => {
     const criteria: Criterion[] = [
       { id: 'taste', name: '喜欢程度', weight: 60 },

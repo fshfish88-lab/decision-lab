@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Clock3, Filter, RotateCcw, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Clock3, Eye, Filter, RotateCcw, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -46,6 +46,11 @@ export function HistoryPage(): React.JSX.Element {
       },
     })
     navigate('/')
+  }
+
+  function openResult(item: DecisionHistoryItem): void {
+    dispatch({ type: 'set-result', result: item })
+    navigate('/result')
   }
 
   return (
@@ -101,6 +106,9 @@ export function HistoryPage(): React.JSX.Element {
                       <span>{item.regrettedAt ? '已记录反悔' : '尚未反悔'}</span>
                       <span>分享 {item.shareCount} 次</span>
                     </div>
+                    <button className="secondary-action" type="button" onClick={() => openResult(item)}>
+                      <Eye size={16} />查看结果
+                    </button>
                     <button className="secondary-action" type="button" onClick={() => reuse(item)}>
                       <RotateCcw size={16} />再次使用
                     </button>

@@ -19,7 +19,7 @@ import {
 export function ResultPage(): React.JSX.Element {
   const navigate = useNavigate()
   const { state, dispatch } = useDecision()
-  const result = state.result
+  const result = state.result ?? readHistory()[0] ?? null
   const [regretted, setRegretted] = useState(() => (
     result ? Boolean(readHistory().find((item) => item.id === result.id)?.regrettedAt) : false
   ))
