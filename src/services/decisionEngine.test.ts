@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { createTarotSpread } from '../tarot/tarotEngine'
 import type { Criterion, DecisionOption, ScientificScoreMap } from '../types/decision'
 import {
   createAiResult,
   createMysticResult,
   createRandomResult,
   createScientificResult,
+  createTarotResult,
 } from './decisionEngine'
 
 const options: DecisionOption[] = [
@@ -125,6 +127,26 @@ describe('decisionEngine', () => {
     expect(morningResonance?.reading).not.toBe(eveningResonance?.reading)
     expect(morningResonance?.description).toContain('09:15')
     expect(eveningResonance?.description).toContain('21:45')
+  })
+
+  it('persists three mysterious tarot passages and resolves the selected option', () => {
+    const spread = createTarotSpread(options, () => 0)
+    const result = createTarotResult({
+      ...metadata,
+      options,
+      selection: spread.cards[0],
+      deckFingerprint: spread.fingerprint,
+    })
+
+    const tarot = result.details?.type === 'mystic' ? result.details.tarot : undefined
+    expect(tarot?.interpretation).toContain(tarot?.chineseName)
+    expect(tarot?.resonance).toContain(`「${result.winner.label}」`)
+    expect(tarot?.resonance).not.toContain('{option}')
+    expect(tarot?.resonance).not.toContain('「「')
+    expect(tarot?.resonance).not.toContain('」」')
+    expect(tarot?.echo?.length).toBeGreaterThanOrEqual(20)
+    expect(tarot?.punchline).toContain('Decision Lab')
+    expect(result.explanation).toContain(tarot?.punchline)
   })
 
   it('builds a scientific result with a full ranking', () => {

@@ -38,6 +38,8 @@ export function ResultPage(): React.JSX.Element {
   const decisionResult = result
   const rerunPath = decisionResult.mode === 'scientific'
     ? '/science'
+    : decisionResult.mode === 'mystic'
+      ? '/tarot'
     : decisionResult.mode === 'ai'
       ? '/ai'
       : '/analysis'

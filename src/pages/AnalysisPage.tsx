@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { createMysticResult, createRandomResult } from '../services/decisionEngine'
+import { createRandomResult } from '../services/decisionEngine'
 import { saveHistoryItem } from '../storage/history'
 import { useDecision } from '../state/DecisionContext'
 import type { DecisionMode, DecisionResult } from '../types/decision'
@@ -81,12 +81,9 @@ export function AnalysisPage(): React.JSX.Element {
   const { state, dispatch } = useDecision()
   const preparedResult = useRef<DecisionResult | null>(state.result)
 
-  if (!preparedResult.current && state.mode && state.mode !== 'scientific' && state.mode !== 'ai') {
+  if (!preparedResult.current && state.mode === 'random') {
     const options = state.options.filter((option) => option.label.trim())
-    preparedResult.current =
-      state.mode === 'mystic'
-        ? createMysticResult({ question: state.question, options })
-        : createRandomResult({ question: state.question, options })
+    preparedResult.current = createRandomResult({ question: state.question, options })
   }
 
   useEffect(() => {
@@ -107,6 +104,17 @@ export function AnalysisPage(): React.JSX.Element {
   }, [dispatch, navigate])
 
   if (!preparedResult.current) {
+    if (state.mode === 'mystic') {
+      return (
+        <main className="empty-state">
+          <span className="empty-state__icon"><Orbit size={24} /></span>
+          <h1>玄学模式需要你亲手抽牌</h1>
+          <p>答案不会在你看到牌阵之前生成。</p>
+          <button className="secondary-action" type="button" onClick={() => navigate('/tarot')}>进入塔罗牌阵</button>
+        </main>
+      )
+    }
+
     return (
       <main className="empty-state">
         <span className="empty-state__icon"><Orbit size={24} /></span>

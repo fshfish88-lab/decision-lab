@@ -11,6 +11,7 @@ import { NotFoundPage } from './pages/NotFoundPage'
 import { ResultPage } from './pages/ResultPage'
 import { SciencePage } from './pages/SciencePage'
 import { StatisticsPage } from './pages/StatisticsPage'
+import { TarotPage } from './pages/TarotPage'
 
 export function AppRoutes(): React.JSX.Element {
   return (
@@ -19,6 +20,7 @@ export function AppRoutes(): React.JSX.Element {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/science" element={<SciencePage />} />
+        <Route path="/tarot" element={<TarotPage />} />
         <Route path="/ai" element={<AiPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/result" element={<ResultPage />} />

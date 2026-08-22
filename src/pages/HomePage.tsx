@@ -11,7 +11,7 @@ import type { DecisionMode } from '../types/decision'
 const CTA_LABELS: Record<DecisionMode, string> = {
   random: '交给命运',
   scientific: '开始计算',
-  mystic: '开始做法',
+  mystic: '开始抽牌',
   ai: '让 AI 替我决定',
 }
 
@@ -48,7 +48,15 @@ export function HomePage(): React.JSX.Element {
   function startDecision(): void {
     if (!canStart || !state.mode) return
     dispatch({ type: 'clear-result' })
-    navigate(state.mode === 'scientific' ? '/science' : state.mode === 'ai' ? '/ai' : '/analysis')
+    navigate(
+      state.mode === 'scientific'
+        ? '/science'
+        : state.mode === 'mystic'
+          ? '/tarot'
+          : state.mode === 'ai'
+            ? '/ai'
+            : '/analysis',
+    )
   }
 
   return (
@@ -131,8 +139,8 @@ export function HomePage(): React.JSX.Element {
               <ModeCard
                 mode="mystic"
                 title="玄学模式"
-                description="一本正经地胡说八道。"
-                aside="可信度：随缘"
+                description="亲手抽一张，大阿卡纳替你表态。"
+                aside="7 张牌背 · 结果已确定"
                 tag="纯娱乐"
                 icon={Orbit}
                 tone="mystic"

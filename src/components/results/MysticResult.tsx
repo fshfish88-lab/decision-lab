@@ -1,6 +1,7 @@
 import { Ban, MoonStar, Sparkles, Telescope } from 'lucide-react'
 
 import type { DecisionMetric, DecisionResult, MysticEvidence, MysticResultDetails } from '../../types/decision'
+import { TarotCardArtwork } from '../tarot/TarotCardArtwork'
 
 interface MysticResultProps {
   result: DecisionResult
@@ -26,6 +27,80 @@ function legacyEvidence(metrics: DecisionMetric[]): MysticEvidence[] {
 
 export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
   const details = getDetails(result)
+  const tarot = details?.tarot
+  if (tarot) {
+    const orientationLabel = tarot.orientation === 'upright' ? '正位' : '逆位'
+    const hasRichReading = Boolean(tarot.resonance && tarot.echo && tarot.punchline)
+
+    return (
+      <div className="mode-result tarot-result">
+        <section className="tarot-result__hero" aria-labelledby="tarot-result-heading">
+          <div className="tarot-result__card" aria-label={`${tarot.chineseName} ${orientationLabel}`}>
+            <small>{tarot.numeral}</small>
+            <TarotCardArtwork cardId={tarot.cardId} className="tarot-result__artwork" />
+            <strong>{tarot.chineseName}</strong>
+            <span>{tarot.name}</span>
+            <small>{orientationLabel}</small>
+          </div>
+          <div className="tarot-result__reading">
+            <span className="mode-result__eyebrow"><MoonStar size={16} /> MAJOR ARCANA READING</span>
+            <h2 id="tarot-result-heading">你的牌</h2>
+            <p className="tarot-result__name">{tarot.numeral} · {tarot.name}</p>
+            <h3>{tarot.chineseName} · {orientationLabel}</h3>
+            <div className="tarot-keywords" aria-label="牌面关键词">
+              {tarot.keywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
+            </div>
+            <div className="tarot-strength" aria-label={`牌面强度 ${tarot.strength}/5`}>
+              <span>牌面强度</span>
+              <div aria-hidden="true">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <i className={index < tarot.strength ? 'is-active' : ''} key={index} />
+                ))}
+              </div>
+              <small>{tarot.strength >= 4 ? '倾向明确' : tarot.strength === 3 ? '倾向温和' : '留有余地'}</small>
+            </div>
+          </div>
+          <div className="tarot-result__winner">
+            <span>本轮指向</span>
+            <h3>{result.winner.label}</h3>
+            <small>牌已经翻开，反悔不在本轮服务范围内。</small>
+          </div>
+        </section>
+
+        <section className="tarot-result__interpretation" aria-labelledby="tarot-interpretation-heading">
+          <div>
+            <span className="section-index">CARD INTERPRETATION</span>
+            <h2 id="tarot-interpretation-heading">牌意解读</h2>
+            {hasRichReading ? (
+              <div className="tarot-reading-passages">
+                <article><span>MEANING / 01</span><h3>牌面含义</h3><p>{tarot.interpretation}</p></article>
+                <article><span>WHY / 02</span><h3>为什么是它</h3><p>{tarot.resonance}</p></article>
+                <article>
+                  <span>CAUTION / 03</span><h3>逆位提醒</h3><p>{tarot.echo}</p>
+                  <small className="tarot-reading-passages__punchline">{tarot.punchline}</small>
+                </article>
+              </div>
+            ) : <p>{tarot.interpretation}</p>}
+          </div>
+          <dl>
+            <div><dt>牌阵指纹</dt><dd>{tarot.deckFingerprint}</dd></div>
+            <div><dt>抽牌位置</dt><dd>{String(tarot.selectedPosition + 1).padStart(2, '0')} / 07</dd></div>
+            <div><dt>科学意见</dt><dd>不予置评</dd></div>
+          </dl>
+        </section>
+
+        {hasRichReading ? (
+          result.disclaimer && <p className="tarot-result__disclaimer">{result.disclaimer}</p>
+        ) : (
+          <section className="mystic-result__explanation" aria-labelledby="mystic-explanation-heading">
+            <div><h2 id="mystic-explanation-heading">本轮结论</h2><p>{result.explanation}</p></div>
+            {result.disclaimer && <small>{result.disclaimer}</small>}
+          </section>
+        )}
+      </div>
+    )
+  }
+
   const evidence = details?.evidence.slice(0, 3) ?? legacyEvidence(result.metrics)
   const favorable = details?.favorable ?? `今日宜：${result.winner.label}`
   const avoid = details?.avoid ?? '今日忌：继续纠结'

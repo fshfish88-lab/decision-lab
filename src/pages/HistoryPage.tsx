@@ -8,6 +8,12 @@ import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
 const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学', ai: 'AI' } as const
 
+function tarotSummary(item: DecisionHistoryItem): string | undefined {
+  const tarot = item.details?.type === 'mystic' ? item.details.tarot : undefined
+  if (!tarot) return undefined
+  return `抽到：${tarot.chineseName} · ${tarot.orientation === 'upright' ? '正位' : '逆位'}`
+}
+
 export function HistoryPage(): React.JSX.Element {
   const navigate = useNavigate()
   const { dispatch } = useDecision()
@@ -58,6 +64,7 @@ export function HistoryPage(): React.JSX.Element {
         <div className="history-list">
           {visibleItems.map((item, index) => {
             const expanded = expandedId === item.id
+            const tarot = tarotSummary(item)
             return (
               <article className={`history-item${expanded ? ' is-expanded' : ''}`} key={item.id}>
                 <span className={`history-item__mode history-item__mode--${item.mode}`}>{MODE_LABELS[item.mode]}</span>
@@ -65,9 +72,10 @@ export function HistoryPage(): React.JSX.Element {
                   <small>NO. {String(history.length - index).padStart(3, '0')}</small>
                   <h2>{item.question}</h2>
                   <p>{item.options.map((option) => option.label).join(' / ')}</p>
+                  {tarot && <p className="history-item__tarot">{tarot}</p>}
                 </div>
                 <div className="history-item__result">
-                  <span>系统选择</span>
+                  <span>{tarot ? '本轮指向' : '系统选择'}</span>
                   <strong>{item.winner.label}</strong>
                   <small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small>
                 </div>

@@ -40,7 +40,7 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: '开始计算' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
-    expect(screen.getByRole('button', { name: '开始做法' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '开始抽牌' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /AI 模式/ }))
     expect(screen.getByRole('button', { name: '让 AI 替我决定' })).toBeInTheDocument()
@@ -51,7 +51,7 @@ describe('HomePage', () => {
 
     expect(screen.getByText('系统不承担后果')).toBeInTheDocument()
     expect(screen.getByText('看起来相当严谨')).toBeInTheDocument()
-    expect(screen.getByText('可信度：随缘')).toBeInTheDocument()
+    expect(screen.getByText('7 张牌背 · 结果已确定')).toBeInTheDocument()
     expect(screen.getByText('这次可能真的有用')).toBeInTheDocument()
   })
 

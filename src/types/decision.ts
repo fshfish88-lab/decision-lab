@@ -60,10 +60,55 @@ export interface MysticEvidence {
   reading: string
 }
 
+export type TarotOrientation = 'upright' | 'reversed'
+
+export interface TarotMeaning {
+  keywords: string[]
+  interpretation: string
+  resonance: string
+  echo: string
+  punchline: string
+  strength: number
+}
+
+export interface TarotCardDefinition {
+  id: string
+  number: number
+  numeral: string
+  name: string
+  chineseName: string
+  upright: TarotMeaning
+  reversed: TarotMeaning
+}
+
+export interface TarotResultReading {
+  cardId: string
+  number: number
+  numeral: string
+  name: string
+  chineseName: string
+  orientation: TarotOrientation
+  keywords: string[]
+  interpretation: string
+  /** 旧版三段式解读字段；仅保留以兼容旧版 LocalStorage。 */
+  omen?: string
+  /** 已将候选项占位符替换为本轮结果。 */
+  resonance?: string
+  echo?: string
+  punchline?: string
+  strength: number
+  selectedPosition: number
+  deckFingerprint: string
+}
+
 export interface MysticResultDetails {
   type: 'mystic'
+  tarot?: TarotResultReading
+  /** 兼容 V1.0 玄学历史记录。 */
   evidence: MysticEvidence[]
+  /** 兼容 V1.0 玄学历史记录。 */
   favorable: string
+  /** 兼容 V1.0 玄学历史记录。 */
   avoid: string
 }
 
