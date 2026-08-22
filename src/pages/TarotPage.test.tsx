@@ -44,12 +44,15 @@ describe('TarotPage', () => {
     expect(screen.getByRole('heading', { name: '凭第一感觉，选择一张' })).toBeInTheDocument()
     const cards = screen.getAllByRole('button', { name: /选择第 \d 张塔罗牌/ })
     expect(cards).toHaveLength(7)
+    expect(screen.queryByText('正位')).not.toBeInTheDocument()
+    expect(screen.queryByText('逆位')).not.toBeInTheDocument()
     expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'set-result' }))
     expect(localStorage.getItem(HISTORY_STORAGE_KEY)).toBeNull()
 
     await user.click(cards[0])
 
     expect(screen.getByRole('heading', { name: '你的牌已翻开' })).toBeInTheDocument()
+    expect(screen.getAllByText('正位').length).toBeGreaterThan(0)
     expect(screen.getByText('本轮指向')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查看完整结果' })).toBeInTheDocument()
     expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'set-result' }))

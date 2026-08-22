@@ -37,11 +37,15 @@ export function TarotCard({
           <small>DECISION LAB</small>
         </span>
         <span className={`tarot-card__face${entry.orientation === 'reversed' ? ' is-reversed' : ''}`} aria-hidden={!selected}>
-          <small>{entry.card.numeral}</small>
-          <i className="tarot-card__sigil" />
-          <strong>{entry.card.chineseName}</strong>
-          <span>{entry.card.name}</span>
-          <small>{orientationLabel}</small>
+          {selected ? (
+            <>
+              <small>{entry.card.numeral}</small>
+              <i className="tarot-card__sigil" />
+              <strong>{entry.card.chineseName}</strong>
+              <span>{entry.card.name}</span>
+              <small>{orientationLabel}</small>
+            </>
+          ) : null}
         </span>
       </span>
     </motion.button>

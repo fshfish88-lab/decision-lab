@@ -1948,8 +1948,8 @@ select:focus-visible {
 }
 
 .tarot-deck__slot {
-  width: clamp(108px, 11.4vw, 146px);
-  flex: 0 1 146px;
+  width: clamp(96px, 11vw, 132px);
+  flex: 0 1 132px;
   transform: rotate(var(--tarot-rotation));
   transform-origin: 50% 120%;
 }
@@ -2778,7 +2778,8 @@ select:focus-visible {
 @media (max-width: 720px) {
   .tarot-page { padding-top: 20px; }
   .tarot-heading { margin-top: 18px; }
-  .tarot-heading h1 { font-size: clamp(34px, 11vw, 48px); }
+  .tarot-heading h1 { font-size: clamp(34px, 10vw, 44px); }
+  .tarot-heading__action { display: block; }
 
   .tarot-deck {
     width: calc(100% + 28px);

@@ -61,7 +61,9 @@ export function TarotPage(): React.JSX.Element {
       </button>
       <header className="tarot-heading">
         <span className="section-index">MYSTIC MODE / MAJOR ARCANA</span>
-        <h1>凭第一感觉，选择一张</h1>
+        <h1 aria-label="凭第一感觉，选择一张">
+          凭第一感觉，<span className="tarot-heading__action">选择一张</span>
+        </h1>
         <p>牌阵已经确定。你选中的不是一张牌背，而是这轮决定的落点。</p>
         <small>22 张大阿卡纳 · 本轮展开 7 张 · 纯娱乐</small>
       </header>

@@ -7,7 +7,7 @@ interface TarotDeckProps {
   onSelect: (position: number) => void
 }
 
-const ROTATIONS = [-12, -8, -4, 0, 4, 8, 12]
+const ROTATIONS = [-7, -5, -2.5, 0, 2.5, 5, 7]
 
 export function TarotDeck({
   spread,
