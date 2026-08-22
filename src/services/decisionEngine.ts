@@ -160,12 +160,13 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
   const { card, orientation, position, winner } = input.selection
   const meaning = card[orientation]
   const orientationLabel = orientation === 'upright' ? '正位' : '逆位'
+  const resonance = meaning.resonance.replace('{option}', `「${winner.label}」`)
 
   return {
     ...baseResult(input),
     mode: 'mystic',
     winner,
-    explanation: `${card.chineseName} · ${orientationLabel}：${meaning.interpretation} 本轮牌面指向「${winner.label}」。`,
+    explanation: `${card.chineseName} · ${orientationLabel}：${meaning.omen} ${resonance} ${meaning.echo}`,
     confidence: meaning.strength * 20,
     metrics: [],
     disclaimer: '塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。',
@@ -180,6 +181,9 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
         orientation,
         keywords: [...meaning.keywords],
         interpretation: meaning.interpretation,
+        omen: meaning.omen,
+        resonance,
+        echo: meaning.echo,
         strength: meaning.strength,
         selectedPosition: position,
         deckFingerprint: input.deckFingerprint,

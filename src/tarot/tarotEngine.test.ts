@@ -29,6 +29,12 @@ describe('tarot card catalogue', () => {
       for (const meaning of [card.upright, card.reversed]) {
         expect(meaning.keywords.length).toBeGreaterThanOrEqual(3)
         expect(meaning.interpretation.length).toBeGreaterThan(10)
+        expect(meaning.omen.length).toBeGreaterThanOrEqual(20)
+        expect(meaning.resonance).toContain('{option}')
+        expect(meaning.echo.length).toBeGreaterThanOrEqual(20)
+        expect(`${meaning.omen}${meaning.resonance}${meaning.echo}`).not.toMatch(
+          /你应该|建议你|风险是|宇宙共振率|玄学置信度/,
+        )
         expect(meaning.strength).toBeGreaterThanOrEqual(1)
         expect(meaning.strength).toBeLessThanOrEqual(5)
       }
