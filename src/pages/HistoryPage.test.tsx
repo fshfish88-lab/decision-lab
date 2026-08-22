@@ -8,6 +8,7 @@ import { DecisionProvider } from '../state/DecisionProvider'
 import type { DecisionResult } from '../types/decision'
 import { HistoryPage } from './HistoryPage'
 import { HomePage } from './HomePage'
+import { ResultPage } from './ResultPage'
 
 const result: DecisionResult = {
   id: 'history-1',
@@ -31,6 +32,7 @@ function renderHistory(): void {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/result" element={<ResultPage />} />
         </Routes>
       </DecisionProvider>
     </MemoryRouter>,
@@ -65,5 +67,55 @@ describe('HistoryPage', () => {
     expect(screen.getByLabelText('选项 1')).toHaveValue('火锅')
     expect(screen.getByLabelText('选项 2')).toHaveValue('日料')
     expect(screen.getByRole('button', { name: '交给命运' })).toBeEnabled()
+  })
+
+  it('opens a saved result from history', async () => {
+    const user = userEvent.setup()
+    renderHistory()
+
+    await user.click(screen.getByRole('button', { name: '查看详情 今晚吃什么？' }))
+    await user.click(screen.getByRole('button', { name: '查看结果' }))
+
+    expect(screen.getByRole('heading', { name: '决策结果' })).toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+  })
+
+  it('restores the latest saved result when the result route is refreshed', () => {
+    render(
+      <MemoryRouter initialEntries={['/result']}>
+        <DecisionProvider>
+          <Routes>
+            <Route path="/result" element={<ResultPage />} />
+          </Routes>
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: '决策结果' })).toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+  })
+
+  it('restores the exact older history result selected in the route', () => {
+    saveHistoryItem({
+      ...result,
+      id: 'history-2',
+      createdAt: '2026-08-14T08:00:00.000Z',
+      question: '更新的决定',
+      winner: { id: 'sushi', label: '日料' },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/result?id=history-1']}>
+        <DecisionProvider>
+          <Routes>
+            <Route path="/result" element={<ResultPage />} />
+          </Routes>
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('今晚吃什么？')).toBeInTheDocument()
+    expect(screen.queryByText('更新的决定')).not.toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
   })
 })

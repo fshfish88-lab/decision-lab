@@ -2187,7 +2187,12 @@ select:focus-visible {
 
 .tarot-reveal__answer span,
 .tarot-reveal__answer small { color: #cbbd9a; font-size: 9px; }
-.tarot-reveal__answer strong { margin: 9px 0 13px; font-size: clamp(30px, 4vw, 48px); }
+.tarot-reveal__answer strong {
+  max-width: 100%;
+  margin: 9px 0 13px;
+  font-size: clamp(30px, 4vw, 48px);
+  overflow-wrap: anywhere;
+}
 .tarot-reveal .primary-action { grid-column: 1 / -1; margin-top: 0; }
 
 .tarot-result__hero {
@@ -2258,6 +2263,13 @@ select:focus-visible {
 .tarot-result__winner > span,
 .tarot-result__winner > small { color: #cbbd9a; font-size: 9px; }
 .tarot-result__winner h3 { margin: 12px 0 14px; font-size: clamp(34px, 5vw, 58px); line-height: 1; }
+.tarot-result__winner p {
+  max-width: 230px;
+  margin: 0 0 16px;
+  color: #e4dcc9;
+  font-size: 11px;
+  line-height: 1.65;
+}
 
 .tarot-result__interpretation {
   padding: 28px;
@@ -2271,10 +2283,6 @@ select:focus-visible {
 
 .tarot-result__interpretation h2 { margin: 8px 0 10px; font-size: 22px; }
 .tarot-result__interpretation p { margin: 0; color: #565964; line-height: 1.8; }
-.tarot-result__interpretation dl { margin: 0; display: grid; gap: 8px; }
-.tarot-result__interpretation dl > div { padding: 12px 14px; display: flex; justify-content: space-between; gap: 14px; border-radius: 11px; background: #f7f5ef; }
-.tarot-result__interpretation dt { color: var(--muted); font-size: 9px; }
-.tarot-result__interpretation dd { margin: 0; font-size: 10px; font-weight: 750; }
 
 .tarot-reading-passages {
   display: grid;
@@ -2311,6 +2319,85 @@ select:focus-visible {
   line-height: 1.65;
 }
 
+.tarot-decision-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #2d303a;
+  border-radius: 18px;
+  color: #f6efdf;
+  background: #181a23;
+}
+
+.tarot-decision-panel__mapping { padding: 24px; }
+.tarot-decision-panel__mapping > span,
+.tarot-decision-panel__verdict > span {
+  color: #cbbd9a;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.tarot-decision-panel__mapping h2 { margin: 8px 0 18px; color: #fff; }
+.tarot-decision-panel__mapping ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.tarot-decision-panel__mapping li {
+  padding: 13px 14px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.tarot-decision-panel__mapping li strong { color: #f0d8a7; font-size: 12px; }
+.tarot-decision-panel__mapping li p {
+  margin-top: 5px;
+  color: #d2cbbb;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.tarot-decision-panel__verdict {
+  padding: 20px 24px 22px;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  background: #11131a;
+}
+
+.tarot-decision-panel__verdict strong {
+  display: block;
+  margin: 9px 0 7px;
+  color: #fff;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.tarot-result__winner h3 { overflow-wrap: anywhere; }
+
+.tarot-decision-panel__verdict p { color: #c9c1b0; font-size: 10px; line-height: 1.65; }
+.tarot-result__legacy-note {
+  align-self: start;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f7f5ef;
+  font-size: 11px;
+}
+
+.tarot-result__footer { display: grid; gap: 8px; }
+.tarot-result__metadata {
+  margin: 0;
+  color: #8d8173;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-align: center;
+}
+
 .tarot-result__disclaimer {
   margin: 0;
   padding: 13px 16px;
@@ -2321,6 +2408,8 @@ select:focus-visible {
   font-size: 10px;
   line-height: 1.6;
 }
+
+.tarot-result__disclaimer span + span::before { content: ' · '; }
 
 @keyframes random-land {
   from { opacity: 0.35; transform: translateX(-18px) rotate(-2deg); }
@@ -2912,6 +3001,8 @@ select:focus-visible {
   .tarot-result__winner { grid-column: 1; }
   .tarot-result__interpretation { padding: 20px; gap: 22px; }
   .tarot-reading-passages { grid-template-columns: 1fr; }
+  .tarot-result__disclaimer span { display: block; }
+  .tarot-result__disclaimer span + span::before { content: none; }
   .tarot-card__artwork { width: 68%; }
 }
 

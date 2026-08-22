@@ -30,7 +30,16 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
   const tarot = details?.tarot
   if (tarot) {
     const orientationLabel = tarot.orientation === 'upright' ? '正位' : '逆位'
-    const hasRichReading = Boolean(tarot.resonance && tarot.echo && tarot.punchline)
+    const hasStructuredReading = Boolean(
+      tarot.message &&
+      tarot.shadowTitle &&
+      tarot.shadow &&
+      tarot.mapping?.length === 3 &&
+      tarot.verdict &&
+      tarot.verdictSubtext,
+    )
+    const hasLegacyReading = Boolean(tarot.resonance && tarot.echo && tarot.punchline)
+    const drawRecord = `DRAW ${String(tarot.selectedPosition + 1).padStart(2, '0')} / 07 · RECORD ${tarot.deckFingerprint} · SYMBOLIC READING`
 
     return (
       <div className="mode-result tarot-result">
@@ -50,8 +59,8 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
             <div className="tarot-keywords" aria-label="牌面关键词">
               {tarot.keywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
             </div>
-            <div className="tarot-strength" aria-label={`牌面强度 ${tarot.strength}/5`}>
-              <span>牌面强度</span>
+            <div className="tarot-strength" aria-label={`决策信号 ${tarot.strength}/5`}>
+              <span>决策信号</span>
               <div aria-hidden="true">
                 {Array.from({ length: 5 }, (_, index) => (
                   <i className={index < tarot.strength ? 'is-active' : ''} key={index} />
@@ -63,15 +72,22 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
           <div className="tarot-result__winner">
             <span>本轮指向</span>
             <h3>{result.winner.label}</h3>
+            {hasStructuredReading && <p>{tarot.verdictSubtext}</p>}
             <small>牌已经翻开，反悔不在本轮服务范围内。</small>
           </div>
         </section>
 
         <section className="tarot-result__interpretation" aria-labelledby="tarot-interpretation-heading">
-          <div>
+          <div className="tarot-result__interpretation-copy">
             <span className="section-index">CARD INTERPRETATION</span>
             <h2 id="tarot-interpretation-heading">牌意解读</h2>
-            {hasRichReading ? (
+            {hasStructuredReading ? (
+              <div className="tarot-reading-passages">
+                <article><span>MEANING / 01</span><h3>牌面含义</h3><p>{tarot.interpretation}</p></article>
+                <article><span>MESSAGE / 02</span><h3>本次启示</h3><p>{tarot.message}</p></article>
+                <article><span>SHADOW / 03</span><h3>{tarot.shadowTitle}</h3><p>{tarot.shadow}</p></article>
+              </div>
+            ) : hasLegacyReading ? (
               <div className="tarot-reading-passages">
                 <article><span>MEANING / 01</span><h3>牌面含义</h3><p>{tarot.interpretation}</p></article>
                 <article><span>WHY / 02</span><h3>为什么是它</h3><p>{tarot.resonance}</p></article>
@@ -82,15 +98,39 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
               </div>
             ) : <p>{tarot.interpretation}</p>}
           </div>
-          <dl>
-            <div><dt>牌阵指纹</dt><dd>{tarot.deckFingerprint}</dd></div>
-            <div><dt>抽牌位置</dt><dd>{String(tarot.selectedPosition + 1).padStart(2, '0')} / 07</dd></div>
-            <div><dt>科学意见</dt><dd>不予置评</dd></div>
-          </dl>
+          {hasStructuredReading ? (
+            <aside className="tarot-decision-panel" aria-labelledby="tarot-mapping-heading">
+              <div className="tarot-decision-panel__mapping">
+                <span>DECISION MAPPING</span>
+                <h2 id="tarot-mapping-heading">牌意落点</h2>
+                <ul>
+                  {tarot.mapping?.map((item) => (
+                    <li key={item.keyword}>
+                      <strong>{item.keyword}</strong>
+                      <p>{item.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="tarot-decision-panel__verdict">
+                <span>TAROT SAYS</span>
+                <strong>{tarot.verdict}</strong>
+                <p>{tarot.verdictSubtext}</p>
+              </div>
+            </aside>
+          ) : (
+            <p className="tarot-result__legacy-note">旧版牌面记录已按原文保留。</p>
+          )}
         </section>
 
-        {hasRichReading ? (
-          result.disclaimer && <p className="tarot-result__disclaimer">{result.disclaimer}</p>
+        {(hasStructuredReading || hasLegacyReading) ? (
+          <footer className="tarot-result__footer">
+            <p className="tarot-result__metadata">{drawRecord}</p>
+            <p className="tarot-result__disclaimer">
+              {result.disclaimer && <span>{result.disclaimer}</span>}
+              <span>Decision Lab 不对神秘学结论提供统计显著性保证。</span>
+            </p>
+          </footer>
         ) : (
           <section className="mystic-result__explanation" aria-labelledby="mystic-explanation-heading">
             <div><h2 id="mystic-explanation-heading">本轮结论</h2><p>{result.explanation}</p></div>

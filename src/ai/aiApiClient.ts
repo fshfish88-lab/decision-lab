@@ -5,6 +5,8 @@ export const AI_ENDPOINTS = {
   decision: 'https://api.fshfish.com/api/ai/decision',
 } as const
 
+export const AI_REQUEST_TIMEOUT_MS = 40_000
+
 export type AiApiErrorCode =
   | 'network'
   | 'timeout'
@@ -143,7 +145,7 @@ async function request<T>(
   normalize: (value: unknown) => T | null,
 ): Promise<T> {
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 20_000)
+  const timeout = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS)
 
   try {
     const response = await fetcher(endpoint, {

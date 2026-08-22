@@ -1,6 +1,6 @@
 import { ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { MysticResult } from '../components/results/MysticResult'
 import { AiDeepAnalysisPanel } from '../components/results/AiDeepAnalysisPanel'
@@ -18,8 +18,13 @@ import {
 
 export function ResultPage(): React.JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { state, dispatch } = useDecision()
-  const result = state.result
+  const requestedResultId = searchParams.get('id')
+  const history = readHistory()
+  const result = requestedResultId
+    ? history.find((item) => item.id === requestedResultId) ?? null
+    : state.result ?? history[0] ?? null
   const [regretted, setRegretted] = useState(() => (
     result ? Boolean(readHistory().find((item) => item.id === result.id)?.regrettedAt) : false
   ))

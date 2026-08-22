@@ -1,154 +1,386 @@
-import type { TarotCardDefinition, TarotMeaning, TarotOrientation } from '../types/decision'
-
-type MeaningSeed = readonly [keywords: string[], strength: number]
-
-function readableMeaning(
-  cardName: string,
-  orientation: TarotOrientation,
-  seed: MeaningSeed,
-  oppositeKeywords: string[],
-): TarotMeaning {
-  const [keywords, strength] = seed
-  const upright = orientation === 'upright'
-  const orientationLabel = upright ? '正位' : '逆位'
-
-  return {
-    keywords,
-    strength,
-    interpretation: upright
-      ? `${cardName}正位代表${keywords.join('、')}。它表示这张牌的核心力量能够顺畅发挥，事情更容易呈现出“${keywords[0]}”的状态。`
-      : `${cardName}逆位代表${keywords.join('、')}。它表示这张牌的力量受阻、过量或方向偏移，问题通常集中在“${keywords[0]}”。`,
-    resonance: upright
-      ? `牌阵会指向「{option}」，是因为它最接近${cardName}${orientationLabel}强调的“${keywords[0]}、${keywords[1]}”。在当前候选项里，这个对应关系最直接。`
-      : `牌阵会指向「{option}」，不是因为它最完美，而是它最能暴露${cardName}${orientationLabel}所说的“${keywords[0]}、${keywords[1]}”。`,
-    echo: upright
-      ? `反面是${oppositeKeywords[0]}和${oppositeKeywords[1]}：如果把“${keywords[0]}”放得太大，原本的优势也可能变成新的限制。`
-      : `需要留意${keywords[0]}和${keywords[1]}会互相放大，让一个普通选择看起来比实际更糟；逆位不等于彻底否定。`,
-    punchline: `Decision Lab 已记录${cardName}${orientationLabel}的意见，责任归属仍显示为“用户本人”。`,
-  }
-}
+import type { TarotCardDefinition, TarotMeaning } from '../types/decision'
 
 function card(
   definition: Omit<TarotCardDefinition, 'upright' | 'reversed'>,
-  upright: MeaningSeed,
-  reversed: MeaningSeed,
+  upright: TarotMeaning,
+  reversed: TarotMeaning,
 ): TarotCardDefinition {
-  return {
-    ...definition,
-    upright: readableMeaning(definition.chineseName, 'upright', upright, reversed[0]),
-    reversed: readableMeaning(definition.chineseName, 'reversed', reversed, upright[0]),
-  }
+  return { ...definition, upright, reversed }
 }
 
 export const TAROT_CARDS: readonly TarotCardDefinition[] = [
   card(
     { id: 'the-fool', number: 0, numeral: '0', name: 'THE FOOL', chineseName: '愚者' },
-    [['尝试', '冒险', '新开始'], 4],
-    [['准备不足', '冲动', '迟疑'], 2],
+    {
+      keywords: ['尝试', '冒险', '新开始'], decisionStyle: 'EXPLORE', strength: 4,
+      interpretation: '愚者正位代表愿意迈出第一步，即使路线还没有完全写好。它重视亲自体验，而不是等到万无一失。',
+      message: '本次问题可以少做一轮预测，给一个尚未验证的落点一次实际发生的机会。',
+      shadowTitle: '别把勇敢当免检通行证',
+      shadow: '尝试不等于忽略安全、预算和时间；只要存在硬性障碍，先处理现实条件。',
+    },
+    {
+      keywords: ['准备不足', '冲动', '迟疑'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '愚者逆位表示出发的冲动和准备不足同时出现，表面想行动，心里却还没有站稳。',
+      message: '本次结果适合先当成暂定落点，补齐一个最关键的信息后再真正启动。',
+      shadowTitle: '别用犹豫伪装准备',
+      shadow: '如果信息已经足够，继续搜集资料只会延长纠结；暂停应当有明确的结束时间。',
+    },
   ),
   card(
     { id: 'the-magician', number: 1, numeral: 'I', name: 'THE MAGICIAN', chineseName: '魔术师' },
-    [['行动', '掌控', '资源'], 5],
-    [['分心', '空转', '错配'], 2],
+    {
+      keywords: ['行动', '掌控', '资源'], decisionStyle: 'ACT', strength: 5,
+      interpretation: '魔术师正位强调手边资源已经足以启动，关键不在继续等待，而在把想法变成动作。',
+      message: '本次结果提供了一个明确起点，现在更有价值的是完成第一步，而不是再比较一轮。',
+      shadowTitle: '别把能做误当成全能',
+      shadow: '资源齐全不代表风险消失；涉及不可逆代价时，仍要先确认最基本的保护措施。',
+    },
+    {
+      keywords: ['分心', '空转', '错配'], decisionStyle: 'BREAK_PATTERN', strength: 2,
+      interpretation: '魔术师逆位表示能力没有消失，只是注意力、工具和目标没有对在同一条线上。',
+      message: '本次结果的作用是切断无效忙碌，把分散的精力重新压到一个可执行落点上。',
+      shadowTitle: '别让动作代替进展',
+      shadow: '如果执行后仍无法回答“完成了什么”，那可能只是换了一种方式继续原地打转。',
+    },
   ),
   card(
     { id: 'the-high-priestess', number: 2, numeral: 'II', name: 'THE HIGH PRIESTESS', chineseName: '女祭司' },
-    [['直觉', '观察', '安静'], 3],
-    [['忽略直觉', '信息噪声', '不安'], 2],
+    {
+      keywords: ['直觉', '观察', '安静'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '女祭司正位提醒人留意尚未说出口的感受，也承认有些信息需要安静下来才看得见。',
+      message: '本次结果适合先感受自己的第一反应，不必立刻把每一种偏好都包装成理性理由。',
+      shadowTitle: '别把沉默当答案',
+      shadow: '直觉可以提供线索，却不能替代事实核验；面对安全或金钱问题时，仍要看证据。',
+    },
+    {
+      keywords: ['忽略直觉', '信息噪声', '不安'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '女祭司逆位表示内在感受被外界意见盖住，信息越多，反而越难听清自己的偏好。',
+      message: '本次结果先作为一个安静的暂停点，等无关声音降下来，再检查它是否仍然顺眼。',
+      shadowTitle: '别把焦虑叫作直觉',
+      shadow: '强烈不安可能来自疲惫或压力，并不自动等于预警；需要用具体事实区分两者。',
+    },
   ),
   card(
     { id: 'the-empress', number: 3, numeral: 'III', name: 'THE EMPRESS', chineseName: '皇后' },
-    [['舒适', '丰盛', '满足'], 4],
-    [['过度迁就', '消耗', '失衡'], 2],
+    {
+      keywords: ['舒适', '丰盛', '满足'], decisionStyle: 'FOLLOW_DESIRE', strength: 4,
+      interpretation: '皇后正位重视真实的舒适和满足，允许选择不仅正确，还可以让人好好享受。',
+      message: '本次结果把感受本身列为有效依据，提醒你不必为每一次偏爱写一份成本报告。',
+      shadowTitle: '别让享受透支明天',
+      shadow: '舒适如果明显超过预算、时间或身体承受范围，就会从照顾自己变成新的负担。',
+    },
+    {
+      keywords: ['过度迁就', '消耗', '失衡'], decisionStyle: 'STABILIZE', strength: 2,
+      interpretation: '皇后逆位表示照顾和满足已经失去边界，注意力可能长期流向别人或短期欲望。',
+      message: '本次结果适合被当作一次收回精力的落点，优先选择不会继续扩大消耗的做法。',
+      shadowTitle: '别把自我照顾变成放纵',
+      shadow: '减少消耗不是对所有需求说不；如果只是压抑真实偏好，失衡还会换个方向回来。',
+    },
   ),
   card(
     { id: 'the-emperor', number: 4, numeral: 'IV', name: 'THE EMPEROR', chineseName: '皇帝' },
-    [['稳定', '秩序', '理性'], 5],
-    [['僵化', '控制', '规则负担'], 2],
+    {
+      keywords: ['稳定', '秩序', '理性'], decisionStyle: 'STABILIZE', strength: 5,
+      interpretation: '皇帝正位强调清楚的边界和可控的执行，让决定建立在稳定结构而非一时兴起上。',
+      message: '本次结果适合作为确定的执行基线，先按规则落地，再根据真实反馈调整。',
+      shadowTitle: '别让规则接管目的',
+      shadow: '秩序只是服务目标的工具；如果守规则的成本已经高于决定本身，就需要重新检查。',
+    },
+    {
+      keywords: ['僵化', '控制', '规则负担'], decisionStyle: 'BREAK_PATTERN', strength: 2,
+      interpretation: '皇帝逆位表示原本提供安全感的规则开始变硬，控制感正在挤压实际选择空间。',
+      message: '本次结果用来松动一个已经失效的默认答案，让决定重新服务当前需求。',
+      shadowTitle: '别为反规则而反规则',
+      shadow: '打破旧框架不等于拒绝所有边界；必要的安全、承诺和责任仍然需要保留。',
+    },
   ),
   card(
     { id: 'the-hierophant', number: 5, numeral: 'V', name: 'THE HIEROPHANT', chineseName: '教皇' },
-    [['经验', '传统', '可靠'], 4],
-    [['打破惯例', '独立判断', '质疑'], 3],
+    {
+      keywords: ['经验', '传统', '可靠'], decisionStyle: 'STABILIZE', strength: 4,
+      interpretation: '教皇正位代表经过验证的方法和共享经验，在不确定时为行动提供可靠扶手。',
+      message: '本次结果适合沿用成熟路径，减少不必要的试错，把精力留给真正重要的差异。',
+      shadowTitle: '别把惯例当真理',
+      shadow: '过去有效不代表现在仍合适；只要现实条件已经变化，经验也需要重新接受检查。',
+    },
+    {
+      keywords: ['打破惯例', '独立判断', '质疑'], decisionStyle: 'EXPLORE', strength: 3,
+      interpretation: '教皇逆位把问题从“大家怎么做”拉回“这次是否适合我”，鼓励重新审视默认规则。',
+      message: '本次结果给非标准选项一次被认真对待的机会，不必只因熟悉就自动选择旧答案。',
+      shadowTitle: '别把不同误当成更好',
+      shadow: '偏离惯例本身不产生价值；如果新路线没有解决任何问题，变化就只是增加成本。',
+    },
   ),
   card(
     { id: 'the-lovers', number: 6, numeral: 'VI', name: 'THE LOVERS', chineseName: '恋人' },
-    [['偏好', '契合', '真心选择'], 5],
-    [['摇摆', '不一致', '迎合'], 2],
+    {
+      keywords: ['偏好', '契合', '真心选择'], decisionStyle: 'FOLLOW_DESIRE', strength: 5,
+      interpretation: '恋人正位不只谈关系，也谈价值一致：一个选择是否与真实偏好站在同一边。',
+      message: '本次结果让你承认哪个落点真正有吸引力，不再用无休止的比较掩盖已经出现的倾向。',
+      shadowTitle: '别让喜欢取消代价',
+      shadow: '真心偏好仍然需要承担现实成本；若代价触及硬约束，喜欢不能单独通过审批。',
+    },
+    {
+      keywords: ['摇摆', '不一致', '迎合'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '恋人逆位表示选择与内在价值没有完全对齐，也可能把别人的期待误当成自己的答案。',
+      message: '本次结果先作为临时落点，等你确认它回应的是自身需求，而不是单纯避免让别人失望。',
+      shadowTitle: '别把独立变成对抗',
+      shadow: '识别迎合不等于忽略他人；共同承担后果的决定，仍需要把相关人的现实影响算进去。',
+    },
   ),
   card(
     { id: 'the-chariot', number: 7, numeral: 'VII', name: 'THE CHARIOT', chineseName: '战车' },
-    [['推进', '突破', '决心'], 5],
-    [['方向偏移', '急躁', '失控'], 2],
+    {
+      keywords: ['推进', '突破', '决心'], decisionStyle: 'ACT', strength: 5,
+      interpretation: '战车正位代表方向已经足够清楚，需要把分散力量收拢到一次坚定推进上。',
+      message: '本次结果的价值在于结束横向比较，立即完成一个能让事情真正向前的动作。',
+      shadowTitle: '别把速度当方向',
+      shadow: '行动很快也可能走错路；如果出现新的硬性事实，应当停车校准，而不是靠意志硬推。',
+    },
+    {
+      keywords: ['方向偏移', '急躁', '失控'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '战车逆位表示推进欲望仍然很强，但方向、节奏或控制感已经开始互相拉扯。',
+      message: '本次结果先充当刹车点，确认下一步的方向和最小动作后，再恢复速度。',
+      shadowTitle: '别把停车变成弃车',
+      shadow: '暂停只为重新取得控制；若条件已经明确，继续等待反而会让可执行窗口缩小。',
+    },
   ),
   card(
     { id: 'strength', number: 8, numeral: 'VIII', name: 'STRENGTH', chineseName: '力量' },
-    [['耐心', '勇气', '温和坚定'], 4],
-    [['自我怀疑', '疲惫', '退缩'], 2],
+    {
+      keywords: ['耐心', '勇气', '温和坚定'], decisionStyle: 'ACT', strength: 4,
+      interpretation: '力量正位强调不靠蛮力也能坚定推进，真正的控制来自稳定而持续的行动。',
+      message: '本次结果不要求戏剧性突破，只要求你温和地认领答案，并完成眼前那一步。',
+      shadowTitle: '别把克制变成硬撑',
+      shadow: '耐心并不等于无限承受；当身体、安全或边界受损时，退出同样是一种力量。',
+    },
+    {
+      keywords: ['自我怀疑', '疲惫', '退缩'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '力量逆位表示意志被疲惫削弱，暂时没有把握并不等于真正缺少能力。',
+      message: '本次结果可以先减小执行规模，让决定不再要求一次完成全部证明。',
+      shadowTitle: '别让休息变成自我否定',
+      shadow: '状态不好时降低负荷很合理，但不要据此给自己下永久结论；恢复后再看一次。',
+    },
   ),
   card(
     { id: 'the-hermit', number: 9, numeral: 'IX', name: 'THE HERMIT', chineseName: '隐者' },
-    [['独处', '审慎', '内省'], 3],
-    [['过度思考', '封闭', '停滞'], 2],
+    {
+      keywords: ['独处', '审慎', '内省'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '隐者正位代表暂时离开噪声，用更少的外界意见换取更清楚的内部判断。',
+      message: '本次结果适合在安静环境中再确认一次，只保留真正影响决定的少数条件。',
+      shadowTitle: '别把独处变成信息隔离',
+      shadow: '内省无法替代外部事实；需要专业知识或他人配合时，仍要主动获取必要信息。',
+    },
+    {
+      keywords: ['过度思考', '封闭', '停滞'], decisionStyle: 'BREAK_PATTERN', strength: 2,
+      interpretation: '隐者逆位表示思考已经失去产出，独处从澄清问题变成了延迟面对问题。',
+      message: '本次结果负责中断内循环，哪怕只执行一个很小的步骤，也比继续脑内推演更有信息。',
+      shadowTitle: '别用行动逃开真正问题',
+      shadow: '结束空转不等于随便做；如果核心风险尚未识别，先写清它再迈步。',
+    },
   ),
   card(
     { id: 'wheel-of-fortune', number: 10, numeral: 'X', name: 'WHEEL OF FORTUNE', chineseName: '命运之轮' },
-    [['变化', '机会', '转折'], 5],
-    [['延误', '反复', '失去节奏'], 2],
+    {
+      keywords: ['变化', '机会', '转折'], decisionStyle: 'EXPLORE', strength: 5,
+      interpretation: '命运之轮正位表示条件正在变化，原本关闭的路线可能出现新的进入时机。',
+      message: '本次结果适合被视为一次顺势试探，用小成本行动确认窗口是否真的打开。',
+      shadowTitle: '别把变化当保证',
+      shadow: '机会只是条件变动，不是成功承诺；投入前仍要确认最坏结果是否能够承受。',
+    },
+    {
+      keywords: ['延误', '反复', '失去节奏'], decisionStyle: 'STABILIZE', strength: 2,
+      interpretation: '命运之轮逆位表示外部节奏不稳定，反复变化正在消耗执行的连续性。',
+      message: '本次结果提供一个固定落点，先完成可控部分，不再把行动交给下一次条件变化。',
+      shadowTitle: '别把稳定变成僵住',
+      shadow: '固定答案只能减少噪声；如果关键条件确实改变，仍要允许自己及时更新。',
+    },
   ),
   card(
     { id: 'justice', number: 11, numeral: 'XI', name: 'JUSTICE', chineseName: '正义' },
-    [['平衡', '责任', '清晰'], 4],
-    [['偏见', '逃避代价', '失衡'], 2],
+    {
+      keywords: ['平衡', '责任', '清晰'], decisionStyle: 'STABILIZE', strength: 4,
+      interpretation: '正义正位强调依据和后果对得上，让选择能够经得起简单、诚实的复核。',
+      message: '本次结果适合在明确边界内执行：接受它的好处，也承认随之而来的代价。',
+      shadowTitle: '别把公平做成平均',
+      shadow: '所有选项得到同样对待不一定合理；真正重要的是标准一致，而不是结果看起来整齐。',
+    },
+    {
+      keywords: ['偏见', '逃避代价', '失衡'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '正义逆位表示判断标准可能前后不一，或者只看见收益，却把代价放到画面外。',
+      message: '本次结果暂时保留，但在执行前需要补问一句：同样标准是否也适用于其他候选项。',
+      shadowTitle: '别把复核变成审讯',
+      shadow: '检查偏差不需要追求绝对无误；如果主要代价已清楚，继续质疑也可能只是拖延。',
+    },
   ),
   card(
     { id: 'the-hanged-man', number: 12, numeral: 'XII', name: 'THE HANGED MAN', chineseName: '倒吊人' },
-    [['换位', '暂停', '新视角'], 3],
-    [['无效等待', '拖延', '固着'], 2],
+    {
+      keywords: ['换位', '暂停', '新视角'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '倒吊人正位代表主动暂停旧角度，让问题在不同位置上显出新的轮廓。',
+      message: '本次结果不必马上执行，可以先从使用它、放弃它和旁观它三个角度各看一次。',
+      shadowTitle: '别把等待神圣化',
+      shadow: '新视角应当带来新信息；如果什么都没有变化，继续悬着只是给拖延加了滤镜。',
+    },
+    {
+      keywords: ['无效等待', '拖延', '固着'], decisionStyle: 'BREAK_PATTERN', strength: 2,
+      interpretation: '倒吊人逆位表示暂停已经失去用途，等待不再换来洞察，只剩下决定迟迟不发生。',
+      message: '本次结果用来结束无期限挂起，设定一个很小但不可继续推迟的执行动作。',
+      shadowTitle: '别用截止时间制造草率',
+      shadow: '结束拖延仍需尊重硬约束；如果风险信息确实缺失，应先规定补齐信息的期限。',
+    },
   ),
   card(
     { id: 'death', number: 13, numeral: 'XIII', name: 'DEATH', chineseName: '死神' },
-    [['结束', '改变', '更新'], 5],
-    [['抗拒变化', '留恋', '停滞'], 3],
+    {
+      keywords: ['结束', '改变', '更新'], decisionStyle: 'BREAK_PATTERN', strength: 5,
+      interpretation: '死神正位并不预测坏事，它象征一个阶段已经完成，继续保留旧答案只会占用空间。',
+      message: '本次结果代表一次清楚的切换，让已经失效的选择退出，给新行动腾出位置。',
+      shadowTitle: '别为变化而清空一切',
+      shadow: '结束旧阶段不等于否定全部经验；仍然有效的资源、关系和教训可以一起带走。',
+    },
+    {
+      keywords: ['抗拒变化', '留恋', '停滞'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '死神逆位表示明知需要变化，却仍被熟悉感拉住，旧选项因此迟迟没有退场。',
+      message: '本次结果先帮你识别最舍不得放下的部分，再决定它是必要条件还是情绪惯性。',
+      shadowTitle: '别把告别做成自我强迫',
+      shadow: '变化可以分阶段发生；若一次切断会造成不可承受的损失，就先设计安全过渡。',
+    },
   ),
   card(
     { id: 'temperance', number: 14, numeral: 'XIV', name: 'TEMPERANCE', chineseName: '节制' },
-    [['调和', '适度', '耐心'], 4],
-    [['过量', '失衡', '急于求成'], 2],
+    {
+      keywords: ['调和', '适度', '耐心'], decisionStyle: 'STABILIZE', strength: 4,
+      interpretation: '节制正位重视比例和节奏，不追求一次极致，而是让选择能够持续运行。',
+      message: '本次结果适合用温和版本落地，先找到可长期接受的程度，再观察真实反馈。',
+      shadowTitle: '别把折中当自动正确',
+      shadow: '中间值有时会同时失去两边优势；如果存在清楚优先级，就不必为了好看强行平均。',
+    },
+    {
+      keywords: ['过量', '失衡', '急于求成'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '节制逆位表示比例或节奏被打乱，想一次解决全部问题反而增加了新的摩擦。',
+      message: '本次结果先缩小到可控制的剂量，避免把一个普通决定升级成全面改造。',
+      shadowTitle: '别用小步掩盖无效方向',
+      shadow: '降低强度只能减少风险；如果方向本身不合适，再温和地执行也不会变得正确。',
+    },
   ),
   card(
     { id: 'the-devil', number: 15, numeral: 'XV', name: 'THE DEVIL', chineseName: '恶魔' },
-    [['欲望', '诱惑', '坦诚'], 4],
-    [['松绑', '摆脱依赖', '清醒'], 4],
+    {
+      keywords: ['欲望', '诱惑', '坦诚'], decisionStyle: 'FOLLOW_DESIRE', strength: 4,
+      interpretation: '恶魔正位把被包装过的理由拿开，直接承认吸引力、习惯和即时满足确实存在。',
+      message: '本次结果让真实欲望进入讨论，不再假装决定完全由高尚或理性的理由驱动。',
+      shadowTitle: '别把诚实当放纵许可',
+      shadow: '承认想要不等于必须满足；当代价伤害健康、安全或长期边界时，欲望需要被限制。',
+    },
+    {
+      keywords: ['松绑', '摆脱依赖', '清醒'], decisionStyle: 'BREAK_PATTERN', strength: 4,
+      interpretation: '恶魔逆位表示束缚开始被看见，你有机会停止一个靠惯性、羞耻或依赖维持的循环。',
+      message: '本次结果用来中断自动重复，让选择重新回到可以说“不”也可以重新决定的状态。',
+      shadowTitle: '别把松绑变成逃避',
+      shadow: '离开旧循环仍要面对后果；如果只是换一个出口回避责任，束缚会换名字继续出现。',
+    },
   ),
   card(
     { id: 'the-tower', number: 16, numeral: 'XVI', name: 'THE TOWER', chineseName: '高塔' },
-    [['打破现状', '突变', '真相'], 5],
-    [['避免冲击', '延后改变', '隐患'], 3],
+    {
+      keywords: ['打破现状', '突变', '真相'], decisionStyle: 'BREAK_PATTERN', strength: 5,
+      interpretation: '高塔正位表示原有结构无法继续假装稳定，暴露的问题要求一次明确调整。',
+      message: '本次结果不是证明灾难将至，而是让已经不成立的默认答案停止占据位置。',
+      shadowTitle: '别主动制造废墟',
+      shadow: '看见问题不等于必须一次推倒全部；能局部修复时，剧烈变化只会扩大可避免的损失。',
+    },
+    {
+      keywords: ['避免冲击', '延后改变', '隐患'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '高塔逆位表示你正在避免一次冲击，但被延后的结构问题并没有因此自动消失。',
+      message: '本次结果先作为缓冲方案，同时明确记录哪项风险只是推迟，而不是已经解决。',
+      shadowTitle: '别把缓冲当永久地址',
+      shadow: '渐进处理需要期限和检查点；没有后续动作的缓冲，通常只是更舒适的拖延。',
+    },
   ),
   card(
     { id: 'the-star', number: 17, numeral: 'XVII', name: 'THE STAR', chineseName: '星星' },
-    [['希望', '长期期待', '恢复'], 5],
-    [['失望', '信心不足', '距离感'], 2],
+    {
+      keywords: ['希望', '长期期待', '恢复'], decisionStyle: 'EXPLORE', strength: 5,
+      interpretation: '星星正位代表在消耗之后重新看见方向，愿意为有意义的可能性保留耐心。',
+      message: '本次结果可以被当作一次面向长期的尝试，不要求马上证明全部价值。',
+      shadowTitle: '别让希望免于验证',
+      shadow: '长期期待仍需要短期检查点；如果持续没有反馈，就要调整路径而不是只增加信念。',
+    },
+    {
+      keywords: ['失望', '信心不足', '距离感'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '星星逆位表示愿景暂时变远，当前状态让可能性看起来比实际更暗。',
+      message: '本次结果先缩小到一个可验证步骤，用真实反馈代替对未来的整体悲观。',
+      shadowTitle: '别把小步当虚假安慰',
+      shadow: '如果方向已被事实否定，就无需靠坚持证明诚意；暂停也可以包括体面退出。',
+    },
   ),
   card(
     { id: 'the-moon', number: 18, numeral: 'XVIII', name: 'THE MOON', chineseName: '月亮' },
-    [['直觉', '不确定', '潜意识'], 3],
-    [['迷雾散去', '识破焦虑', '澄清'], 3],
+    {
+      keywords: ['直觉', '不确定', '潜意识'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '月亮正位表示信息还没有完全清楚，直觉、担忧和想象暂时混在同一片阴影里。',
+      message: '本次结果适合保留为直觉候选，但执行前只补查一个真正影响决定的关键事实。',
+      shadowTitle: '别让想象补完证据',
+      shadow: '不确定时大脑会自动填空；无法被具体描述的担忧，不宜直接升级为事实判断。',
+    },
+    {
+      keywords: ['迷雾散去', '识破焦虑', '澄清'], decisionStyle: 'STABILIZE', strength: 3,
+      interpretation: '月亮逆位表示混乱开始退去，一部分担忧已经能够被命名和核对。',
+      message: '本次结果可以在已澄清的条件下成为稳定落点，不必继续为所有未知项预演最坏结局。',
+      shadowTitle: '别过早宣布天亮',
+      shadow: '看清一部分不等于掌握全部；若仍有会改变结论的硬信息缺失，应继续核验。',
+    },
   ),
   card(
     { id: 'the-sun', number: 19, numeral: 'XIX', name: 'THE SUN', chineseName: '太阳' },
-    [['快乐', '明确', '满足'], 5],
-    [['期待过高', '快乐受阻', '想太多'], 3],
+    {
+      keywords: ['快乐', '明确', '满足'], decisionStyle: 'ACT', strength: 5,
+      interpretation: '太阳正位代表偏好和结果都变得清楚，决定不再需要隐藏在复杂解释后面。',
+      message: '本次结果足以结束追加比较，把已经明确的吸引力直接转化为行动。',
+      shadowTitle: '别把晴天当保证书',
+      shadow: '积极感受不是风险豁免；如果预算、安全或承诺不允许，现实条件仍然拥有否决权。',
+    },
+    {
+      keywords: ['期待过高', '快乐受阻', '想太多'], decisionStyle: 'PAUSE', strength: 3,
+      interpretation: '太阳逆位表示好处仍然存在，但过高期待或反复审视让满足感被挡住了一部分。',
+      message: '本次结果可以降低期待后再执行，不必要求一次普通选择负责提供完美体验。',
+      shadowTitle: '别用降低期待取消底线',
+      shadow: '接受不完美不等于接受明显不合适；触碰硬约束时，仍然可以放弃本轮牌面。',
+    },
   ),
   card(
     { id: 'judgement', number: 20, numeral: 'XX', name: 'JUDGEMENT', chineseName: '审判' },
-    [['觉醒', '复盘', '决定'], 5],
-    [['自我否定', '迟疑', '拒绝结论'], 2],
+    {
+      keywords: ['觉醒', '复盘', '决定'], decisionStyle: 'ACT', strength: 5,
+      interpretation: '审判正位代表复盘已经形成结论，过去的经验现在可以被整理成一次明确决定。',
+      message: '本次结果适合结束内部听证，把已经反复出现的答案正式转成下一步。',
+      shadowTitle: '别把结论写成终身判决',
+      shadow: '当前决定只服务当前条件；如果关键事实改变，更新结论并不等于推翻自己。',
+    },
+    {
+      keywords: ['自我否定', '迟疑', '拒绝结论'], decisionStyle: 'PAUSE', strength: 2,
+      interpretation: '审判逆位表示复盘正在变成自我怀疑，你可能已经看见答案，却迟迟不肯让讨论结束。',
+      message: '这次先停止内心听证会，把本次结果当成暂定答案，再用一次实际体验收集信息。',
+      shadowTitle: '别把暂停变成逃避',
+      shadow: '如果存在今天必须处理的责任或明确硬约束，就忽略牌面，先把现实问题解决。',
+    },
   ),
   card(
     { id: 'the-world', number: 21, numeral: 'XXI', name: 'THE WORLD', chineseName: '世界' },
-    [['完成', '整合', '圆满'], 5],
-    [['未完成', '差最后一步', '收尾'], 4],
+    {
+      keywords: ['完成', '整合', '圆满'], decisionStyle: 'ACT', strength: 5,
+      interpretation: '世界正位代表主要条件已经能够互相配合，这一轮选择具备收尾和落地的完整度。',
+      message: '本次结果适合被正式接受，不再为了寻找理论上的更优解而延长已经完成的比较。',
+      shadowTitle: '别让圆满要求零缺点',
+      shadow: '完整不等于完美；只要代价可接受，就无需因为小瑕疵重新打开全部候选项。',
+    },
+    {
+      keywords: ['未完成', '差最后一步', '收尾'], decisionStyle: 'STABILIZE', strength: 4,
+      interpretation: '世界逆位表示整体方向已经接近完成，但仍有一个具体环节没有真正闭合。',
+      message: '本次结果可以继续保留，重点不是换答案，而是找出阻止落地的最后一个动作。',
+      shadowTitle: '别把最后一步无限放大',
+      shadow: '收尾问题不应被包装成全盘失败；若主体条件成立，就只修补缺口而不是重新开始。',
+    },
   ),
 ]

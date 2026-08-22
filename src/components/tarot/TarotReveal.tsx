@@ -38,7 +38,7 @@ export function TarotReveal({ result, onContinue }: TarotRevealProps): React.JSX
       <div className="tarot-reveal__answer">
         <span>本轮指向</span>
         <strong>{result.winner.label}</strong>
-        <small>塔罗已经表态，科学部门对此不发表评论。</small>
+        <small>牌已经翻开，反悔不在本轮服务范围内。</small>
       </div>
       <button className="primary-action" type="button" onClick={onContinue}>
         <span>查看完整结果</span><ArrowRight size={18} />
