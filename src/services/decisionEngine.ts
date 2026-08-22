@@ -160,7 +160,7 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
   const { card, orientation, position, winner } = input.selection
   const meaning = card[orientation]
   const orientationLabel = orientation === 'upright' ? '正位' : '逆位'
-  const resonance = meaning.resonance.replace('{option}', `「${winner.label}」`)
+  const resonance = meaning.resonance.replace('{option}', winner.label)
 
   return {
     ...baseResult(input),

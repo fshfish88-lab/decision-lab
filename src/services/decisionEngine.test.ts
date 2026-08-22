@@ -98,6 +98,8 @@ describe('decisionEngine', () => {
     expect(tarot?.interpretation).toContain(tarot?.chineseName)
     expect(tarot?.resonance).toContain(`「${result.winner.label}」`)
     expect(tarot?.resonance).not.toContain('{option}')
+    expect(tarot?.resonance).not.toContain('「「')
+    expect(tarot?.resonance).not.toContain('」」')
     expect(tarot?.echo?.length).toBeGreaterThanOrEqual(20)
     expect(tarot?.punchline).toContain('Decision Lab')
     expect(result.explanation).toContain(tarot?.punchline)
