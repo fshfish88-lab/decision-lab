@@ -50,7 +50,7 @@ export function HistoryPage(): React.JSX.Element {
 
   function openResult(item: DecisionHistoryItem): void {
     dispatch({ type: 'set-result', result: item })
-    navigate('/result')
+    navigate(`/result?id=${encodeURIComponent(item.id)}`)
   }
 
   return (

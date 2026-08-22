@@ -130,6 +130,23 @@ describe('AI prompt builders', () => {
     expect(content).not.toContain('玄学证据')
   })
 
+  it('does not describe a legacy mystic record as a user-drawn tarot result', () => {
+    const legacyMysticResult: DecisionResult = {
+      ...tarotResult,
+      details: {
+        type: 'mystic',
+        evidence: [{ key: 'legacy', title: '旧版征兆', description: '娱乐模板', reading: '42%' }],
+        favorable: '今日宜：日料',
+        avoid: '今日忌：继续纠结',
+      },
+    }
+    const content = buildDeepAnalysisContent(legacyMysticResult)
+
+    expect(content).toContain('正在解读 DECISION LAB 的旧版「玄学模式」记录')
+    expect(content).toContain('旧版征兆：娱乐模板（42%）')
+    expect(content).not.toContain('最终候选项由用户亲自抽中的塔罗牌决定')
+  })
+
   it('requires direct advice to select one existing option', () => {
     const content = buildDirectDecisionContent({
       question: '今晚吃什么？',

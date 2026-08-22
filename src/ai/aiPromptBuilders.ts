@@ -91,6 +91,20 @@ const TAROT_ANALYSIS_RULES = `你正在解读 DECISION LAB 的「塔罗模式」
 牌面是娱乐性的象征，
 真正决定权始终属于用户。`
 
+const LEGACY_MYSTIC_ANALYSIS_RULES = `你正在解读 DECISION LAB 的旧版「玄学模式」记录。
+
+本模式仅供娱乐。本轮候选项由旧版本地娱乐模板决定，结果已经确定，禁止替换或重新选择。
+
+请用清楚、克制的语言说明这份旧记录怎样把娱乐性征兆映射到本轮结果，并给出一个现实判断标准。
+
+重要规则：
+
+- 明确说明旧版指标和百分比是娱乐包装，不是测量事实；
+- 不要把旧记录描述成塔罗抽牌；
+- 不要声称它预测未来或证明某个方案客观更优；
+- 不要编造用户没有提供的经历、性格或心理状态；
+- 结尾可以保留一句轻微冷幽默。`
+
 const DIRECT_DECISION_RULES = `你是 DECISION LAB 的 AI 决策顾问。
 
 你的任务是根据用户提供的现实情况，
@@ -143,6 +157,20 @@ const MODE_ANALYSIS_RULES: Record<LocalAnalysisMode, string> = {
   random: RANDOM_ANALYSIS_RULES,
   scientific: SCIENTIFIC_ANALYSIS_RULES,
   mystic: TAROT_ANALYSIS_RULES,
+}
+
+function analysisRules(result: DecisionResult): string {
+  if (result.mode === 'ai') {
+    throw new Error('AI 模式不使用本地结果深度分析 Prompt')
+  }
+  if (
+    result.mode === 'mystic' &&
+    result.details?.type === 'mystic' &&
+    !result.details.tarot
+  ) {
+    return LEGACY_MYSTIC_ANALYSIS_RULES
+  }
+  return MODE_ANALYSIS_RULES[result.mode]
 }
 
 function optionLabels(options: DecisionOption[]): string {
@@ -225,7 +253,7 @@ export function buildDeepAnalysisContent(result: DecisionResult): string {
 
   return [
     '任务类型：AI 深度分析',
-    MODE_ANALYSIS_RULES[result.mode],
+    analysisRules(result),
     VOICE_RULES,
     ANALYSIS_DATA_RULES,
     decisionDataBlock([

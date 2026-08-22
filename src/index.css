@@ -2187,7 +2187,12 @@ select:focus-visible {
 
 .tarot-reveal__answer span,
 .tarot-reveal__answer small { color: #cbbd9a; font-size: 9px; }
-.tarot-reveal__answer strong { margin: 9px 0 13px; font-size: clamp(30px, 4vw, 48px); }
+.tarot-reveal__answer strong {
+  max-width: 100%;
+  margin: 9px 0 13px;
+  font-size: clamp(30px, 4vw, 48px);
+  overflow-wrap: anywhere;
+}
 .tarot-reveal .primary-action { grid-column: 1 / -1; margin-top: 0; }
 
 .tarot-result__hero {

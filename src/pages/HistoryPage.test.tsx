@@ -94,4 +94,28 @@ describe('HistoryPage', () => {
     expect(screen.getByRole('heading', { name: '决策结果' })).toBeInTheDocument()
     expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
   })
+
+  it('restores the exact older history result selected in the route', () => {
+    saveHistoryItem({
+      ...result,
+      id: 'history-2',
+      createdAt: '2026-08-14T08:00:00.000Z',
+      question: '更新的决定',
+      winner: { id: 'sushi', label: '日料' },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/result?id=history-1']}>
+        <DecisionProvider>
+          <Routes>
+            <Route path="/result" element={<ResultPage />} />
+          </Routes>
+        </DecisionProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('今晚吃什么？')).toBeInTheDocument()
+    expect(screen.queryByText('更新的决定')).not.toBeInTheDocument()
+    expect(screen.getAllByText('火锅').length).toBeGreaterThan(0)
+  })
 })
