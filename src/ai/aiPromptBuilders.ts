@@ -163,11 +163,8 @@ function analysisRules(result: DecisionResult): string {
   if (result.mode === 'ai') {
     throw new Error('AI 模式不使用本地结果深度分析 Prompt')
   }
-  if (
-    result.mode === 'mystic' &&
-    result.details?.type === 'mystic' &&
-    !result.details.tarot
-  ) {
+  const hasTarotDetails = result.details?.type === 'mystic' && Boolean(result.details.tarot)
+  if (result.mode === 'mystic' && !hasTarotDetails) {
     return LEGACY_MYSTIC_ANALYSIS_RULES
   }
   return MODE_ANALYSIS_RULES[result.mode]

@@ -147,6 +147,13 @@ describe('AI prompt builders', () => {
     expect(content).not.toContain('最终候选项由用户亲自抽中的塔罗牌决定')
   })
 
+  it('uses legacy mystic rules when an old record has no details payload', () => {
+    const content = buildDeepAnalysisContent({ ...tarotResult, details: undefined })
+
+    expect(content).toContain('正在解读 DECISION LAB 的旧版「玄学模式」记录')
+    expect(content).not.toContain('最终候选项由用户亲自抽中的塔罗牌决定')
+  })
+
   it('requires direct advice to select one existing option', () => {
     const content = buildDirectDecisionContent({
       question: '今晚吃什么？',
