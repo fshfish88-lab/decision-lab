@@ -60,11 +60,22 @@ describe('AnalysisPage mode experiences', () => {
     expect(screen.getByText('正在应用指标权重')).toBeInTheDocument()
   })
 
-  it('shows mystic connection language', () => {
+  it('does not precompute a mystic result before the user draws a tarot card', () => {
     vi.useFakeTimers()
-    renderAnalysis('mystic')
+    render(
+      <MemoryRouter initialEntries={['/analysis']}>
+        <DecisionContext.Provider
+          value={{
+            state: { ...initialDecisionState, mode: 'mystic', result: null },
+            dispatch: vi.fn(),
+          }}
+        >
+          <AnalysisPage />
+        </DecisionContext.Provider>
+      </MemoryRouter>,
+    )
 
-    expect(screen.getByRole('heading', { name: '正在连接命运频道' })).toBeInTheDocument()
-    expect(screen.getByText('正在搜索平行时间线')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '玄学模式需要你亲手抽牌' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '正在连接命运频道' })).not.toBeInTheDocument()
   })
 })

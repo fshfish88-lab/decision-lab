@@ -93,6 +93,35 @@ const mysticResult: DecisionResult = {
   },
 }
 
+const tarotResult: DecisionResult = {
+  ...mysticResult,
+  id: 'tarot-1',
+  winner: { id: 'sushi', label: '日料' },
+  explanation: '太阳正位让答案变得明确。',
+  confidence: 100,
+  metrics: [],
+  disclaimer: '塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。',
+  details: {
+    type: 'mystic',
+    tarot: {
+      cardId: 'the-sun',
+      number: 19,
+      numeral: 'XIX',
+      name: 'THE SUN',
+      chineseName: '太阳',
+      orientation: 'upright',
+      keywords: ['快乐', '明确', '满足'],
+      interpretation: '太阳牌认为答案无需过度解释，选择那个让你直接感到开心的方案。',
+      strength: 5,
+      selectedPosition: 2,
+      deckFingerprint: 'TAROT-1234ABCD',
+    },
+    evidence: [],
+    favorable: '接受「日料」作为本轮答案',
+    avoid: '翻回牌背假装刚才没有看见',
+  },
+}
+
 describe('RandomResult', () => {
   it('presents an honest random landing instead of analysis metrics', () => {
     render(<RandomResult result={randomResult} />)
@@ -141,6 +170,22 @@ describe('ScientificResult', () => {
 })
 
 describe('MysticResult', () => {
+  it('renders a tarot reading without legacy pseudo-science numbers', () => {
+    render(<MysticResult result={tarotResult} />)
+
+    expect(screen.getByRole('heading', { name: '你的牌' })).toBeInTheDocument()
+    expect(screen.getByText('XIX · THE SUN')).toBeInTheDocument()
+    expect(screen.getByText('太阳 · 正位')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '日料' })).toBeInTheDocument()
+    expect(screen.getByLabelText('牌面强度 5/5')).toBeInTheDocument()
+    expect(screen.getByText('快乐')).toBeInTheDocument()
+    expect(screen.getByText('TAROT-1234ABCD')).toBeInTheDocument()
+    expect(screen.queryByText('命运星盘')).not.toBeInTheDocument()
+    expect(screen.queryByText('玄学证据')).not.toBeInTheDocument()
+    expect(screen.queryByText(/可信度/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/宇宙共振率/)).not.toBeInTheDocument()
+  })
+
   it('renders a playful destiny report with evidence and an entertainment warning', () => {
     render(<MysticResult result={mysticResult} />)
 

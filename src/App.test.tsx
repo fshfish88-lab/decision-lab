@@ -39,7 +39,7 @@ describe('DECISION LAB flow', () => {
     await user.type(screen.getByLabelText('选项 2'), '日料')
     await user.type(screen.getByPlaceholderText('例如：今晚吃什么？'), '今晚吃什么？')
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
-    await user.click(screen.getByRole('button', { name: '开始做法' }))
+    await user.click(screen.getByRole('button', { name: '开始抽牌' }))
 
     expect(screen.getByRole('heading', { name: '凭第一感觉，选择一张' })).toBeInTheDocument()
     expect(localStorage.getItem('decision-lab:history')).toBeNull()
@@ -50,7 +50,9 @@ describe('DECISION LAB flow', () => {
 
     expect(screen.getByRole('heading', { name: '你的牌已翻开' })).toBeInTheDocument()
     const revealedWinner = screen.getByText('本轮指向').parentElement?.querySelector('strong')?.textContent
-    expect(revealedWinner).toBeTruthy()
+    if (!revealedWinner) throw new Error('揭牌结果缺少候选项')
+    const storedTarot = JSON.parse(localStorage.getItem('decision-lab:history') ?? '{}').items?.[0]?.details?.tarot
+    if (!storedTarot) throw new Error('历史记录缺少塔罗详情')
     await user.click(screen.getByRole('button', { name: '查看完整结果' }))
 
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
@@ -60,6 +62,7 @@ describe('DECISION LAB flow', () => {
     await user.click(screen.getByRole('link', { name: '决策记录' }))
     expect(screen.getByText('今晚吃什么？')).toBeInTheDocument()
     expect(screen.getByText(revealedWinner!)).toBeInTheDocument()
+    expect(screen.getByText(`抽到：${storedTarot.chineseName} · ${storedTarot.orientation === 'upright' ? '正位' : '逆位'}`)).toBeInTheDocument()
   })
 
   it('completes the scientific scoring flow and shows a full ranking', async () => {

@@ -7,7 +7,7 @@ export function AboutPage(): React.JSX.Element {
       <section className="about-grid">
         <article><span className="about-icon about-icon--random"><Dices /></span><small>01 / RANDOM</small><h2>随机模式</h2><p>对每个有效候选项执行等概率抽取。没有暗箱，也没有系统偏爱。</p></article>
         <article><span className="about-icon about-icon--scientific"><BarChart3 /></span><small>02 / SCIENCE</small><h2>科学模式</h2><p>通过自定义指标、权重和 1～10 分评分，计算完整加权排名。</p></article>
-        <article><span className="about-icon about-icon--mystic"><Orbit /></span><small>03 / MYSTIC</small><h2>玄学模式</h2><p>用本地模板和虚构指标认真胡说。娱乐性质会始终明确标注。</p></article>
+        <article><span className="about-icon about-icon--mystic"><Orbit /></span><small>03 / MYSTIC</small><h2>玄学模式</h2><p>从 22 张大阿卡纳中展开 7 张，由你亲手抽牌。牌阵在本地生成，娱乐性质会始终明确标注。</p></article>
         <article><span className="about-icon about-icon--data"><Database /></span><small>PRIVACY / LOCAL</small><h2>只存本机</h2><p>历史记录使用 LocalStorage 保存。V1 没有账号、数据库或后端上传。</p></article>
       </section>
     </main>

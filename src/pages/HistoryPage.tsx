@@ -7,6 +7,12 @@ import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
 const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学' } as const
 
+function tarotSummary(item: DecisionHistoryItem): string | undefined {
+  const tarot = item.details?.type === 'mystic' ? item.details.tarot : undefined
+  if (!tarot) return undefined
+  return `抽到：${tarot.chineseName} · ${tarot.orientation === 'upright' ? '正位' : '逆位'}`
+}
+
 export function HistoryPage(): React.JSX.Element {
   const [history, setHistory] = useState<DecisionHistoryItem[]>(() => readHistory())
   const [filter, setFilter] = useState<'all' | DecisionMode>('all')
@@ -43,8 +49,8 @@ export function HistoryPage(): React.JSX.Element {
           {visibleItems.map((item, index) => (
             <article className="history-item" key={item.id}>
               <span className={`history-item__mode history-item__mode--${item.mode}`}>{MODE_LABELS[item.mode]}</span>
-              <div className="history-item__copy"><small>NO. {String(history.length - index).padStart(3, '0')}</small><h2>{item.question}</h2><p>{item.options.map((option) => option.label).join(' / ')}</p></div>
-              <div className="history-item__result"><span>系统选择</span><strong>{item.winner.label}</strong><small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small></div>
+              <div className="history-item__copy"><small>NO. {String(history.length - index).padStart(3, '0')}</small><h2>{item.question}</h2><p>{item.options.map((option) => option.label).join(' / ')}</p>{tarotSummary(item) && <p className="history-item__tarot">{tarotSummary(item)}</p>}</div>
+              <div className="history-item__result"><span>{tarotSummary(item) ? '本轮指向' : '系统选择'}</span><strong>{item.winner.label}</strong><small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small></div>
               <button className="icon-button" type="button" aria-label={`删除记录 ${item.question}`} onClick={() => remove(item.id)}><Trash2 size={16} /></button>
             </article>
           ))}
