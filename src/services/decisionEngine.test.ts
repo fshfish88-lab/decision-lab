@@ -95,10 +95,12 @@ describe('decisionEngine', () => {
     })
 
     const tarot = result.details?.type === 'mystic' ? result.details.tarot : undefined
-    expect(tarot?.omen?.length).toBeGreaterThanOrEqual(20)
+    expect(tarot?.interpretation).toContain(tarot?.chineseName)
     expect(tarot?.resonance).toContain(`「${result.winner.label}」`)
     expect(tarot?.resonance).not.toContain('{option}')
     expect(tarot?.echo?.length).toBeGreaterThanOrEqual(20)
+    expect(tarot?.punchline).toContain('Decision Lab')
+    expect(result.explanation).toContain(tarot?.punchline)
   })
 
   it('builds a scientific result with a full ranking', () => {

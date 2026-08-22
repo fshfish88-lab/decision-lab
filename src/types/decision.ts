@@ -65,9 +65,9 @@ export type TarotOrientation = 'upright' | 'reversed'
 export interface TarotMeaning {
   keywords: string[]
   interpretation: string
-  omen: string
   resonance: string
   echo: string
+  punchline: string
   strength: number
 }
 
@@ -90,11 +90,12 @@ export interface TarotResultReading {
   orientation: TarotOrientation
   keywords: string[]
   interpretation: string
-  /** 新版三段式解读；可选以兼容旧版 LocalStorage。 */
+  /** 旧版三段式解读字段；仅保留以兼容旧版 LocalStorage。 */
   omen?: string
   /** 已将候选项占位符替换为本轮结果。 */
   resonance?: string
   echo?: string
+  punchline?: string
   strength: number
   selectedPosition: number
   deckFingerprint: string

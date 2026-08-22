@@ -2277,6 +2277,16 @@ select:focus-visible {
 .tarot-reading-passages h3 { margin: 9px 0; font-size: 19px; }
 .tarot-reading-passages p { margin: 0; color: #625b51; line-height: 1.8; }
 
+.tarot-reading-passages__punchline {
+  display: block;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e4dac8;
+  color: #7d705f;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
 @keyframes random-land {
   from { opacity: 0.35; transform: translateX(-18px) rotate(-2deg); }
   to { opacity: 1; transform: translateX(0) rotate(0); }

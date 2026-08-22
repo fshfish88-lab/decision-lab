@@ -30,14 +30,10 @@ export function TarotReveal({ result, onContinue }: TarotRevealProps): React.JSX
         <div className="tarot-keywords" aria-label="牌面关键词">
           {tarot.keywords.map((keyword) => <span key={keyword}>{keyword}</span>)}
         </div>
-        {tarot.omen ? (
-          <div className="tarot-reveal__omen">
-            <span>牌面征兆</span>
-            <p>{tarot.omen}</p>
-          </div>
-        ) : (
-          <p className="tarot-reveal__interpretation">{tarot.interpretation}</p>
-        )}
+        <div className="tarot-reveal__omen">
+          <span>牌面含义</span>
+          <p>{tarot.interpretation}</p>
+        </div>
       </div>
       <div className="tarot-reveal__answer">
         <span>本轮指向</span>

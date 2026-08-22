@@ -27,13 +27,13 @@ describe('tarot card catalogue', () => {
 
     for (const card of TAROT_CARDS) {
       for (const meaning of [card.upright, card.reversed]) {
-        expect(meaning.keywords.length).toBeGreaterThanOrEqual(3)
-        expect(meaning.interpretation.length).toBeGreaterThan(10)
-        expect(meaning.omen.length).toBeGreaterThanOrEqual(20)
+        expect(meaning.keywords).toHaveLength(3)
+        expect(meaning.interpretation).toContain(card.chineseName)
         expect(meaning.resonance).toContain('{option}')
         expect(meaning.echo.length).toBeGreaterThanOrEqual(20)
-        expect(`${meaning.omen}${meaning.resonance}${meaning.echo}`).not.toMatch(
-          /你应该|建议你|风险是|宇宙共振率|玄学置信度/,
+        expect(meaning.punchline).toContain('Decision Lab')
+        expect(`${meaning.interpretation}${meaning.resonance}${meaning.echo}${meaning.punchline}`).not.toMatch(
+          /命运缝隙|第三次回声|未被命名|最后一道光|轻响|隐秘余韵|你应该|建议你|选择那个/,
         )
         expect(meaning.strength).toBeGreaterThanOrEqual(1)
         expect(meaning.strength).toBeLessThanOrEqual(5)

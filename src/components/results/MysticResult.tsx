@@ -30,7 +30,7 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
   const tarot = details?.tarot
   if (tarot) {
     const orientationLabel = tarot.orientation === 'upright' ? '正位' : '逆位'
-    const hasRichReading = Boolean(tarot.omen && tarot.resonance && tarot.echo)
+    const hasRichReading = Boolean(tarot.resonance && tarot.echo && tarot.punchline)
 
     return (
       <div className="mode-result tarot-result">
@@ -73,9 +73,12 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
             <h2 id="tarot-interpretation-heading">牌意解读</h2>
             {hasRichReading ? (
               <div className="tarot-reading-passages">
-                <article><span>OMEN / 01</span><h3>牌面征兆</h3><p>{tarot.omen}</p></article>
-                <article><span>RESONANCE / 02</span><h3>命运映射</h3><p>{tarot.resonance}</p></article>
-                <article><span>ECHO / 03</span><h3>隐秘余韵</h3><p>{tarot.echo}</p></article>
+                <article><span>MEANING / 01</span><h3>牌面含义</h3><p>{tarot.interpretation}</p></article>
+                <article><span>WHY / 02</span><h3>为什么是它</h3><p>{tarot.resonance}</p></article>
+                <article>
+                  <span>CAUTION / 03</span><h3>逆位提醒</h3><p>{tarot.echo}</p>
+                  <small className="tarot-reading-passages__punchline">{tarot.punchline}</small>
+                </article>
               </div>
             ) : <p>{tarot.interpretation}</p>}
           </div>
