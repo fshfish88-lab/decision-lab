@@ -2079,13 +2079,23 @@ select:focus-visible {
 .tarot-card__face > strong { font-size: clamp(12px, 1.2vw, 16px); }
 .tarot-card__face > span { font-size: clamp(5px, 0.6vw, 8px); letter-spacing: 0.08em; }
 
-.tarot-card__sigil {
-  width: 48%;
-  aspect-ratio: 1;
-  border: 1px solid #8a7952;
-  border-radius: 50%;
-  background: radial-gradient(circle, #8a7952 0 7%, transparent 8% 27%, #8a7952 28% 29%, transparent 30%);
+.tarot-card__artwork,
+.tarot-result__artwork {
+  --tarot-artwork-accent: #9a8455;
+  width: 72%;
+  color: #292a31;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
+
+.tarot-card__artwork *,
+.tarot-result__artwork * { vector-effect: non-scaling-stroke; }
+.tarot-card__artwork { max-height: 54%; }
+.tarot-result__artwork { width: min(74%, 170px); margin: auto; }
+.tarot-artwork__stars { color: var(--tarot-artwork-accent); }
 
 .tarot-prompt {
   margin: 0;
@@ -2110,6 +2120,16 @@ select:focus-visible {
 .tarot-reveal__copy > p { margin: 0; color: var(--muted); }
 .tarot-reveal__copy h3 { margin: 6px 0 14px; font-size: 17px; }
 .tarot-reveal__interpretation { margin-top: 16px !important; line-height: 1.7; }
+
+.tarot-reveal__omen {
+  margin-top: 17px;
+  padding: 15px 17px;
+  border-left: 2px solid #9a8455;
+  background: #faf7f0;
+}
+
+.tarot-reveal__omen span { color: #967a4b; font-size: 9px; font-weight: 800; letter-spacing: 0.12em; }
+.tarot-reveal__omen p { margin: 7px 0 0; color: #625b51; line-height: 1.75; }
 
 .tarot-keywords {
   display: flex;
@@ -2175,7 +2195,6 @@ select:focus-visible {
   text-align: center;
 }
 
-.tarot-result__card i { margin: auto; color: #8a7952; }
 .tarot-result__card strong { font-size: 22px; }
 .tarot-result__card span,
 .tarot-result__card small { font-size: 8px; letter-spacing: 0.12em; }
@@ -2232,6 +2251,31 @@ select:focus-visible {
 .tarot-result__interpretation dl > div { padding: 12px 14px; display: flex; justify-content: space-between; gap: 14px; border-radius: 11px; background: #f7f5ef; }
 .tarot-result__interpretation dt { color: var(--muted); font-size: 9px; }
 .tarot-result__interpretation dd { margin: 0; font-size: 10px; font-weight: 750; }
+
+.tarot-reading-passages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.tarot-reading-passages article {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #ebe2d2;
+  border-radius: 16px;
+  background: #faf7f0;
+}
+
+.tarot-reading-passages article > span {
+  color: #967a4b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.tarot-reading-passages h3 { margin: 9px 0; font-size: 19px; }
+.tarot-reading-passages p { margin: 0; color: #625b51; line-height: 1.8; }
 
 @keyframes random-land {
   from { opacity: 0.35; transform: translateX(-18px) rotate(-2deg); }
@@ -2817,6 +2861,8 @@ select:focus-visible {
   .tarot-result__card { width: 170px; }
   .tarot-result__winner { grid-column: 1; }
   .tarot-result__interpretation { padding: 20px; gap: 22px; }
+  .tarot-reading-passages { grid-template-columns: 1fr; }
+  .tarot-card__artwork { width: 68%; }
 }
 
 @media (max-width: 480px) {

@@ -1,6 +1,7 @@
-import { Ban, CircleDot, MoonStar, Sparkles, Telescope } from 'lucide-react'
+import { Ban, MoonStar, Sparkles, Telescope } from 'lucide-react'
 
 import type { DecisionMetric, DecisionResult, MysticEvidence, MysticResultDetails } from '../../types/decision'
+import { TarotCardArtwork } from '../tarot/TarotCardArtwork'
 
 interface MysticResultProps {
   result: DecisionResult
@@ -29,13 +30,14 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
   const tarot = details?.tarot
   if (tarot) {
     const orientationLabel = tarot.orientation === 'upright' ? '正位' : '逆位'
+    const hasRichReading = Boolean(tarot.omen && tarot.resonance && tarot.echo)
 
     return (
       <div className="mode-result tarot-result">
         <section className="tarot-result__hero" aria-labelledby="tarot-result-heading">
           <div className="tarot-result__card" aria-label={`${tarot.chineseName} ${orientationLabel}`}>
             <small>{tarot.numeral}</small>
-            <i aria-hidden="true"><CircleDot size={54} strokeWidth={1.2} /></i>
+            <TarotCardArtwork cardId={tarot.cardId} className="tarot-result__artwork" />
             <strong>{tarot.chineseName}</strong>
             <span>{tarot.name}</span>
             <small>{orientationLabel}</small>
@@ -69,18 +71,19 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
           <div>
             <span className="section-index">CARD INTERPRETATION</span>
             <h2 id="tarot-interpretation-heading">牌意解读</h2>
-            <p>{tarot.interpretation}</p>
+            {hasRichReading ? (
+              <div className="tarot-reading-passages">
+                <article><span>OMEN / 01</span><h3>牌面征兆</h3><p>{tarot.omen}</p></article>
+                <article><span>RESONANCE / 02</span><h3>命运映射</h3><p>{tarot.resonance}</p></article>
+                <article><span>ECHO / 03</span><h3>隐秘余韵</h3><p>{tarot.echo}</p></article>
+              </div>
+            ) : <p>{tarot.interpretation}</p>}
           </div>
           <dl>
             <div><dt>牌阵指纹</dt><dd>{tarot.deckFingerprint}</dd></div>
             <div><dt>抽牌位置</dt><dd>{String(tarot.selectedPosition + 1).padStart(2, '0')} / 07</dd></div>
             <div><dt>科学意见</dt><dd>不予置评</dd></div>
           </dl>
-        </section>
-
-        <section className="mystic-guidance" aria-label="本轮建议">
-          <article className="is-favorable"><Sparkles size={20} /><div><span>宜</span><strong>{details.favorable}</strong></div></article>
-          <article className="is-avoid"><Ban size={20} /><div><span>忌</span><strong>{details.avoid}</strong></div></article>
         </section>
 
         <section className="mystic-result__explanation" aria-labelledby="mystic-explanation-heading">

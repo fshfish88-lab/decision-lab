@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 
 import type { TarotSpreadCard } from '../../tarot/tarotEngine'
+import { TarotCardArtwork } from './TarotCardArtwork'
 
 interface TarotCardProps {
   entry: TarotSpreadCard
@@ -40,7 +41,7 @@ export function TarotCard({
           {selected ? (
             <>
               <small>{entry.card.numeral}</small>
-              <i className="tarot-card__sigil" />
+              <TarotCardArtwork cardId={entry.card.id} className="tarot-card__artwork" />
               <strong>{entry.card.chineseName}</strong>
               <span>{entry.card.name}</span>
               <small>{orientationLabel}</small>
