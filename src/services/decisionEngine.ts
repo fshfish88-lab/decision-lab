@@ -9,6 +9,8 @@ import type {
   DecisionResult,
   MysticEvidence,
   ScientificScoreMap,
+  TarotDecisionMapping,
+  TarotDecisionStyle,
 } from '../types/decision'
 
 interface ResultMetadata {
@@ -162,17 +164,49 @@ export function createMysticResult(input: RandomResultInput): DecisionResult {
   }
 }
 
+const TAROT_MAPPING_ACTIONS: Record<TarotDecisionStyle, readonly [string, string, string]> = {
+  EXPLORE: ['给一次小范围尝试', '离开默认惯性', '用实际体验补充信息'],
+  STABILIZE: ['作为当前稳定落点', '减少无效波动', '按可控节奏执行'],
+  FOLLOW_DESIRE: ['承认真实吸引力', '让偏好进入决定', '接受选择所带来的取舍'],
+  ACT: ['停止追加比较', '把答案变成动作', '用执行结束本轮纠结'],
+  PAUSE: ['先作为暂定答案', '只补查关键事实', '在硬约束清楚后再行动'],
+  BREAK_PATTERN: ['中断自动重复', '离开已经失效的旧答案', '用新动作打破纠结循环'],
+}
+
+const TAROT_VERDICT_SUBTEXT: Record<TarotDecisionStyle, string> = {
+  EXPLORE: '牌面给它一次尝试机会，不代表它已经被证明客观更优。',
+  STABILIZE: '牌面把它作为当前稳定落点，不代表它已经被证明客观更优。',
+  FOLLOW_DESIRE: '牌面允许真实偏好参与决定，不代表它已经被证明客观更优。',
+  ACT: '牌面负责结束追加比较，不负责证明它客观更优。',
+  PAUSE: '牌面先给出暂定落点，不代表它已经被证明客观更优。',
+  BREAK_PATTERN: '牌面用它中断旧循环，不代表它已经被证明客观更优。',
+}
+
+function buildTarotMapping(
+  decisionStyle: TarotDecisionStyle,
+  keywords: string[],
+  winner: DecisionOption,
+): TarotDecisionMapping[] {
+  const actions = TAROT_MAPPING_ACTIONS[decisionStyle]
+  return keywords.map((keyword, index) => ({
+    keyword,
+    description: `让「${winner.label}」${actions[index] ?? actions[actions.length - 1]}。`,
+  }))
+}
+
 export function createTarotResult(input: TarotResultInput): DecisionResult {
   const { card, orientation, position, winner } = input.selection
   const meaning = card[orientation]
   const orientationLabel = orientation === 'upright' ? '正位' : '逆位'
-  const resonance = meaning.resonance.replace('{option}', winner.label)
+  const mapping = buildTarotMapping(meaning.decisionStyle, meaning.keywords, winner)
+  const verdict = `${winner.label}。就这样。`
+  const verdictSubtext = TAROT_VERDICT_SUBTEXT[meaning.decisionStyle]
 
   return {
     ...baseResult(input),
     mode: 'mystic',
     winner,
-    explanation: `${card.chineseName} · ${orientationLabel}：${meaning.interpretation} ${resonance} ${meaning.echo} ${meaning.punchline}`,
+    explanation: `${card.chineseName} · ${orientationLabel}：${meaning.interpretation} ${meaning.message} ${meaning.shadow}`,
     confidence: meaning.strength * 20,
     metrics: [],
     disclaimer: '塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。',
@@ -186,10 +220,14 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
         chineseName: card.chineseName,
         orientation,
         keywords: [...meaning.keywords],
+        decisionStyle: meaning.decisionStyle,
         interpretation: meaning.interpretation,
-        resonance,
-        echo: meaning.echo,
-        punchline: meaning.punchline,
+        message: meaning.message,
+        shadowTitle: meaning.shadowTitle,
+        shadow: meaning.shadow,
+        mapping,
+        verdict,
+        verdictSubtext,
         strength: meaning.strength,
         selectedPosition: position,
         deckFingerprint: input.deckFingerprint,

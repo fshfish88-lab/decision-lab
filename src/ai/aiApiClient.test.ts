@@ -130,10 +130,12 @@ describe('createAiApiClient', () => {
       .rejects.toEqual(expect.objectContaining<Partial<AiApiError>>({ code: 'invalid_response' }))
   })
 
-  it('aborts a request after twenty seconds', async () => {
+  it('keeps a request alive through 39,999 ms and aborts at 40 seconds', async () => {
     vi.useFakeTimers()
+    const requestSignals: AbortSignal[] = []
     const fetcher = vi.fn((_input: URL | RequestInfo, init?: RequestInit) => (
       new Promise<Response>((_resolve, reject) => {
+        if (init?.signal) requestSignals.push(init.signal)
         init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
       })
     )) as unknown as typeof fetch
@@ -142,7 +144,10 @@ describe('createAiApiClient', () => {
       expect.objectContaining<Partial<AiApiError>>({ code: 'timeout' }),
     )
 
-    await vi.advanceTimersByTimeAsync(20_000)
+    await vi.advanceTimersByTimeAsync(39_999)
+    expect(requestSignals[0]?.aborted).toBe(false)
+
+    await vi.advanceTimersByTimeAsync(1)
 
     await rejection
   })

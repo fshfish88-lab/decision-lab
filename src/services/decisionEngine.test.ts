@@ -129,7 +129,7 @@ describe('decisionEngine', () => {
     expect(eveningResonance?.description).toContain('21:45')
   })
 
-  it('persists three mysterious tarot passages and resolves the selected option', () => {
+  it('persists a structured tarot decision reading and resolves the selected option', () => {
     const spread = createTarotSpread(options, () => 0)
     const result = createTarotResult({
       ...metadata,
@@ -140,13 +140,16 @@ describe('decisionEngine', () => {
 
     const tarot = result.details?.type === 'mystic' ? result.details.tarot : undefined
     expect(tarot?.interpretation).toContain(tarot?.chineseName)
-    expect(tarot?.resonance).toContain(`「${result.winner.label}」`)
-    expect(tarot?.resonance).not.toContain('{option}')
-    expect(tarot?.resonance).not.toContain('「「')
-    expect(tarot?.resonance).not.toContain('」」')
-    expect(tarot?.echo?.length).toBeGreaterThanOrEqual(20)
-    expect(tarot?.punchline).toContain('Decision Lab')
-    expect(result.explanation).toContain(tarot?.punchline)
+    expect(tarot?.message?.length).toBeGreaterThanOrEqual(16)
+    expect(tarot?.shadowTitle?.length).toBeGreaterThanOrEqual(4)
+    expect(tarot?.shadow?.length).toBeGreaterThanOrEqual(16)
+    expect(tarot?.mapping).toHaveLength(3)
+    expect(tarot?.mapping?.map((item) => item.keyword)).toEqual(tarot?.keywords)
+    expect(tarot?.mapping?.every((item) => item.description.includes(result.winner.label)))
+      .toBe(true)
+    expect(tarot?.verdict).toBe(`${result.winner.label}。就这样。`)
+    expect(tarot?.verdictSubtext).toContain('客观更优')
+    expect(result.explanation).toContain(tarot?.message)
   })
 
   it('builds a scientific result with a full ranking', () => {

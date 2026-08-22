@@ -62,12 +62,26 @@ export interface MysticEvidence {
 
 export type TarotOrientation = 'upright' | 'reversed'
 
+export type TarotDecisionStyle =
+  | 'EXPLORE'
+  | 'STABILIZE'
+  | 'FOLLOW_DESIRE'
+  | 'ACT'
+  | 'PAUSE'
+  | 'BREAK_PATTERN'
+
+export interface TarotDecisionMapping {
+  keyword: string
+  description: string
+}
+
 export interface TarotMeaning {
   keywords: string[]
+  decisionStyle: TarotDecisionStyle
   interpretation: string
-  resonance: string
-  echo: string
-  punchline: string
+  message: string
+  shadowTitle: string
+  shadow: string
   strength: number
 }
 
@@ -89,7 +103,14 @@ export interface TarotResultReading {
   chineseName: string
   orientation: TarotOrientation
   keywords: string[]
+  decisionStyle?: TarotDecisionStyle
   interpretation: string
+  message?: string
+  shadowTitle?: string
+  shadow?: string
+  mapping?: TarotDecisionMapping[]
+  verdict?: string
+  verdictSubtext?: string
   /** 旧版三段式解读字段；仅保留以兼容旧版 LocalStorage。 */
   omen?: string
   /** 已将候选项占位符替换为本轮结果。 */

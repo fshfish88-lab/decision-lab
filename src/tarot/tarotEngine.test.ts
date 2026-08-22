@@ -28,17 +28,26 @@ describe('tarot card catalogue', () => {
     for (const card of TAROT_CARDS) {
       for (const meaning of [card.upright, card.reversed]) {
         expect(meaning.keywords).toHaveLength(3)
+        expect(['EXPLORE', 'STABILIZE', 'FOLLOW_DESIRE', 'ACT', 'PAUSE', 'BREAK_PATTERN'])
+          .toContain(meaning.decisionStyle)
         expect(meaning.interpretation).toContain(card.chineseName)
-        expect(meaning.resonance).toContain('{option}')
-        expect(meaning.echo.length).toBeGreaterThanOrEqual(20)
-        expect(meaning.punchline).toContain('Decision Lab')
-        expect(`${meaning.interpretation}${meaning.resonance}${meaning.echo}${meaning.punchline}`).not.toMatch(
+        expect(meaning.message.length).toBeGreaterThanOrEqual(16)
+        expect(meaning.shadowTitle.length).toBeGreaterThanOrEqual(4)
+        expect(meaning.shadow.length).toBeGreaterThanOrEqual(16)
+        expect(`${meaning.interpretation}${meaning.message}${meaning.shadowTitle}${meaning.shadow}`).not.toMatch(
           /命运缝隙|第三次回声|未被命名|最后一道光|轻响|隐秘余韵|你应该|建议你|选择那个/,
         )
         expect(meaning.strength).toBeGreaterThanOrEqual(1)
         expect(meaning.strength).toBeLessThanOrEqual(5)
       }
     }
+
+    expect(TAROT_CARDS.find((card) => card.id === 'the-devil')?.reversed.shadowTitle)
+      .toBe('别把松绑变成逃避')
+    expect(TAROT_CARDS.find((card) => card.id === 'judgement')?.reversed.message)
+      .toContain('停止内心听证会')
+    expect(TAROT_CARDS.find((card) => card.id === 'the-moon')?.upright.interpretation)
+      .toContain('信息还没有完全清楚')
   })
 })
 

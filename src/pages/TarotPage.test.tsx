@@ -58,6 +58,8 @@ describe('TarotPage', () => {
     expect(screen.getByText('本轮指向')).toBeInTheDocument()
     expect(screen.getAllByTestId(/tarot-artwork-/)).toHaveLength(1)
     expect(screen.getByText('牌面含义')).toBeInTheDocument()
+    expect(screen.getByText('牌已经翻开，反悔不在本轮服务范围内。')).toBeInTheDocument()
+    expect(screen.queryByText(/科学部门/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查看完整结果' })).toBeInTheDocument()
     expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'set-result' }))
     expect(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) ?? '{}').items).toHaveLength(1)

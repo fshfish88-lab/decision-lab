@@ -112,10 +112,18 @@ const tarotResult: DecisionResult = {
       chineseName: '太阳',
       orientation: 'upright',
       keywords: ['快乐', '明确', '满足'],
+      decisionStyle: 'ACT',
       interpretation: '太阳正位代表快乐、明确、满足。它表示事情正在变得清楚，内心偏好也更容易被看见。',
-      resonance: '牌阵会指向「日料」，是因为它最接近太阳牌强调的直接满足感。',
-      echo: '反面是期待过高：如果把快乐当成唯一标准，其他现实条件就容易被忽略。',
-      punchline: 'Decision Lab 已记录太阳的意见，责任归属仍显示为“用户本人”。',
+      message: '这次不必再追加比较，明确的偏好已经足以支持行动。',
+      shadowTitle: '别把晴天当保证书',
+      shadow: '快乐是有效线索，但如果存在预算或安全等硬约束，仍应优先处理现实条件。',
+      mapping: [
+        { keyword: '快乐', description: '承认「日料」带来的直接吸引力。' },
+        { keyword: '明确', description: '让「日料」结束这一轮追加比较。' },
+        { keyword: '满足', description: '把「日料」从候选项变成可执行答案。' },
+      ],
+      verdict: '日料。就这样。',
+      verdictSubtext: '牌面负责给出落点，不负责证明它客观更优。',
       strength: 5,
       selectedPosition: 2,
       deckFingerprint: 'TAROT-1234ABCD',
@@ -209,18 +217,24 @@ describe('MysticResult', () => {
     expect(screen.getByText('XIX · THE SUN')).toBeInTheDocument()
     expect(screen.getByText('太阳 · 正位')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '日料' })).toBeInTheDocument()
-    expect(screen.getByLabelText('牌面强度 5/5')).toBeInTheDocument()
-    expect(screen.getByText('快乐')).toBeInTheDocument()
-    expect(screen.getByText('TAROT-1234ABCD')).toBeInTheDocument()
+    expect(screen.getByLabelText('决策信号 5/5')).toBeInTheDocument()
+    expect(screen.getAllByText('快乐')).toHaveLength(2)
+    expect(screen.getByText(/DRAW 03 \/ 07 · RECORD TAROT-1234ABCD · SYMBOLIC READING/)).toBeInTheDocument()
     expect(screen.getByTestId('tarot-artwork-the-sun')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '牌面含义' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '为什么是它' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '逆位提醒' })).toBeInTheDocument()
-    expect(screen.getByText('牌阵会指向「日料」，是因为它最接近太阳牌强调的直接满足感。')).toBeInTheDocument()
-    expect(screen.getByText(/Decision Lab 已记录太阳的意见/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '本次启示' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '别把晴天当保证书' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '牌意落点' })).toBeInTheDocument()
+    expect(screen.getByText('日料。就这样。')).toBeInTheDocument()
+    expect(screen.getByText('把「日料」从候选项变成可执行答案。')).toBeInTheDocument()
+    expect(screen.getByText('Decision Lab 不对神秘学结论提供统计显著性保证。')).toBeInTheDocument()
     expect(screen.queryByText('牌面征兆')).not.toBeInTheDocument()
     expect(screen.queryByText('命运映射')).not.toBeInTheDocument()
     expect(screen.queryByText('隐秘余韵')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '为什么是它' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '逆位提醒' })).not.toBeInTheDocument()
+    expect(screen.queryByText('科学意见')).not.toBeInTheDocument()
+    expect(screen.queryByText('不予置评')).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '本轮结论' })).not.toBeInTheDocument()
     expect(screen.getByText('塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。')).toBeInTheDocument()
     expect(screen.queryByLabelText('本轮建议')).not.toBeInTheDocument()
@@ -233,15 +247,24 @@ describe('MysticResult', () => {
   it('keeps older tarot history readable without rich reading fields', () => {
     const legacyTarotResult = structuredClone(tarotResult)
     if (legacyTarotResult.details?.type === 'mystic' && legacyTarotResult.details.tarot) {
-      delete legacyTarotResult.details.tarot.resonance
-      delete legacyTarotResult.details.tarot.echo
-      delete legacyTarotResult.details.tarot.punchline
+      const tarot = legacyTarotResult.details.tarot
+      delete tarot.decisionStyle
+      delete tarot.message
+      delete tarot.shadowTitle
+      delete tarot.shadow
+      delete tarot.mapping
+      delete tarot.verdict
+      delete tarot.verdictSubtext
+      tarot.resonance = '牌阵会指向「日料」，因为旧记录这样写。'
+      tarot.echo = '旧记录仍然保留一条反面提醒。'
+      tarot.punchline = 'Decision Lab 保留了这条旧记录。'
     }
 
     render(<MysticResult result={legacyTarotResult} />)
 
     expect(screen.getByText('太阳正位代表快乐、明确、满足。它表示事情正在变得清楚，内心偏好也更容易被看见。')).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: '牌面含义' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '为什么是它' })).toBeInTheDocument()
+    expect(screen.getByText('牌阵会指向「日料」，因为旧记录这样写。')).toBeInTheDocument()
   })
 
   it('renders a playful destiny report with evidence and an entertainment warning', () => {
