@@ -1,6 +1,7 @@
 import { createMysticDecision } from '../algorithms/mystic'
 import { drawRandomOption } from '../algorithms/random'
 import { rankScientificOptions } from '../algorithms/scientific'
+import type { TarotSpreadCard } from '../tarot/tarotEngine'
 import type {
   Criterion,
   DecisionOption,
@@ -23,6 +24,11 @@ interface RandomResultInput extends ResultMetadata {
 interface ScientificResultInput extends ResultMetadata {
   criteria: Criterion[]
   scores: ScientificScoreMap
+}
+
+interface TarotResultInput extends ResultMetadata {
+  selection: TarotSpreadCard
+  deckFingerprint: string
 }
 
 function defaultId(): string {
@@ -146,6 +152,41 @@ export function createMysticResult(input: RandomResultInput): DecisionResult {
       evidence: buildMysticEvidence(input, winner, mystic.confidence, currentTime),
       favorable: `今日宜：${winner.label}`,
       avoid: '今日忌：重新打开选项继续纠结',
+    },
+  }
+}
+
+export function createTarotResult(input: TarotResultInput): DecisionResult {
+  const { card, orientation, position, winner } = input.selection
+  const meaning = card[orientation]
+  const orientationLabel = orientation === 'upright' ? '正位' : '逆位'
+
+  return {
+    ...baseResult(input),
+    mode: 'mystic',
+    winner,
+    explanation: `${card.chineseName} · ${orientationLabel}：${meaning.interpretation} 本轮牌面指向「${winner.label}」。`,
+    confidence: meaning.strength * 20,
+    metrics: [],
+    disclaimer: '塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。',
+    details: {
+      type: 'mystic',
+      tarot: {
+        cardId: card.id,
+        number: card.number,
+        numeral: card.numeral,
+        name: card.name,
+        chineseName: card.chineseName,
+        orientation,
+        keywords: [...meaning.keywords],
+        interpretation: meaning.interpretation,
+        strength: meaning.strength,
+        selectedPosition: position,
+        deckFingerprint: input.deckFingerprint,
+      },
+      evidence: [],
+      favorable: `接受「${winner.label}」作为本轮答案`,
+      avoid: '翻回牌背假装刚才没有看见',
     },
   }
 }

@@ -25,7 +25,7 @@ describe('DECISION LAB flow', () => {
     vi.unstubAllGlobals()
   })
 
-  it('runs a mystic decision, shows the result, and stores it in history', async () => {
+  it('lets the user choose a tarot card before showing and storing the mystic result', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -41,17 +41,25 @@ describe('DECISION LAB flow', () => {
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
     await user.click(screen.getByRole('button', { name: '开始做法' }))
 
-    expect(screen.getByRole('heading', { name: '正在连接命运频道' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '凭第一感觉，选择一张' })).toBeInTheDocument()
+    expect(localStorage.getItem('decision-lab:history')).toBeNull()
+
+    const tarotCards = screen.getAllByRole('button', { name: /选择第 \d 张塔罗牌/ })
+    expect(tarotCards).toHaveLength(7)
+    await user.click(tarotCards[0])
+
+    expect(screen.getByRole('heading', { name: '你的牌已翻开' })).toBeInTheDocument()
+    const revealedWinner = screen.getByText('本轮指向').parentElement?.querySelector('strong')?.textContent
+    expect(revealedWinner).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '查看完整结果' }))
 
     expect(await screen.findByRole('heading', { name: '决策结果' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '命运星盘' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '玄学证据' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: revealedWinner })).toBeInTheDocument()
     expect(screen.getByText(/仅供娱乐/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: '决策记录' }))
     expect(screen.getByText('今晚吃什么？')).toBeInTheDocument()
-    expect(screen.getByText('火锅')).toBeInTheDocument()
+    expect(screen.getByText(revealedWinner!)).toBeInTheDocument()
   })
 
   it('completes the scientific scoring flow and shows a full ranking', async () => {

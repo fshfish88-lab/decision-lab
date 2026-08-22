@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { ResultPage } from './pages/ResultPage'
 import { SciencePage } from './pages/SciencePage'
+import { TarotPage } from './pages/TarotPage'
 
 export function AppRoutes(): React.JSX.Element {
   return (
@@ -17,6 +18,7 @@ export function AppRoutes(): React.JSX.Element {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/science" element={<SciencePage />} />
+        <Route path="/tarot" element={<TarotPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/result" element={<ResultPage />} />
         <Route path="/history" element={<HistoryPage />} />

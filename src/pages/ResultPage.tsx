@@ -23,7 +23,11 @@ export function ResultPage(): React.JSX.Element {
     )
   }
 
-  const rerunPath = result.mode === 'scientific' ? '/science' : '/analysis'
+  const rerunPath = result.mode === 'scientific'
+    ? '/science'
+    : result.mode === 'mystic'
+      ? '/tarot'
+      : '/analysis'
 
   function rerun(): void {
     dispatch({ type: 'clear-result' })

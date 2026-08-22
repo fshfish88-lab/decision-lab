@@ -31,7 +31,13 @@ export function HomePage(): React.JSX.Element {
   function startDecision(): void {
     if (!canStart || !state.mode) return
     dispatch({ type: 'clear-result' })
-    navigate(state.mode === 'scientific' ? '/science' : '/analysis')
+    navigate(
+      state.mode === 'scientific'
+        ? '/science'
+        : state.mode === 'mystic'
+          ? '/tarot'
+          : '/analysis',
+    )
   }
 
   return (
