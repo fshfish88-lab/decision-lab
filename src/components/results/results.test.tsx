@@ -192,6 +192,8 @@ describe('MysticResult', () => {
     expect(screen.queryByText('牌面征兆')).not.toBeInTheDocument()
     expect(screen.queryByText('命运映射')).not.toBeInTheDocument()
     expect(screen.queryByText('隐秘余韵')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '本轮结论' })).not.toBeInTheDocument()
+    expect(screen.getByText('塔罗解读仅供娱乐。牌已经表态，真正的决定权仍然在你。')).toBeInTheDocument()
     expect(screen.queryByLabelText('本轮建议')).not.toBeInTheDocument()
     expect(screen.queryByText('命运星盘')).not.toBeInTheDocument()
     expect(screen.queryByText('玄学证据')).not.toBeInTheDocument()

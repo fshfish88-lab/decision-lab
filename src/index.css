@@ -2287,6 +2287,17 @@ select:focus-visible {
   line-height: 1.65;
 }
 
+.tarot-result__disclaimer {
+  margin: 0;
+  padding: 13px 16px;
+  border: 1px solid #f0d9de;
+  border-radius: 12px;
+  color: #906b74;
+  background: #fff7f8;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
 @keyframes random-land {
   from { opacity: 0.35; transform: translateX(-18px) rotate(-2deg); }
   to { opacity: 1; transform: translateX(0) rotate(0); }

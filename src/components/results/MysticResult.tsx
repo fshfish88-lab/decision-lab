@@ -89,10 +89,14 @@ export function MysticResult({ result }: MysticResultProps): React.JSX.Element {
           </dl>
         </section>
 
-        <section className="mystic-result__explanation" aria-labelledby="mystic-explanation-heading">
-          <div><h2 id="mystic-explanation-heading">本轮结论</h2><p>{result.explanation}</p></div>
-          {result.disclaimer && <small>{result.disclaimer}</small>}
-        </section>
+        {hasRichReading ? (
+          result.disclaimer && <p className="tarot-result__disclaimer">{result.disclaimer}</p>
+        ) : (
+          <section className="mystic-result__explanation" aria-labelledby="mystic-explanation-heading">
+            <div><h2 id="mystic-explanation-heading">本轮结论</h2><p>{result.explanation}</p></div>
+            {result.disclaimer && <small>{result.disclaimer}</small>}
+          </section>
+        )}
       </div>
     )
   }
