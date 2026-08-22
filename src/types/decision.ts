@@ -1,4 +1,4 @@
-export type DecisionMode = 'random' | 'scientific' | 'mystic'
+export type DecisionMode = 'random' | 'scientific' | 'mystic' | 'ai'
 
 export interface DecisionOption {
   id: string
@@ -112,10 +112,36 @@ export interface MysticResultDetails {
   avoid: string
 }
 
+export interface AiDeepAnalysisData {
+  overview: string
+  key_factors: string[]
+  risks: string[]
+  hidden_conflicts: string[]
+  scenarios: string[]
+  next_steps: string[]
+}
+
+export interface AiDecisionData {
+  recommended_option: string
+  confidence: number
+  verdict: string
+  core_reasons: string[]
+  main_tradeoff: string
+  conditions_to_reconsider: string[]
+  action_plan: string[]
+}
+
+export interface AiResultDetails {
+  type: 'ai'
+  context: string
+  advice: AiDecisionData
+}
+
 export type DecisionResultDetails =
   | RandomResultDetails
   | ScientificResultDetails
   | MysticResultDetails
+  | AiResultDetails
 
 export interface DecisionResult {
   id: string
@@ -132,9 +158,20 @@ export interface DecisionResult {
   details?: DecisionResultDetails
 }
 
-export type DecisionHistoryItem = DecisionResult
+export interface DecisionBehavior {
+  regrettedAt?: string
+  shareCount: number
+  lastSharedAt?: string
+}
+
+export type DecisionHistoryItem = DecisionResult & DecisionBehavior
 
 export interface HistoryStoreV1 {
   version: 1
+  items: DecisionResult[]
+}
+
+export interface HistoryStoreV2 {
+  version: 2
   items: DecisionHistoryItem[]
 }

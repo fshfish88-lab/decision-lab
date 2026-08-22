@@ -25,6 +25,11 @@ export type DecisionAction =
   | { type: 'set-score'; optionId: string; criterionId: string; score: number }
   | { type: 'set-result'; result: DecisionResult }
   | { type: 'clear-result' }
+  | { type: 'prepare-mode-selection' }
+  | {
+      type: 'restore-draft'
+      draft: Pick<DecisionState, 'question' | 'options' | 'mode'>
+    }
   | { type: 'reset-draft' }
 
 export const DEFAULT_CRITERIA: Criterion[] = [
@@ -97,6 +102,16 @@ export function decisionReducer(
       return { ...state, result: action.result }
     case 'clear-result':
       return { ...state, result: null }
+    case 'prepare-mode-selection':
+      return { ...state, mode: null, result: null }
+    case 'restore-draft':
+      return {
+        ...initialDecisionState,
+        question: action.draft.question,
+        options: action.draft.options.map((option) => ({ ...option })),
+        mode: action.draft.mode,
+        criteria: DEFAULT_CRITERIA.map((criterion) => ({ ...criterion })),
+      }
     case 'reset-draft':
       return initialDecisionState
     default:

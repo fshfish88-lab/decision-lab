@@ -1,4 +1,4 @@
-import { BarChart3, Check, Dices, LoaderCircle, Orbit, Sparkles } from 'lucide-react'
+import { BarChart3, Bot, Check, Dices, LoaderCircle, Orbit, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -35,6 +35,13 @@ const ANALYSIS_CONFIG: Record<DecisionMode, {
     description: '水晶球正在工作，科学部门已暂时离开现场。',
     steps: ['正在校准宇宙频率', '正在读取潜意识波动', '正在搜索平行时间线', '水晶球连接稳定'],
     conclusion: '天机已泄露。',
+  },
+  ai: {
+    eyebrow: 'AI MODE / SERVER REQUIRED',
+    title: 'AI 服务尚未接入',
+    description: '该模式不会在本地伪造分析。',
+    steps: ['等待安全服务端点', '等待需求提取', '等待用户确认', '等待本地评分'],
+    conclusion: '请先配置 Serverless API。',
   },
 }
 
@@ -120,7 +127,7 @@ export function AnalysisPage(): React.JSX.Element {
 
   const mode = preparedResult.current.mode
   const config = ANALYSIS_CONFIG[mode]
-  const MarkIcon = mode === 'random' ? Dices : mode === 'scientific' ? BarChart3 : Sparkles
+  const MarkIcon = mode === 'random' ? Dices : mode === 'scientific' ? BarChart3 : mode === 'mystic' ? Sparkles : Bot
 
   return (
     <main className="analysis-page">

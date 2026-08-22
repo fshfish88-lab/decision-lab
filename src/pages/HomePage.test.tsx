@@ -41,6 +41,9 @@ describe('HomePage', () => {
 
     await user.click(screen.getByRole('button', { name: /玄学模式/ }))
     expect(screen.getByRole('button', { name: '开始抽牌' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /AI 模式/ }))
+    expect(screen.getByRole('button', { name: '让 AI 替我决定' })).toBeInTheDocument()
   })
 
   it('gives every mode a restrained personality line', () => {
@@ -52,14 +55,14 @@ describe('HomePage', () => {
     expect(screen.getByText('这次可能真的有用')).toBeInTheDocument()
   })
 
-  it('adds an option with Enter and keeps AI marked unavailable', async () => {
+  it('adds an option with Enter and keeps the API-ready AI entry available', async () => {
     const user = userEvent.setup()
     renderHome()
 
     await user.type(screen.getByLabelText('选项 2'), '{Enter}')
 
     expect(screen.getByLabelText('选项 3')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /AI 模式/ })).toBeDisabled()
-    expect(screen.getByText('V1.5')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /AI 模式/ })).toBeEnabled()
+    expect(screen.getByText('在线顾问')).toBeInTheDocument()
   })
 })

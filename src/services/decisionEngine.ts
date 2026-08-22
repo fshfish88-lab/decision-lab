@@ -3,6 +3,7 @@ import { drawRandomOption } from '../algorithms/random'
 import { rankScientificOptions } from '../algorithms/scientific'
 import type { TarotSpreadCard } from '../tarot/tarotEngine'
 import type {
+  AiDecisionData,
   Criterion,
   DecisionOption,
   DecisionResult,
@@ -29,6 +30,11 @@ interface ScientificResultInput extends ResultMetadata {
 interface TarotResultInput extends ResultMetadata {
   selection: TarotSpreadCard
   deckFingerprint: string
+}
+
+interface AiResultInput extends ResultMetadata {
+  context: string
+  advice: AiDecisionData
 }
 
 function defaultId(): string {
@@ -191,6 +197,32 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
       evidence: [],
       favorable: `接受「${winner.label}」作为本轮答案`,
       avoid: '翻回牌背假装刚才没有看见',
+    },
+  }
+}
+
+export function createAiResult(input: AiResultInput): DecisionResult {
+  const recommendation = input.advice.recommended_option.trim()
+  const winner = input.options.find((option) => option.label.trim() === recommendation)
+  if (!winner) throw new Error('AI 推荐项无法映射到候选项')
+
+  return {
+    ...baseResult(input),
+    mode: 'ai',
+    winner,
+    explanation: input.advice.verdict,
+    confidence: input.advice.confidence,
+    metrics: [],
+    details: {
+      type: 'ai',
+      context: input.context.trim(),
+      advice: {
+        ...input.advice,
+        recommended_option: recommendation,
+        core_reasons: [...input.advice.core_reasons],
+        conditions_to_reconsider: [...input.advice.conditions_to_reconsider],
+        action_plan: [...input.advice.action_plan],
+      },
     },
   }
 }

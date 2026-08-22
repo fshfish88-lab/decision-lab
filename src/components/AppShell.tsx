@@ -1,4 +1,4 @@
-import { Clock3, FlaskConical, Home, Info, Menu, X } from 'lucide-react'
+import { BarChart3, Clock3, FlaskConical, Home, Info, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import { NavLink } from 'react-router-dom'
@@ -6,6 +6,7 @@ import { NavLink } from 'react-router-dom'
 const NAV_ITEMS = [
   { to: '/', label: '首页', icon: Home },
   { to: '/history', label: '决策记录', icon: Clock3 },
+  { to: '/statistics', label: '统计分析', icon: BarChart3 },
   { to: '/about', label: '关于', icon: Info },
 ] as const
 
@@ -64,11 +65,21 @@ export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
       <div className="page-container">{children}</div>
 
       <footer className="site-footer">
-        <div>
+        <div className="site-footer__brand">
           <FlaskConical size={16} aria-hidden="true" />
-          DECISION LAB · V1.0
+          DECISION LAB · V1.5
         </div>
-        <p>该科学的时候真的计算，该玄学的时候认真胡说。</p>
+        <div className="site-footer__meta">
+          <p>该科学的时候真的计算，该玄学的时候认真胡说。</p>
+          <a
+            className="site-footer__filing"
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            浙ICP备2026067685号-1
+          </a>
+        </div>
       </footer>
     </div>
   )

@@ -1,11 +1,12 @@
-import { Clock3, Filter, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Clock3, Filter, RotateCcw, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
+import { useDecision } from '../state/DecisionContext'
 import { clearHistory, deleteHistoryItem, readHistory } from '../storage/history'
 import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
-const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学' } as const
+const MODE_LABELS = { random: '随机', scientific: '科学', mystic: '玄学', ai: 'AI' } as const
 
 function tarotSummary(item: DecisionHistoryItem): string | undefined {
   const tarot = item.details?.type === 'mystic' ? item.details.tarot : undefined
@@ -14,8 +15,11 @@ function tarotSummary(item: DecisionHistoryItem): string | undefined {
 }
 
 export function HistoryPage(): React.JSX.Element {
+  const navigate = useNavigate()
+  const { dispatch } = useDecision()
   const [history, setHistory] = useState<DecisionHistoryItem[]>(() => readHistory())
   const [filter, setFilter] = useState<'all' | DecisionMode>('all')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const visibleItems = useMemo(
     () => filter === 'all' ? history : history.filter((item) => item.mode === filter),
     [filter, history],
@@ -32,6 +36,18 @@ export function HistoryPage(): React.JSX.Element {
     setHistory([])
   }
 
+  function reuse(item: DecisionHistoryItem): void {
+    dispatch({
+      type: 'restore-draft',
+      draft: {
+        question: item.question,
+        options: item.options,
+        mode: item.mode,
+      },
+    })
+    navigate('/')
+  }
+
   return (
     <main className="history-page">
       <header className="page-heading page-heading--split">
@@ -40,20 +56,59 @@ export function HistoryPage(): React.JSX.Element {
       </header>
 
       <div className="history-toolbar">
-        <label><Filter size={16} /><span>筛选模式</span><select value={filter} onChange={(event) => setFilter(event.target.value as 'all' | DecisionMode)}><option value="all">全部模式</option><option value="random">随机模式</option><option value="scientific">科学模式</option><option value="mystic">玄学模式</option></select></label>
+        <label><Filter size={16} /><span>筛选模式</span><select value={filter} onChange={(event) => setFilter(event.target.value as 'all' | DecisionMode)}><option value="all">全部模式</option><option value="random">随机模式</option><option value="scientific">科学模式</option><option value="mystic">玄学模式</option><option value="ai">AI 模式</option></select></label>
         <button className="text-button text-button--danger" type="button" disabled={!history.length} onClick={clearAll}><Trash2 size={16} />清空记录</button>
       </div>
 
       {visibleItems.length ? (
         <div className="history-list">
-          {visibleItems.map((item, index) => (
-            <article className="history-item" key={item.id}>
-              <span className={`history-item__mode history-item__mode--${item.mode}`}>{MODE_LABELS[item.mode]}</span>
-              <div className="history-item__copy"><small>NO. {String(history.length - index).padStart(3, '0')}</small><h2>{item.question}</h2><p>{item.options.map((option) => option.label).join(' / ')}</p>{tarotSummary(item) && <p className="history-item__tarot">{tarotSummary(item)}</p>}</div>
-              <div className="history-item__result"><span>{tarotSummary(item) ? '本轮指向' : '系统选择'}</span><strong>{item.winner.label}</strong><small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small></div>
-              <button className="icon-button" type="button" aria-label={`删除记录 ${item.question}`} onClick={() => remove(item.id)}><Trash2 size={16} /></button>
-            </article>
-          ))}
+          {visibleItems.map((item, index) => {
+            const expanded = expandedId === item.id
+            const tarot = tarotSummary(item)
+            return (
+              <article className={`history-item${expanded ? ' is-expanded' : ''}`} key={item.id}>
+                <span className={`history-item__mode history-item__mode--${item.mode}`}>{MODE_LABELS[item.mode]}</span>
+                <div className="history-item__copy">
+                  <small>NO. {String(history.length - index).padStart(3, '0')}</small>
+                  <h2>{item.question}</h2>
+                  <p>{item.options.map((option) => option.label).join(' / ')}</p>
+                  {tarot && <p className="history-item__tarot">{tarot}</p>}
+                </div>
+                <div className="history-item__result">
+                  <span>{tarot ? '本轮指向' : '系统选择'}</span>
+                  <strong>{item.winner.label}</strong>
+                  <small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small>
+                </div>
+                <div className="history-item__controls">
+                  <button
+                    className="icon-button"
+                    type="button"
+                    aria-label={`${expanded ? '收起详情' : '查看详情'} ${item.question}`}
+                    aria-expanded={expanded}
+                    onClick={() => setExpandedId(expanded ? null : item.id)}
+                  >
+                    {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                  <button className="icon-button" type="button" aria-label={`删除记录 ${item.question}`} onClick={() => remove(item.id)}><Trash2 size={16} /></button>
+                </div>
+                {expanded && (
+                  <div className="history-item__details">
+                    <div>
+                      <span>系统解释</span>
+                      <p>{item.explanation}</p>
+                    </div>
+                    <div className="history-item__meta">
+                      <span>{item.regrettedAt ? '已记录反悔' : '尚未反悔'}</span>
+                      <span>分享 {item.shareCount} 次</span>
+                    </div>
+                    <button className="secondary-action" type="button" onClick={() => reuse(item)}>
+                      <RotateCcw size={16} />再次使用
+                    </button>
+                  </div>
+                )}
+              </article>
+            )
+          })}
         </div>
       ) : (
         <div className="empty-state empty-state--embedded"><span className="empty-state__icon"><Clock3 size={24} /></span><h2>{history.length ? '没有符合筛选条件的记录' : '还没有决策记录'}</h2><p>完成第一次决定后，系统会把结果保存在这里。</p><Link className="secondary-action" to="/">开始一次决定</Link></div>
