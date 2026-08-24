@@ -1,7 +1,8 @@
-import { ArrowLeft, ArrowRight, BarChart3, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BarChart3, Dices, Plus, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { createRandomScientificScores } from '../algorithms/scientific'
 import { createScientificResult } from '../services/decisionEngine'
 import { useDecision } from '../state/DecisionContext'
 
@@ -9,6 +10,7 @@ export function SciencePage(): React.JSX.Element {
   const navigate = useNavigate()
   const { state, dispatch } = useDecision()
   const [error, setError] = useState('')
+  const [hasRandomizedScores, setHasRandomizedScores] = useState(false)
   const options = useMemo(
     () => state.options.filter((option) => option.label.trim()),
     [state.options],
@@ -57,6 +59,22 @@ export function SciencePage(): React.JSX.Element {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '科学模式配置不完整')
     }
+  }
+
+  function randomizeScores(): void {
+    const scores = createRandomScientificScores(options, state.criteria)
+    for (const option of options) {
+      for (const criterion of state.criteria) {
+        dispatch({
+          type: 'set-score',
+          optionId: option.id,
+          criterionId: criterion.id,
+          score: scores[option.id][criterion.id],
+        })
+      }
+    }
+    setHasRandomizedScores(true)
+    setError('')
   }
 
   if (options.length < 2) {
@@ -128,7 +146,13 @@ export function SciencePage(): React.JSX.Element {
             <span className="step-number">STEP 02</span>
             <h2 id="scores-heading">为候选项评分</h2>
           </div>
-          <p>1 分较低，10 分较高</p>
+          <div className="score-table-actions">
+            <p>1 分较低，10 分较高</p>
+            <button className="score-randomize-button" type="button" onClick={randomizeScores}>
+              <Dices size={17} />
+              {hasRandomizedScores ? '再随机一批评分' : '随机填充评分'}
+            </button>
+          </div>
         </div>
         <div className="score-table-wrap">
           <table className="score-table">

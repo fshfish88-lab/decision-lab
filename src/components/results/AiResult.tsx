@@ -31,33 +31,33 @@ export function AiResult({ result }: AiResultProps): React.JSX.Element {
         <div className="ai-result__choice">
           <span>别再开会了，就选</span>
           <h2>{result.winner.label}</h2>
-          <strong>推荐强度 {advice.confidence}%</strong>
+          <strong>决策明确度 {advice.confidence}%</strong>
         </div>
       </section>
 
       <div className="ai-result__grid">
         <section className="ai-result__card ai-result__card--reasons">
           <span className="ai-result__icon"><CheckCircle2 size={20} /></span>
-          <h2>为什么推荐</h2>
+          <h2>为什么选它</h2>
           <AdviceList items={advice.core_reasons} />
         </section>
 
         <section className="ai-result__card ai-result__card--tradeoff">
           <span className="ai-result__icon"><Scale size={20} /></span>
-          <h2>需要接受</h2>
+          <h2>最大取舍</h2>
           <p>{advice.main_tradeoff}</p>
           <small>没有零代价的决定，只有更值得付的代价。</small>
         </section>
 
         <section className="ai-result__card">
           <span className="ai-result__icon"><RefreshCw size={20} /></span>
-          <h2>重新考虑条件</h2>
+          <h2>什么情况下应该改主意</h2>
           <AdviceList items={advice.conditions_to_reconsider} />
         </section>
 
         <section className="ai-result__card ai-result__card--action">
           <span className="ai-result__icon"><ArrowRight size={20} /></span>
-          <h2>下一步行动</h2>
+          <h2>现在就做</h2>
           <ol className="ai-result__steps">
             {advice.action_plan.map((action, index) => (
               <li key={action}><span>{String(index + 1).padStart(2, '0')}</span>{action}</li>

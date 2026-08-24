@@ -5,7 +5,7 @@ import type {
   DecisionOption,
   ScientificScoreMap,
 } from '../types/decision'
-import { rankScientificOptions } from './scientific'
+import { createRandomScientificScores, rankScientificOptions } from './scientific'
 
 const options: DecisionOption[] = [
   { id: 'hotpot', label: '火锅' },
@@ -78,5 +78,19 @@ describe('rankScientificOptions', () => {
         sushi: { taste: 7, price: 9 },
       }),
     ).toThrow('评分必须在 1 到 10 之间')
+  })
+})
+
+describe('createRandomScientificScores', () => {
+  it('fills every option and criterion with an integer score from 1 to 10', () => {
+    const values = [0, 0.19, 0.51, 0.999]
+    let index = 0
+
+    expect(
+      createRandomScientificScores(options, criteria, () => values[index++] ?? 0),
+    ).toEqual({
+      hotpot: { taste: 1, price: 2 },
+      sushi: { taste: 6, price: 10 },
+    })
   })
 })
