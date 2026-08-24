@@ -105,13 +105,18 @@ describe('AI prompt builders', () => {
     expect(content).toContain('幽默不能遮盖结论、风险和行动建议')
   })
 
-  it('uses scientific-only robustness rules and includes model evidence', () => {
+  it('uses concise scientific explanation rules and includes model evidence', () => {
     const content = buildDeepAnalysisContent(scientificResult)
 
-    expect(content).toContain('你的任务是作为多指标决策分析师')
-    expect(content).toContain('当前结果对用户输入比较敏感')
+    expect(content).toContain('禁止重新计算、修改或质疑这些数据')
+    expect(content).toContain('你的任务只负责解释已有结果')
+    expect(content).toContain('简单指出什么变化可能让结果翻转，不进行额外计算')
+    expect(content).toContain('overview 不超过100字')
+    expect(content).toContain('每个数组最多3项')
     expect(content).toContain('完整排名：\n1. 日料：8.20\n2. 火锅：8.10')
     expect(content).toContain('口味：权重 100%，评分 8.2，贡献 8.20')
+    expect(content).not.toContain('你的任务是作为多指标决策分析师')
+    expect(content).not.toContain('当前结果对用户输入比较敏感')
     expect(content).not.toContain('随机结果在现实中是否存在明显不可执行因素')
   })
 
