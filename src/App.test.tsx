@@ -87,10 +87,13 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByRole('heading', { name: '科学模式' })).toBeInTheDocument()
     expect(screen.getByText('当前权重总和')).toBeInTheDocument()
 
-    for (const criterion of ['喜欢程度', '价格友好', '距离便利', '执行便利']) {
-      await user.type(screen.getByLabelText(`火锅的${criterion}评分`), '9')
-      await user.type(screen.getByLabelText(`日料的${criterion}评分`), '6')
-    }
+    await user.click(screen.getByRole('button', { name: '随机填充评分' }))
+    expect(screen.getByLabelText('火锅的喜欢程度评分')).toHaveValue(1)
+
+    vi.mocked(Math.random).mockReturnValue(0.99)
+    await user.click(screen.getByRole('button', { name: '再随机一批评分' }))
+    expect(screen.getByLabelText('火锅的喜欢程度评分')).toHaveValue(10)
+    expect(screen.getByLabelText('日料的执行便利评分')).toHaveValue(10)
 
     await user.click(screen.getByRole('button', { name: '开始科学分析' }))
 
@@ -99,7 +102,7 @@ describe('DECISION LAB flow', () => {
     expect(screen.getByRole('heading', { name: '完整排名' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '指标贡献' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '方案评分对比' })).toBeInTheDocument()
-    expect(screen.getAllByText('9.00').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('10.00').length).toBeGreaterThan(0)
   })
 
   it('runs an equal-probability random draw and exposes the draw landing', async () => {

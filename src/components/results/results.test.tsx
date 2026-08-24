@@ -296,11 +296,11 @@ describe('AiResult', () => {
 
     expect(screen.getByRole('heading', { name: 'AI 最终建议' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '火锅' })).toBeInTheDocument()
-    expect(screen.getByText('推荐强度 89%')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '为什么推荐' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '需要接受' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '重新考虑条件' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '下一步行动' })).toBeInTheDocument()
+    expect(screen.getByText('决策明确度 89%')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '为什么选它' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '最大取舍' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '什么情况下应该改主意' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '现在就做' })).toBeInTheDocument()
     expect(screen.queryByText('AI 深度分析')).not.toBeInTheDocument()
   })
 

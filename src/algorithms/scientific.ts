@@ -7,6 +7,21 @@ import type {
 
 const EPSILON = 1e-6
 
+export function createRandomScientificScores(
+  options: DecisionOption[],
+  criteria: Criterion[],
+  random: () => number = Math.random,
+): ScientificScoreMap {
+  return Object.fromEntries(
+    options.map((option) => [
+      option.id,
+      Object.fromEntries(
+        criteria.map((criterion) => [criterion.id, Math.floor(random() * 10) + 1]),
+      ),
+    ]),
+  )
+}
+
 export function rankScientificOptions(
   options: DecisionOption[],
   criteria: Criterion[],
