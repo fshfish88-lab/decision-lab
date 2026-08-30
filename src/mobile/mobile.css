@@ -30,6 +30,27 @@
   padding: max(20px, env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom));
 }
 
+.mobile-route-transition {
+  min-height: 100%;
+}
+
+.mobile-app__exit-toast {
+  position: fixed;
+  z-index: 60;
+  right: 50%;
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  translate: 50% 0;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 15px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(17 21 39 / 94%);
+  box-shadow: 0 12px 32px rgb(17 21 39 / 22%);
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .mobile-app__flow-header {
   position: sticky;
   top: 0;

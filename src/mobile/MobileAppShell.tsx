@@ -9,6 +9,8 @@ import {
 } from '../navigation/navigationItems'
 import { useMobileNavigation } from './navigation/MobileNavigationContext'
 import { MobileNavigationProvider } from './navigation/MobileNavigationProvider'
+import { MobileRouteTransition } from './navigation/MobileRouteTransition'
+import { useNativeBackNavigation } from './navigation/useNativeBackNavigation'
 
 export function MobileAppShell({ children }: PropsWithChildren): React.JSX.Element {
   return (
@@ -20,8 +22,9 @@ export function MobileAppShell({ children }: PropsWithChildren): React.JSX.Eleme
 
 function MobileAppFrame({ children }: PropsWithChildren): React.JSX.Element {
   const { pathname } = useLocation()
-  const { navigateBack, navigateForward } = useMobileNavigation()
+  const { exitPending, navigateBack, navigateForward } = useMobileNavigation()
   const isFlowRoute = mobileFlowRoutes.has(pathname)
+  useNativeBackNavigation()
 
   return (
     <div className="mobile-app">
@@ -35,7 +38,9 @@ function MobileAppFrame({ children }: PropsWithChildren): React.JSX.Element {
         </header>
       ) : null}
 
-      <main className="mobile-app__content">{children}</main>
+      <main className="mobile-app__content">
+        <MobileRouteTransition>{children}</MobileRouteTransition>
+      </main>
 
       {!isFlowRoute ? (
         <nav className="mobile-app__navigation" aria-label="App 主导航">
@@ -56,6 +61,10 @@ function MobileAppFrame({ children }: PropsWithChildren): React.JSX.Element {
             </NavLink>
           ))}
         </nav>
+      ) : null}
+
+      {exitPending ? (
+        <div className="mobile-app__exit-toast" role="status">再返回一次退出 Decision Lab</div>
       ) : null}
     </div>
   )

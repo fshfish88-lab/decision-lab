@@ -44,7 +44,11 @@ describe('MobileAppShell', () => {
   it('wraps routed content in a semantic main region', () => {
     renderShell('/')
 
-    expect(screen.getByRole('main')).toHaveTextContent('页面内容')
+    const main = screen.getByRole('main')
+    const navigation = screen.getByRole('navigation', { name: 'App 主导航' })
+    expect(main).toHaveTextContent('页面内容')
+    expect(main.querySelector('.mobile-route-transition')).toHaveTextContent('页面内容')
+    expect(navigation.closest('.mobile-route-transition')).toBeNull()
   })
 
   it('keeps exactly one main landmark when a destination supplies page markup', () => {
