@@ -20,6 +20,7 @@ import {
   type AiApiErrorCode,
 } from '../../ai/aiApiClient'
 import { buildDeepAnalysisContent } from '../../ai/aiPromptBuilders'
+import { usePlatform } from '../../platform/PlatformContext'
 import type { AiDeepAnalysisData, DecisionResult } from '../../types/decision'
 
 const ERROR_COPY: Record<AiApiErrorCode, string> = {
@@ -166,6 +167,7 @@ function panelCopy(result: DecisionResult): { eyebrow: string; title: string; de
 }
 
 export function AiDeepAnalysisPanel({ result, client = createAiApiClient() }: AiDeepAnalysisPanelProps): React.JSX.Element {
+  const platform = usePlatform()
   const [analysis, setAnalysis] = useState<AiDeepAnalysisData | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState('')
@@ -186,7 +188,7 @@ export function AiDeepAnalysisPanel({ result, client = createAiApiClient() }: Ai
   }
 
   return (
-    <section className={`ai-deep-analysis ai-deep-analysis--${result.mode}`} role={analysis ? 'region' : undefined} aria-label={analysis ? 'AI 深度分析结果' : undefined}>
+    <section className={`ai-deep-analysis ai-deep-analysis--${result.mode}${platform === 'app' ? ' mobile-ai-deep-analysis' : ''}`} role={analysis ? 'region' : undefined} aria-label={analysis ? 'AI 深度分析结果' : undefined}>
       <div className="ai-deep-analysis__heading">
         <div>
           <span className="section-index">{copy.eyebrow}</span>

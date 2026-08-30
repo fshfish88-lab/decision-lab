@@ -8,6 +8,8 @@ import { AiResult } from '../components/results/AiResult'
 import { RandomResult } from '../components/results/RandomResult'
 import { ResultShell } from '../components/results/ResultShell'
 import { ScientificResult } from '../components/results/ScientificResult'
+import { MobileResultShell } from '../mobile/components/MobileResultShell'
+import { usePlatform } from '../platform/PlatformContext'
 import { buildShareText, downloadBlob, renderShareCardBlob } from '../sharing/shareCard'
 import { useDecision } from '../state/DecisionContext'
 import {
@@ -18,6 +20,7 @@ import {
 
 export function ResultPage(): React.JSX.Element {
   const navigate = useNavigate()
+  const platform = usePlatform()
   const [searchParams] = useSearchParams()
   const { state, dispatch } = useDecision()
   const requestedResultId = searchParams.get('id')
@@ -31,7 +34,7 @@ export function ResultPage(): React.JSX.Element {
 
   if (!result) {
     return (
-      <main className="empty-state">
+      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><ShieldCheck size={24} /></span>
         <h1>当前没有决策结果</h1>
         <p>系统不会为了填满页面而编造一个答案。</p>
@@ -81,8 +84,10 @@ export function ResultPage(): React.JSX.Element {
     incrementHistoryItemShare(decisionResult.id)
   }
 
+  const ResultContainer = platform === 'app' ? MobileResultShell : ResultShell
+
   return (
-    <ResultShell
+    <ResultContainer
       result={decisionResult}
       onRerun={rerun}
       onReturnHome={() => navigate('/')}
@@ -105,6 +110,6 @@ export function ResultPage(): React.JSX.Element {
         )}
         {decisionResult.mode !== 'ai' ? <AiDeepAnalysisPanel result={decisionResult} /> : null}
       </>
-    </ResultShell>
+    </ResultContainer>
   )
 }

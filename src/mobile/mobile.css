@@ -895,3 +895,124 @@
   color: #fff;
   font-weight: 850;
 }
+
+.mobile-result {
+  display: grid;
+  gap: 18px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.mobile-result__heading {
+  display: grid;
+  gap: 6px;
+}
+
+.mobile-result__heading span {
+  color: var(--mobile-muted);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.mobile-result__heading h1,
+.mobile-result__heading p {
+  margin: 0;
+}
+
+.mobile-result__heading h1 { font-size: 28px; }
+.mobile-result__heading p { color: var(--mobile-muted); font-size: 13px; }
+
+.mobile-result__content {
+  min-width: 0;
+}
+
+.mobile-result .mode-result,
+.mobile-result .mode-result__section,
+.mobile-result .random-result__hero,
+.mobile-result .scientific-result__hero,
+.mobile-result .tarot-result__hero,
+.mobile-result .ai-result__hero,
+.mobile-result .ai-result__card,
+.mobile-result .tarot-result__interpretation,
+.mobile-result .mystic-result__report {
+  border-radius: 18px;
+}
+
+.mobile-result .scientific-result__hero,
+.mobile-result .tarot-result__hero,
+.mobile-result .ai-result__hero,
+.mobile-result .ai-result__grid,
+.mobile-result .tarot-result__interpretation {
+  grid-template-columns: 1fr;
+}
+
+.mobile-result .scientific-table-wrap,
+.mobile-result .fate-track {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mobile-result__after {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 18px;
+  background: var(--mobile-card);
+}
+
+.mobile-result__after span { color: var(--mobile-muted); font-size: 11px; font-weight: 800; }
+.mobile-result__after h2 { margin: 3px 0 0; font-size: 17px; }
+.mobile-result__after > p { min-height: 18px; margin: 0; color: var(--mobile-muted); font-size: 11px; }
+
+.mobile-result__after-grid,
+.mobile-result__actions {
+  display: grid;
+  gap: 9px;
+}
+
+.mobile-result__after-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mobile-result__after-grid button,
+.mobile-result__actions button,
+.mobile-result__actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 12px;
+  background: var(--mobile-card);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.mobile-result__actions .is-primary {
+  min-height: 52px;
+  border-color: #111527;
+  background: #111527;
+  color: #fff;
+}
+
+.mobile-ai-deep-analysis {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.mobile-ai-deep-analysis .ai-deep-analysis__heading,
+.mobile-ai-deep-analysis .ai-analysis-grid {
+  grid-template-columns: 1fr;
+}
+
+.mobile-ai-deep-analysis .ai-deep-analysis__heading {
+  align-items: start;
+  gap: 12px;
+}
+
+.mobile-ai-deep-analysis .secondary-action {
+  width: 100%;
+}
