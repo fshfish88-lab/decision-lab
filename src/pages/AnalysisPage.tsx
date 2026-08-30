@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { createRandomResult } from '../services/decisionEngine'
+import { MobileAnalysisView } from '../mobile/pages/MobileAnalysisView'
+import { usePlatform } from '../platform/PlatformContext'
 import { saveHistoryItem } from '../storage/history'
 import { useDecision } from '../state/DecisionContext'
 import type { DecisionMode, DecisionResult } from '../types/decision'
@@ -78,6 +80,7 @@ function AnalysisVisual({ mode }: { mode: DecisionMode }): React.JSX.Element {
 
 export function AnalysisPage(): React.JSX.Element {
   const navigate = useNavigate()
+  const platform = usePlatform()
   const { state, dispatch } = useDecision()
   const preparedResult = useRef<DecisionResult | null>(state.result)
 
@@ -106,7 +109,7 @@ export function AnalysisPage(): React.JSX.Element {
   if (!preparedResult.current) {
     if (state.mode === 'mystic') {
       return (
-        <main className="empty-state">
+        <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
           <span className="empty-state__icon"><Orbit size={24} /></span>
           <h1>玄学模式需要你亲手抽牌</h1>
           <p>答案不会在你看到牌阵之前生成。</p>
@@ -116,7 +119,7 @@ export function AnalysisPage(): React.JSX.Element {
     }
 
     return (
-      <main className="empty-state">
+      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Orbit size={24} /></span>
         <h1>还没有可分析的决定</h1>
         <p>请先返回首页输入至少两个选项。</p>
@@ -128,6 +131,18 @@ export function AnalysisPage(): React.JSX.Element {
   const mode = preparedResult.current.mode
   const config = ANALYSIS_CONFIG[mode]
   const MarkIcon = mode === 'random' ? Dices : mode === 'scientific' ? BarChart3 : mode === 'mystic' ? Sparkles : Bot
+
+  if (platform === 'app') {
+    return (
+      <MobileAnalysisView
+        mode={mode}
+        title={config.title}
+        description={config.description}
+        steps={config.steps}
+        conclusion={config.conclusion}
+      />
+    )
+  }
 
   return (
     <main className="analysis-page">

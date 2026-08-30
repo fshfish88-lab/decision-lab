@@ -614,3 +614,170 @@
   color: #fff;
   font-weight: 800;
 }
+
+.mobile-tarot {
+  display: grid;
+  gap: 20px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.mobile-tarot__heading {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.mobile-tarot__heading > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #a25267;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.mobile-tarot__heading h1,
+.mobile-tarot__heading p {
+  margin: 0;
+}
+
+.mobile-tarot__heading h1 {
+  font-size: 29px;
+  letter-spacing: -0.035em;
+}
+
+.mobile-tarot__heading p,
+.mobile-tarot__heading small {
+  color: var(--mobile-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.mobile-tarot__stage {
+  margin: 0 -16px;
+  padding: 8px 16px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.mobile-tarot__stage::-webkit-scrollbar { display: none; }
+
+.mobile-tarot__stage .tarot-deck {
+  width: max-content;
+  min-width: 640px;
+  margin: 0 auto;
+}
+
+.mobile-tarot__prompt {
+  margin: 0;
+  color: var(--mobile-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.mobile-tarot .tarot-reveal {
+  grid-template-columns: 1fr;
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.mobile-analysis {
+  display: grid;
+  gap: 20px;
+  max-width: 480px;
+  margin: 8vh auto 0;
+  padding: 22px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 24px;
+  background: var(--mobile-card);
+  box-shadow: 0 24px 70px rgb(35 39 61 / 10%);
+}
+
+.mobile-analysis__mark {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 18px;
+  background: #e9e7ff;
+  color: #6559de;
+}
+
+.mobile-analysis--scientific .mobile-analysis__mark { background: #fff3d5; color: #b17a10; }
+.mobile-analysis--mystic .mobile-analysis__mark { background: #ffe8ea; color: #c65570; }
+.mobile-analysis--ai .mobile-analysis__mark { background: #e8f4df; color: #588d43; }
+
+.mobile-analysis header {
+  display: grid;
+  gap: 8px;
+}
+
+.mobile-analysis header span {
+  color: var(--mobile-muted);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.mobile-analysis h1,
+.mobile-analysis header p {
+  margin: 0;
+}
+
+.mobile-analysis h1 { font-size: 26px; }
+.mobile-analysis header p { color: var(--mobile-muted); font-size: 13px; line-height: 1.6; }
+
+.mobile-analysis__progress {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eceef4;
+}
+
+.mobile-analysis__progress span {
+  display: block;
+  width: 65%;
+  height: 100%;
+  border-radius: inherit;
+  background: #111527;
+  animation: mobile-analysis-progress 1.8s ease-in-out infinite alternate;
+}
+
+.mobile-analysis__steps {
+  display: grid;
+  gap: 9px;
+}
+
+.mobile-analysis__steps > div {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  background: #f7f8fc;
+}
+
+.mobile-analysis__steps span {
+  display: grid;
+  place-items: center;
+}
+
+.mobile-analysis__steps p,
+.mobile-analysis__steps small,
+.mobile-analysis__conclusion {
+  margin: 0;
+}
+
+.mobile-analysis__steps p { font-size: 12px; }
+.mobile-analysis__steps small { color: var(--mobile-muted); font-size: 10px; }
+.mobile-analysis__conclusion { text-align: center; font-size: 13px; font-weight: 800; }
+
+@keyframes mobile-analysis-progress {
+  from { width: 45%; }
+  to { width: 78%; }
+}

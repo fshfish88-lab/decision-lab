@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { TarotDeck } from '../components/tarot/TarotDeck'
 import { TarotReveal } from '../components/tarot/TarotReveal'
+import { MobileTarotView } from '../mobile/pages/MobileTarotView'
+import { usePlatform } from '../platform/PlatformContext'
 import { createTarotResult } from '../services/decisionEngine'
 import { saveHistoryItem } from '../storage/history'
 import { useDecision } from '../state/DecisionContext'
@@ -12,6 +14,7 @@ import type { DecisionResult } from '../types/decision'
 
 export function TarotPage(): React.JSX.Element {
   const navigate = useNavigate()
+  const platform = usePlatform()
   const { state, dispatch } = useDecision()
   const validOptions = useMemo(
     () => state.options.filter((option) => option.label.trim()),
@@ -45,12 +48,24 @@ export function TarotPage(): React.JSX.Element {
 
   if (!ready || !spreadRef.current) {
     return (
-      <main className="empty-state">
+      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Layers3 size={24} /></span>
         <h1>还没有可用的塔罗牌阵</h1>
         <p>请先返回首页，输入至少两个选项并选择玄学模式。</p>
         <button className="secondary-action" type="button" onClick={() => navigate('/')}>返回首页</button>
       </main>
+    )
+  }
+
+  if (platform === 'app') {
+    return (
+      <MobileTarotView
+        spread={spreadRef.current}
+        selectedPosition={selectedPosition}
+        revealedResult={revealedResult}
+        onSelect={reveal}
+        onContinue={() => navigate('/result')}
+      />
     )
   }
 

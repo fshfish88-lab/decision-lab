@@ -1,0 +1,43 @@
+import { Sparkles } from 'lucide-react'
+
+import { TarotDeck } from '../../components/tarot/TarotDeck'
+import { TarotReveal } from '../../components/tarot/TarotReveal'
+import type { TarotSpread } from '../../tarot/tarotEngine'
+import type { DecisionResult } from '../../types/decision'
+
+interface MobileTarotViewProps {
+  spread: TarotSpread
+  selectedPosition: number | null
+  revealedResult: DecisionResult | null
+  onSelect: (position: number) => void
+  onContinue: () => void
+}
+
+export function MobileTarotView({
+  spread,
+  selectedPosition,
+  revealedResult,
+  onSelect,
+  onContinue,
+}: MobileTarotViewProps): React.JSX.Element {
+  return (
+    <section className="mobile-tarot">
+      <header className="mobile-tarot__heading">
+        <span><Sparkles size={15} aria-hidden="true" /> 大阿卡纳牌阵</span>
+        <h1>凭第一感觉，选一张</h1>
+        <p>牌阵已经确定。不要分析牌背，第一眼想点哪张，就点哪张。</p>
+        <small>22 张大阿卡纳 · 本轮展开 7 张 · 仅供娱乐</small>
+      </header>
+
+      <div className="mobile-tarot__stage">
+        <TarotDeck spread={spread} selectedPosition={selectedPosition} onSelect={onSelect} />
+      </div>
+
+      {revealedResult ? (
+        <TarotReveal result={revealedResult} onContinue={onContinue} />
+      ) : (
+        <p className="mobile-tarot__prompt">轻点一张牌，答案会在原地翻开。</p>
+      )}
+    </section>
+  )
+}
