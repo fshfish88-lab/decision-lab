@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { DecisionResult } from '../../types/decision'
+import { MobileNavigationProvider } from '../navigation/MobileNavigationProvider'
 import { MobileResultShell } from './MobileResultShell'
 
 const result: DecisionResult = {
@@ -23,19 +24,24 @@ describe('MobileResultShell', () => {
     const onRegret = vi.fn()
     render(
       <MemoryRouter>
-        <MobileResultShell
-          result={result}
-          onRerun={onRerun}
-          onReturnHome={vi.fn()}
-          onChangeMode={vi.fn()}
-          onEditOptions={vi.fn()}
-          onRegret={onRegret}
-          onCopy={vi.fn().mockResolvedValue(undefined)}
-          onDownload={vi.fn().mockResolvedValue(undefined)}
-          regretted={false}
-        >
-          <p>结果详情</p>
-        </MobileResultShell>
+        <MobileNavigationProvider>
+          <MobileResultShell
+            result={result}
+            onRerun={onRerun}
+            onReturnHome={vi.fn()}
+            onChangeMode={vi.fn()}
+            onEditOptions={vi.fn()}
+            onRegret={onRegret}
+            onCopy={vi.fn().mockResolvedValue(undefined)}
+            renderShareCard={vi.fn(() => new Promise<Blob>(() => undefined))}
+            saveShareCard={vi.fn()}
+            shareShareCard={vi.fn()}
+            onShareChooserOpened={vi.fn()}
+            regretted={false}
+          >
+            <p>结果详情</p>
+          </MobileResultShell>
+        </MobileNavigationProvider>
       </MemoryRouter>,
     )
 
@@ -48,5 +54,9 @@ describe('MobileResultShell', () => {
     expect(onRerun).toHaveBeenCalledOnce()
     expect(onRegret).toHaveBeenCalledOnce()
     expect(screen.getByText(/反悔已记录/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '分享结果卡' }))
+    expect(screen.getByRole('dialog', { name: '分享结果卡' })).toBeInTheDocument()
+    expect(screen.getByText('正在生成分享卡')).toBeInTheDocument()
   })
 })

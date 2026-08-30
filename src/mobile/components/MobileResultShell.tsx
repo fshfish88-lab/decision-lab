@@ -1,8 +1,9 @@
-import { Check, Clipboard, Download, History, PencilLine, RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Clipboard, History, PencilLine, RefreshCw, RotateCcw, Share2, Undo2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import type { DecisionResult } from '../../types/decision'
+import { MobileShareCardSheet } from './MobileShareCardSheet'
 
 const MODE_LABELS = {
   random: '随机模式',
@@ -20,7 +21,10 @@ interface MobileResultShellProps {
   onEditOptions: () => void
   onRegret: () => void
   onCopy: () => Promise<void>
-  onDownload: () => Promise<void>
+  renderShareCard: (result: DecisionResult) => Promise<Blob>
+  saveShareCard: (base64: string) => Promise<{ uri: string; fileName: string }>
+  shareShareCard: (base64: string) => Promise<{ chooserOpened: true }>
+  onShareChooserOpened: () => void
   regretted: boolean
 }
 
@@ -33,12 +37,17 @@ export function MobileResultShell({
   onEditOptions,
   onRegret,
   onCopy,
-  onDownload,
+  renderShareCard,
+  saveShareCard,
+  shareShareCard,
+  onShareChooserOpened,
   regretted,
 }: MobileResultShellProps): React.JSX.Element {
   const [regretRecorded, setRegretRecorded] = useState(regretted)
-  const [busyAction, setBusyAction] = useState<'copy' | 'download' | null>(null)
+  const [copying, setCopying] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const [status, setStatus] = useState('')
+  const closeShareSheet = useCallback(() => setShareOpen(false), [])
 
   function recordRegret(): void {
     if (regretRecorded) return
@@ -47,21 +56,16 @@ export function MobileResultShell({
     setStatus('反悔已记录，系统表示并不意外')
   }
 
-  async function runShareAction(kind: 'copy' | 'download'): Promise<void> {
-    setBusyAction(kind)
+  async function copyResult(): Promise<void> {
+    setCopying(true)
     setStatus('')
     try {
-      if (kind === 'copy') {
-        await onCopy()
-        setStatus('结果已复制')
-      } else {
-        await onDownload()
-        setStatus('分享卡已下载')
-      }
+      await onCopy()
+      setStatus('结果已复制')
     } catch {
-      setStatus(kind === 'copy' ? '复制失败，请检查系统权限' : '分享卡生成失败，请稍后重试')
+      setStatus('复制失败，请检查系统权限')
     } finally {
-      setBusyAction(null)
+      setCopying(false)
     }
   }
 
@@ -85,11 +89,11 @@ export function MobileResultShell({
             {regretRecorded ? <Check size={17} /> : <Undo2 size={17} />}
             {regretRecorded ? '已记录反悔' : '我后悔了'}
           </button>
-          <button type="button" disabled={busyAction !== null} onClick={() => void runShareAction('copy')}>
+          <button type="button" disabled={copying} onClick={() => void copyResult()}>
             <Clipboard size={17} />复制结果
           </button>
-          <button type="button" disabled={busyAction !== null} onClick={() => void runShareAction('download')}>
-            <Download size={17} />下载分享卡
+          <button type="button" disabled={copying} onClick={() => setShareOpen(true)}>
+            <Share2 size={17} />分享结果卡
           </button>
         </div>
         <p aria-live="polite">{status}</p>
@@ -104,6 +108,17 @@ export function MobileResultShell({
         <Link to="/history"><History size={18} />查看记录</Link>
         <button type="button" onClick={onReturnHome}>返回决策首页</button>
       </div>
+
+      {shareOpen ? (
+        <MobileShareCardSheet
+          result={result}
+          onClose={closeShareSheet}
+          renderShareCard={renderShareCard}
+          saveShareCard={saveShareCard}
+          shareShareCard={shareShareCard}
+          onShareChooserOpened={onShareChooserOpened}
+        />
+      ) : null}
     </section>
   )
 }
