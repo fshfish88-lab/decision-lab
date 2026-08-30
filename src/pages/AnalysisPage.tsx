@@ -107,24 +107,25 @@ export function AnalysisPage(): React.JSX.Element {
   }, [dispatch, navigate])
 
   if (!preparedResult.current) {
+    const EmptyStateElement = platform === 'app' ? 'section' : 'main'
     if (state.mode === 'mystic') {
       return (
-        <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
+        <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
           <span className="empty-state__icon"><Orbit size={24} /></span>
           <h1>玄学模式需要你亲手抽牌</h1>
           <p>答案不会在你看到牌阵之前生成。</p>
           <button className="secondary-action" type="button" onClick={() => navigate('/tarot')}>进入塔罗牌阵</button>
-        </main>
+        </EmptyStateElement>
       )
     }
 
     return (
-      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
+      <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Orbit size={24} /></span>
         <h1>还没有可分析的决定</h1>
         <p>请先返回首页输入至少两个选项。</p>
         <button className="secondary-action" type="button" onClick={() => navigate('/')}>返回首页</button>
-      </main>
+      </EmptyStateElement>
     )
   }
 

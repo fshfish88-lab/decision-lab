@@ -32,7 +32,7 @@ export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React
 
   if (platform === 'app') {
     return (
-      <main className="mobile-statistics">
+      <section className="mobile-statistics">
         <header className="mobile-destination-heading">
           <span>LOCAL INSIGHTS</span>
           <h1>统计</h1>
@@ -89,7 +89,7 @@ export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React
             ))}
           </div>
         </section>
-      </main>
+      </section>
     )
   }
 

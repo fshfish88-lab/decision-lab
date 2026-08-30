@@ -5,7 +5,7 @@ export function AboutPage(): React.JSX.Element {
   const platform = usePlatform()
   if (platform === 'app') {
     return (
-      <main className="mobile-about">
+      <section className="mobile-about">
         <header className="mobile-destination-heading">
           <span>DECISION LAB</span>
           <h1>关于 Decision Lab</h1>
@@ -19,7 +19,7 @@ export function AboutPage(): React.JSX.Element {
           <article><Database /><div><h2>数据与隐私</h2><p>历史记录保存在当前设备；Web 与 App 不自动同步。</p></div></article>
         </section>
         <p className="mobile-about__note">AI 模式需要联网；随机、科学和塔罗模式不依赖 AI 服务。</p>
-      </main>
+      </section>
     )
   }
   return (

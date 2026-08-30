@@ -33,13 +33,14 @@ export function ResultPage(): React.JSX.Element {
   ))
 
   if (!result) {
+    const EmptyStateElement = platform === 'app' ? 'section' : 'main'
     return (
-      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
+      <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><ShieldCheck size={24} /></span>
         <h1>当前没有决策结果</h1>
         <p>系统不会为了填满页面而编造一个答案。</p>
         <button className="secondary-action" type="button" onClick={() => navigate('/')}>开始一次决定</button>
-      </main>
+      </EmptyStateElement>
     )
   }
 

@@ -69,13 +69,14 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
   }, [submitting])
 
   if (options.length < 2) {
+    const EmptyStateElement = platform === 'app' ? 'section' : 'main'
     return (
-      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
+      <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Bot size={24} /></span>
         <h1>AI 还没有可理解的选项</h1>
         <p>请先输入至少两个有效选项。</p>
         <Link className="secondary-action" to="/">返回首页</Link>
-      </main>
+      </EmptyStateElement>
     )
   }
 

@@ -26,14 +26,14 @@ describe('mobile top-level destinations', () => {
     renderAppPage(<HistoryPage />)
     expect(screen.getByRole('heading', { name: '决策记录' })).toBeInTheDocument()
     expect(screen.getByText('还没有决策记录')).toBeInTheDocument()
-    expect(screen.getByRole('main')).toHaveClass('mobile-history')
+    expect(document.querySelector('.mobile-history')).toBeInTheDocument()
   })
 
   it('renders mobile statistics without demonstration data', () => {
     renderAppPage(<StatisticsPage now={new Date('2026-08-30T00:00:00.000Z')} />)
     expect(screen.getByRole('heading', { name: '统计' })).toBeInTheDocument()
     expect(screen.getByText('还没有足够的决策数据')).toBeInTheDocument()
-    expect(screen.getByRole('main')).toHaveClass('mobile-statistics')
+    expect(document.querySelector('.mobile-statistics')).toBeInTheDocument()
   })
 
   it('renders real app information without a fake settings page', () => {

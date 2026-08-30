@@ -47,13 +47,14 @@ export function TarotPage(): React.JSX.Element {
   }
 
   if (!ready || !spreadRef.current) {
+    const EmptyStateElement = platform === 'app' ? 'section' : 'main'
     return (
-      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
+      <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Layers3 size={24} /></span>
         <h1>还没有可用的塔罗牌阵</h1>
         <p>请先返回首页，输入至少两个选项并选择玄学模式。</p>
         <button className="secondary-action" type="button" onClick={() => navigate('/')}>返回首页</button>
-      </main>
+      </EmptyStateElement>
     )
   }
 

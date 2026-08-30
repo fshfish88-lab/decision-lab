@@ -57,7 +57,7 @@ export function HistoryPage(): React.JSX.Element {
 
   if (platform === 'app') {
     return (
-      <main className="mobile-history">
+      <section className="mobile-history">
         <header className="mobile-destination-heading">
           <span>LOCAL ARCHIVE</span>
           <h1>决策记录</h1>
@@ -128,7 +128,7 @@ export function HistoryPage(): React.JSX.Element {
         <button className="mobile-danger-action" type="button" disabled={!history.length} onClick={clearAll}>
           <Trash2 size={16} />清空全部记录
         </button>
-      </main>
+      </section>
     )
   }
 

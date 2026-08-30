@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
+import { AboutPage } from '../pages/AboutPage'
+import { PlatformContext } from '../platform/PlatformContext'
 import { MobileAppShell } from './MobileAppShell'
 
 function renderShell(pathname: string) {
@@ -43,5 +45,19 @@ describe('MobileAppShell', () => {
     renderShell('/')
 
     expect(screen.getByRole('main')).toHaveTextContent('页面内容')
+  })
+
+  it('keeps exactly one main landmark when a destination supplies page markup', () => {
+    render(
+      <MemoryRouter initialEntries={['/about']}>
+        <PlatformContext.Provider value="app">
+          <MobileAppShell>
+            <AboutPage />
+          </MobileAppShell>
+        </PlatformContext.Provider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getAllByRole('main')).toHaveLength(1)
   })
 })
