@@ -781,3 +781,117 @@
   from { width: 45%; }
   to { width: 78%; }
 }
+
+.mobile-ai {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.mobile-ai__network {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #bfdbaa;
+  border-radius: 14px;
+  background: #e8f4df;
+  color: #477536;
+}
+
+.mobile-ai__network.is-offline {
+  border-color: #efc1ca;
+  background: #ffe8ea;
+  color: #a24056;
+}
+
+.mobile-ai__network div {
+  display: grid;
+  gap: 2px;
+}
+
+.mobile-ai__network strong { font-size: 13px; }
+.mobile-ai__network span { font-size: 11px; line-height: 1.45; }
+
+.mobile-ai__form {
+  display: grid;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 20px;
+  background: var(--mobile-card);
+  box-shadow: 0 14px 40px rgb(35 39 61 / 6%);
+}
+
+.mobile-ai__summary {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+}
+
+.mobile-ai__summary > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: #e8f4df;
+  color: #588d43;
+}
+
+.mobile-ai__summary small,
+.mobile-ai__summary p {
+  color: var(--mobile-muted);
+  font-size: 11px;
+}
+
+.mobile-ai__summary h2,
+.mobile-ai__summary p {
+  margin: 2px 0 0;
+}
+
+.mobile-ai__summary h2 { font-size: 17px; }
+
+.mobile-ai__field {
+  display: grid;
+  gap: 7px;
+  color: #555964;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.mobile-ai__field textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 13px;
+  resize: vertical;
+  border: 1px solid var(--mobile-border);
+  border-radius: 12px;
+  background: #fbfbfd;
+  color: var(--mobile-text);
+  line-height: 1.6;
+}
+
+.mobile-ai__field small { justify-self: end; color: var(--mobile-muted); }
+
+.mobile-ai__privacy {
+  display: flex;
+  gap: 7px;
+  color: var(--mobile-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.mobile-ai__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px !important;
+  border: 0;
+  border-radius: 14px;
+  background: #111527;
+  color: #fff;
+  font-weight: 850;
+}

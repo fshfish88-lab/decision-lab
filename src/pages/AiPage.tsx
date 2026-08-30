@@ -16,6 +16,9 @@ import {
   type AiApiErrorCode,
 } from '../ai/aiApiClient'
 import { buildDirectDecisionContent } from '../ai/aiPromptBuilders'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { MobileAiView } from '../mobile/pages/MobileAiView'
+import { usePlatform } from '../platform/PlatformContext'
 import { createAiResult } from '../services/decisionEngine'
 import { useDecision } from '../state/DecisionContext'
 import { saveHistoryItem } from '../storage/history'
@@ -40,6 +43,8 @@ const THINKING_STEPS = [
 
 export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX.Element {
   const navigate = useNavigate()
+  const platform = usePlatform()
+  const online = useOnlineStatus()
   const { state, dispatch } = useDecision()
   const options = useMemo(
     () => state.options.filter((option) => option.label.trim()),
@@ -65,7 +70,7 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
 
   if (options.length < 2) {
     return (
-      <main className="empty-state">
+      <main className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
         <span className="empty-state__icon"><Bot size={24} /></span>
         <h1>AI 还没有可理解的选项</h1>
         <p>请先输入至少两个有效选项。</p>
@@ -76,7 +81,7 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
 
   async function submit(event: React.FormEvent): Promise<void> {
     event.preventDefault()
-    if (submitting || !context.trim()) return
+    if (submitting || !context.trim() || !online) return
     setSubmitting(true)
     setStatus('')
     try {
@@ -104,6 +109,22 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (platform === 'app') {
+    return (
+      <MobileAiView
+        question={state.question}
+        optionSummary={options.map((option) => option.label).join(' / ')}
+        context={context}
+        status={status}
+        submitting={submitting}
+        thinkingLabel={THINKING_STEPS[thinkingIndex]}
+        online={online}
+        onContextChange={setContext}
+        onSubmit={(event) => void submit(event)}
+      />
+    )
   }
 
   return (
