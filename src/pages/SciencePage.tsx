@@ -4,9 +4,16 @@ import { useNavigate } from 'react-router-dom'
 
 import { createRandomScientificScores } from '../algorithms/scientific'
 import { createScientificResult } from '../services/decisionEngine'
+import { MobileSciencePage } from '../mobile/pages/MobileSciencePage'
+import { usePlatform } from '../platform/PlatformContext'
 import { useDecision } from '../state/DecisionContext'
 
 export function SciencePage(): React.JSX.Element {
+  const platform = usePlatform()
+  return platform === 'app' ? <MobileSciencePage /> : <WebSciencePage />
+}
+
+function WebSciencePage(): React.JSX.Element {
   const navigate = useNavigate()
   const { state, dispatch } = useDecision()
   const [error, setError] = useState('')

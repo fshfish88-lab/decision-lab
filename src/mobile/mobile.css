@@ -400,3 +400,217 @@
     grid-template-columns: 1fr;
   }
 }
+
+.mobile-science,
+.mobile-score-list,
+.mobile-criteria-list {
+  display: grid;
+  gap: 14px;
+}
+
+.mobile-science {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.mobile-flow-progress {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.mobile-flow-progress span {
+  height: 4px;
+  border-radius: 999px;
+  background: #e1e3ea;
+}
+
+.mobile-flow-progress span.is-active {
+  background: #111527;
+}
+
+.mobile-flow-heading {
+  display: grid;
+  gap: 7px;
+}
+
+.mobile-flow-heading > span {
+  color: var(--mobile-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mobile-flow-heading h1,
+.mobile-flow-heading p {
+  margin: 0;
+}
+
+.mobile-flow-heading h1 {
+  font-size: 28px;
+  letter-spacing: -0.035em;
+}
+
+.mobile-flow-heading p {
+  color: var(--mobile-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.mobile-weight-total {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  padding: 15px 16px;
+  border: 1px solid #f0d99f;
+  border-radius: 16px;
+  background: #fff3d5;
+}
+
+.mobile-weight-total strong {
+  grid-row: span 2;
+  font-size: 28px;
+}
+
+.mobile-weight-total small {
+  color: #8a6720;
+}
+
+.mobile-weight-total.is-valid {
+  border-color: #b8d6a9;
+  background: #e8f4df;
+}
+
+.mobile-criterion-card,
+.mobile-score-card {
+  margin: 0;
+  padding: 15px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 16px;
+  background: var(--mobile-card);
+}
+
+.mobile-criterion-card__heading {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-criterion-card__heading > span {
+  color: var(--mobile-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mobile-criterion-card__heading input {
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 10px;
+}
+
+.mobile-criterion-card__heading button {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.mobile-criterion-card__weight {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--mobile-muted);
+  font-size: 12px;
+}
+
+.mobile-criterion-card__weight input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.mobile-inline-action,
+.mobile-step-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 12px;
+  background: var(--mobile-card);
+  font-weight: 750;
+}
+
+.mobile-score-card {
+  display: grid;
+  gap: 10px;
+}
+
+.mobile-score-card legend {
+  padding: 0 4px;
+  font-size: 17px;
+  font-weight: 850;
+}
+
+.mobile-score-card label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 10px;
+  color: #444852;
+  font-size: 13px;
+}
+
+.mobile-score-card label span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-score-card label small {
+  color: var(--mobile-muted);
+}
+
+.mobile-score-card input {
+  width: 58px;
+  padding: 0 8px;
+  text-align: center;
+  border: 1px solid var(--mobile-border);
+  border-radius: 10px;
+}
+
+.mobile-form-error {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ffe8ea;
+  color: #9d3b50;
+  font-size: 13px;
+}
+
+.mobile-empty-state {
+  display: grid;
+  gap: 14px;
+  max-width: 440px;
+  margin: 20vh auto 0;
+  text-align: center;
+}
+
+.mobile-empty-state h1,
+.mobile-empty-state p {
+  margin: 0;
+}
+
+.mobile-empty-state p {
+  color: var(--mobile-muted);
+}
+
+.mobile-empty-state button {
+  border: 0;
+  border-radius: 14px;
+  background: #111527;
+  color: #fff;
+  font-weight: 800;
+}
