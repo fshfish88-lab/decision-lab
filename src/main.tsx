@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom'
 
 import { AppRoutes } from './App'
 import './index.css'
+import './mobile/mobile.css'
 import { PlatformProvider } from './platform/PlatformProvider'
 import { DecisionProvider } from './state/DecisionProvider'
 
