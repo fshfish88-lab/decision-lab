@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useDecision } from '../state/DecisionContext'
+import { usePlatform } from '../platform/PlatformContext'
 import { clearHistory, deleteHistoryItem, readHistory } from '../storage/history'
 import type { DecisionHistoryItem, DecisionMode } from '../types/decision'
 
@@ -16,6 +17,7 @@ function tarotSummary(item: DecisionHistoryItem): string | undefined {
 
 export function HistoryPage(): React.JSX.Element {
   const navigate = useNavigate()
+  const platform = usePlatform()
   const { dispatch } = useDecision()
   const [history, setHistory] = useState<DecisionHistoryItem[]>(() => readHistory())
   const [filter, setFilter] = useState<'all' | DecisionMode>('all')
@@ -51,6 +53,83 @@ export function HistoryPage(): React.JSX.Element {
   function openResult(item: DecisionHistoryItem): void {
     dispatch({ type: 'set-result', result: item })
     navigate(`/result?id=${encodeURIComponent(item.id)}`)
+  }
+
+  if (platform === 'app') {
+    return (
+      <main className="mobile-history">
+        <header className="mobile-destination-heading">
+          <span>LOCAL ARCHIVE</span>
+          <h1>决策记录</h1>
+          <p>只保存在这台设备中 · 共 {history.length} 条</p>
+        </header>
+        <div className="mobile-filter-row" role="group" aria-label="筛选决策模式">
+          {([
+            ['all', '全部'],
+            ['random', '随机'],
+            ['scientific', '科学'],
+            ['mystic', '塔罗'],
+            ['ai', 'AI'],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              className={filter === value ? 'is-active' : ''}
+              type="button"
+              aria-pressed={filter === value}
+              onClick={() => setFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {visibleItems.length ? (
+          <div className="mobile-history__list">
+            {visibleItems.map((item) => {
+              const expanded = expandedId === item.id
+              const tarot = tarotSummary(item)
+              return (
+                <article className="mobile-history-card" key={item.id}>
+                  <div className="mobile-history-card__meta">
+                    <span className={`is-${item.mode}`}>{MODE_LABELS[item.mode]}</span>
+                    <small>{new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}</small>
+                  </div>
+                  <h2>{item.question}</h2>
+                  <p>{item.options.map((option) => option.label).join(' / ')}</p>
+                  {tarot ? <p>{tarot}</p> : null}
+                  <div className="mobile-history-card__winner">
+                    <span>系统选择</span><strong>{item.winner.label}</strong>
+                  </div>
+                  <div className="mobile-history-card__actions">
+                    <button type="button" aria-expanded={expanded} onClick={() => setExpandedId(expanded ? null : item.id)}>
+                      {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}{expanded ? '收起详情' : '查看详情'}
+                    </button>
+                    <button type="button" onClick={() => remove(item.id)}><Trash2 size={16} />删除</button>
+                  </div>
+                  {expanded ? (
+                    <div className="mobile-history-card__details">
+                      <p>{item.explanation}</p>
+                      <small>{item.regrettedAt ? '已记录反悔' : '尚未反悔'} · 分享 {item.shareCount} 次</small>
+                      <button type="button" onClick={() => openResult(item)}><Eye size={16} />查看结果</button>
+                      <button type="button" onClick={() => reuse(item)}><RotateCcw size={16} />再次使用</button>
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        ) : (
+          <section className="mobile-empty-card">
+            <Clock3 size={25} aria-hidden="true" />
+            <h2>{history.length ? '没有符合筛选条件的记录' : '还没有决策记录'}</h2>
+            <p>完成第一次决定后，结果会出现在这里。</p>
+            <Link to="/">开始一次决定</Link>
+          </section>
+        )}
+        <button className="mobile-danger-action" type="button" disabled={!history.length} onClick={clearAll}>
+          <Trash2 size={16} />清空全部记录
+        </button>
+      </main>
+    )
   }
 
   return (

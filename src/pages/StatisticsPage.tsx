@@ -7,6 +7,7 @@ import { evaluateAchievements } from '../achievements/achievements'
 import { consumeNewlyUnlocked } from '../achievements/unlockState'
 import { calculateStatistics } from '../analytics/statistics'
 import { readHistory } from '../storage/history'
+import { usePlatform } from '../platform/PlatformContext'
 import type { DecisionMode } from '../types/decision'
 
 const MODE_LABELS: Record<DecisionMode, string> = {
@@ -21,12 +22,76 @@ interface StatisticsPageProps {
 }
 
 export function StatisticsPage({ now = new Date() }: StatisticsPageProps): React.JSX.Element {
+  const platform = usePlatform()
   const history = useMemo(() => readHistory(), [])
   const summary = useMemo(() => calculateStatistics(history, now), [history, now])
   const achievements = useMemo(() => evaluateAchievements(history), [history])
   const [newlyUnlocked] = useState(() => consumeNewlyUnlocked(achievements))
   const reducedMotion = useReducedMotion()
   const trendMaximum = Math.max(1, ...summary.trend.map((entry) => entry.count))
+
+  if (platform === 'app') {
+    return (
+      <main className="mobile-statistics">
+        <header className="mobile-destination-heading">
+          <span>LOCAL INSIGHTS</span>
+          <h1>统计</h1>
+          <p>只分析这台设备中真实保存的决定。</p>
+        </header>
+        <section className="mobile-statistics__kpis" aria-label="核心统计">
+          <article><span>累计决策</span><strong>{summary.totalCount}</strong><small>次</small></article>
+          <article><span>本月决策</span><strong>{summary.monthCount}</strong><small>次</small></article>
+          <article><span>反悔次数</span><strong>{summary.regretCount}</strong><small>次</small></article>
+          <article><span>决策服从率</span><strong>{summary.obedienceRate?.toFixed(1)}%</strong><small>未反悔</small></article>
+        </section>
+        {history.length === 0 ? (
+          <section className="mobile-empty-card">
+            <TrendingUp size={25} aria-hidden="true" />
+            <h2>还没有足够的决策数据</h2>
+            <p>完成第一次决定后，这里才会开始认真统计。</p>
+            <Link to="/">开始一次决定</Link>
+          </section>
+        ) : (
+          <>
+            <section className="mobile-statistics__panel" aria-labelledby="mobile-trend-title">
+              <h2 id="mobile-trend-title">最近 7 天</h2>
+              <div className="mobile-trend-chart">
+                {summary.trend.map((entry) => (
+                  <div key={entry.dateKey}>
+                    <span role="img" aria-label={`${entry.label}：${entry.count} 次决策`}>
+                      <i style={{ height: `${Math.max(8, (entry.count / trendMaximum) * 100)}%` }} />
+                    </span>
+                    <strong>{entry.count}</strong><small>{entry.label}</small>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="mobile-statistics__panel">
+              <h2>模式分布</h2>
+              {summary.distribution.map((entry) => (
+                <div className="mobile-distribution-row" key={entry.mode}>
+                  <span>{MODE_LABELS[entry.mode]} · {entry.count} 次</span>
+                  <strong>{entry.percentage.toFixed(1)}%</strong>
+                </div>
+              ))}
+            </section>
+          </>
+        )}
+        <section className="mobile-statistics__panel">
+          <h2>成就档案</h2>
+          <div className="mobile-achievements">
+            {achievements.map((item) => (
+              <article className={item.unlocked ? 'is-unlocked' : ''} key={item.id}>
+                <Award size={18} aria-hidden="true" />
+                <div><strong>{item.title}</strong><p>{item.description}</p></div>
+                <small>{item.unlocked ? '已解锁' : `${item.progress} / ${item.target}`}</small>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   return (
     <main className="statistics-page">
