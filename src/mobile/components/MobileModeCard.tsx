@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react'
+import { Check, type LucideIcon } from 'lucide-react'
 
 import type { DecisionMode } from '../../types/decision'
 
@@ -31,14 +31,19 @@ export function MobileModeCard({
       disabled={disabled}
       onClick={() => onSelect(mode)}
     >
-      <span className="mobile-mode-card__icon" aria-hidden="true">
-        <Icon size={22} strokeWidth={1.8} />
+      <span className="mobile-mode-card__body">
+        <span className="mobile-mode-card__icon" aria-hidden="true">
+          <Icon size={22} strokeWidth={1.8} />
+        </span>
+        <span className="mobile-mode-card__copy">
+          <strong>{title}</strong>
+          <span>{description}</span>
+        </span>
       </span>
-      <span className="mobile-mode-card__copy">
-        <strong>{title}</strong>
-        <span>{description}</span>
+      <span className="mobile-mode-card__state">
+        {selected ? <Check size={15} aria-hidden="true" /> : null}
+        <span className="mobile-mode-card__state-label">{selected ? '已选择' : '选择'}</span>
       </span>
-      <span className="mobile-mode-card__state">{selected ? '已选择' : '选择'}</span>
     </button>
   )
 }

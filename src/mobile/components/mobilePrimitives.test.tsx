@@ -29,6 +29,24 @@ describe('mobile primitives', () => {
     expect(onSelect).toHaveBeenCalledWith('random')
   })
 
+  it('keeps the selected state in a dedicated normal-flow footer', () => {
+    const { container } = render(
+      <MobileModeCard
+        mode="mystic"
+        title="塔罗模式"
+        description="抽一张牌，听听象征怎么说。"
+        icon={Dices}
+        tone="mystic"
+        selected
+        onSelect={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /塔罗模式/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('已选择')).toHaveClass('mobile-mode-card__state-label')
+    expect(container.querySelector('.mobile-mode-card__state svg')).toHaveAttribute('aria-hidden', 'true')
+  })
+
   it('keeps option editing within the 2 to 10 item limits', () => {
     const onAdd = vi.fn()
     const onRemove = vi.fn()
