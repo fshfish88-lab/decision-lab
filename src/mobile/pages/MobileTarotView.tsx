@@ -1,9 +1,10 @@
 import { Sparkles } from 'lucide-react'
+import { useState } from 'react'
 
-import { TarotDeck } from '../../components/tarot/TarotDeck'
 import { TarotReveal } from '../../components/tarot/TarotReveal'
 import type { TarotSpread } from '../../tarot/tarotEngine'
 import type { DecisionResult } from '../../types/decision'
+import { MobileTarotSpread, type MobileTarotPhase } from '../components/MobileTarotSpread'
 
 interface MobileTarotViewProps {
   spread: TarotSpread
@@ -20,6 +21,8 @@ export function MobileTarotView({
   onSelect,
   onContinue,
 }: MobileTarotViewProps): React.JSX.Element {
+  const [phase, setPhase] = useState<MobileTarotPhase>(selectedPosition === null ? 'idle' : 'revealed')
+
   return (
     <section className="mobile-tarot">
       <header className="mobile-tarot__heading">
@@ -30,13 +33,20 @@ export function MobileTarotView({
       </header>
 
       <div className="mobile-tarot__stage">
-        <TarotDeck spread={spread} selectedPosition={selectedPosition} onSelect={onSelect} />
+        <MobileTarotSpread
+          spread={spread}
+          selectedPosition={selectedPosition}
+          onSelect={onSelect}
+          onPhaseChange={setPhase}
+        />
       </div>
 
-      {revealedResult ? (
+      {revealedResult && phase === 'revealed' ? (
         <TarotReveal result={revealedResult} onContinue={onContinue} />
       ) : (
-        <p className="mobile-tarot__prompt">轻点一张牌，答案会在原地翻开。</p>
+        <p className="mobile-tarot__prompt">
+          {phase === 'focusing' ? '牌面正在回应你的第一感觉…' : '轻点一张牌，答案会在原地翻开。'}
+        </p>
       )}
     </section>
   )

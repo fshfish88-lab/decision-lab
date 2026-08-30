@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -78,5 +78,38 @@ describe('TarotPage', () => {
 
     expect(screen.getByRole('heading', { name: '还没有可用的塔罗牌阵' })).toBeInTheDocument()
     expect(screen.queryAllByRole('button', { name: /选择第 \d 张塔罗牌/ })).toHaveLength(0)
+  })
+
+  it('accepts only the first tarot selection when two cards are activated in one tick', () => {
+    const dispatch = vi.fn()
+    render(
+      <MemoryRouter initialEntries={['/tarot']}>
+        <DecisionContext.Provider
+          value={{
+            state: {
+              ...initialDecisionState,
+              question: '今晚吃什么？',
+              mode: 'mystic',
+              options: [
+                { id: 'hotpot', label: '火锅' },
+                { id: 'sushi', label: '日料' },
+              ],
+            },
+            dispatch,
+          }}
+        >
+          <TarotPage />
+        </DecisionContext.Provider>
+      </MemoryRouter>,
+    )
+
+    const cards = screen.getAllByRole('button', { name: /选择第 \d 张塔罗牌/ })
+    act(() => {
+      cards[0].click()
+      cards[1].click()
+    })
+
+    expect(dispatch.mock.calls.filter(([action]) => action.type === 'set-result')).toHaveLength(1)
+    expect(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) ?? '{}').items).toHaveLength(1)
   })
 })

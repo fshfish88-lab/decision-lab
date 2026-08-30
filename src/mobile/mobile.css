@@ -670,18 +670,64 @@
 }
 
 .mobile-tarot__stage {
-  margin: 0 -16px;
-  padding: 8px 16px 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  min-height: 318px;
+  margin: 0 -8px;
+  padding: 8px 8px 12px;
+  overflow-x: clip;
 }
 
-.mobile-tarot__stage::-webkit-scrollbar { display: none; }
-
-.mobile-tarot__stage .tarot-deck {
-  width: max-content;
-  min-width: 640px;
+.mobile-tarot-spread {
+  position: relative;
+  display: grid;
+  min-height: 298px;
+  align-content: center;
+  gap: 9px;
   margin: 0 auto;
+  overflow-x: clip;
+  perspective: 900px;
+}
+
+.mobile-tarot-spread__row {
+  display: grid;
+  justify-content: center;
+  gap: clamp(5px, 1.8vw, 9px);
+}
+
+.mobile-tarot-spread__row--top {
+  grid-template-columns: repeat(4, clamp(62px, 19vw, 82px));
+}
+
+.mobile-tarot-spread__row--bottom {
+  grid-template-columns: repeat(3, clamp(62px, 19vw, 82px));
+}
+
+.mobile-tarot-spread__slot {
+  width: clamp(62px, 19vw, 82px);
+  min-width: 0;
+  transform: translateY(var(--mobile-tarot-offset-y)) rotate(var(--mobile-tarot-rotation));
+  transform-origin: 50% 115%;
+  transition: opacity 180ms ease, filter 180ms ease, transform 220ms var(--ease-out);
+}
+
+.mobile-tarot-spread__slot .tarot-card {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.mobile-tarot-spread[data-phase='focusing'] .mobile-tarot-spread__slot.is-focused,
+.mobile-tarot-spread[data-phase='revealed'] .mobile-tarot-spread__slot.is-focused {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: clamp(108px, 31vw, 132px);
+  transform: translate(-50%, -50%) rotate(0) scale(1.03);
+}
+
+.mobile-tarot-spread__slot.is-dimmed {
+  opacity: 0.1;
+  filter: blur(0.5px);
+  pointer-events: none;
 }
 
 .mobile-tarot__prompt {
@@ -695,6 +741,22 @@
   grid-template-columns: 1fr;
   padding: 16px;
   border-radius: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-tarot-spread__slot,
+  .mobile-tarot-spread[data-phase] .mobile-tarot-spread__slot.is-focused {
+    transition-duration: 1ms;
+  }
+
+  .mobile-tarot-spread[data-phase='focusing'] .mobile-tarot-spread__slot.is-focused,
+  .mobile-tarot-spread[data-phase='revealed'] .mobile-tarot-spread__slot.is-focused {
+    transform: translate(-50%, -50%);
+  }
+
+  .mobile-tarot-spread .tarot-card__inner {
+    transition-duration: 1ms;
+  }
 }
 
 .mobile-analysis {

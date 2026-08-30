@@ -22,6 +22,7 @@ export function TarotPage(): React.JSX.Element {
   )
   const ready = state.mode === 'mystic' && validOptions.length >= 2
   const spreadRef = useRef<TarotSpread | null>(null)
+  const selectionLockRef = useRef(false)
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null)
   const [revealedResult, setRevealedResult] = useState<DecisionResult | null>(null)
 
@@ -31,7 +32,8 @@ export function TarotPage(): React.JSX.Element {
 
   function reveal(position: number): void {
     const spread = spreadRef.current
-    if (!spread || selectedPosition !== null) return
+    if (!spread || selectionLockRef.current || selectedPosition !== null) return
+    selectionLockRef.current = true
 
     const selection = selectTarotCard(spread, position)
     const result = createTarotResult({
