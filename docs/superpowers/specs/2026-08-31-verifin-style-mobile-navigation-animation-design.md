@@ -14,6 +14,23 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 
 目标是在保留 Decision Lab 浅色实验室视觉、HashRouter、Android 返回逻辑和现有页面结构的前提下，让一级导航更接近原生 App。
 
+### 1.1 参考实现映射
+
+参考对话中，Verifin 的完整交互由 `PageView` 和一个独立的底部指示器共同组成：页面通过 `animateToPage` 以 260ms 的 `easeOutCubic` 动画切换；底部只有一个真实指示器，其位置由连续索引乘以槽位宽度得到。Verifin 还支持页面滑动、拖动指示器、2px 拖动阈值、280ms 追向按下位置和 240ms 松手吸附。
+
+方案 B 只迁移以下状态与手感：
+
+| Verifin 概念 | Decision Lab 对应实现 |
+|---|---|
+| `PageController` 当前页索引 | React Router 当前一级路径索引 |
+| `animateToPage` | Framer Motion 路由页面进入/退出 |
+| `PageView` 横向页面运动 | 路由提交后一次完整横向场景转场 |
+| 连续 `_displayIndex` | 单一胶囊的 `translateX(activeIndex * 100%)` |
+| 按下缩放到 94% | 导航目标 `whileTap` / 按压状态 |
+| 手指滑页与拖动胶囊 | 本次明确不迁移 |
+
+因此，本方案追求相同的视觉因果关系，而不是一比一复制 Flutter 的组件结构。
+
 ## 2. 范围
 
 ### 2.1 本次包含
@@ -78,6 +95,38 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 - 指针按下时目标项缩放到 `0.94`，释放后恢复到 `1`；
 - 键盘激活不依赖指针事件，Enter 和 Space 仍走标准链接行为。
 
+### 3.4 联动时序
+
+一次“决策 → 统计”的点击按以下顺序发生：
+
+```text
+按下统计
+  ↓ 0ms
+统计项缩放到 94%
+  ↓
+记录 fromIndex=0、toIndex=2，并提交 /statistics
+  ↓ React Router 提交新路径
+页面向左切换 + 胶囊从第 1 槽滑到第 3 槽（同一渲染帧开始）
+  ↓ 160ms
+按压缩放恢复
+  ↓ 240ms
+胶囊到位
+  ↓ 260ms
+页面转场结束，清理退出场景
+```
+
+“关于 → 记录”使用相反方向。跨越两个或三个导航项时，动画时长不叠加，也不逐页停顿。
+
+### 3.5 页面运动幅度与层级
+
+- 一级页面进入初始位置为目标方向的 `100%` 内容宽度；
+- 一级页面退出目标位置为相反方向的 `100%` 内容宽度；
+- 新旧页面在 260ms 内短暂并行，内容区域使用 `overflow-x: clip`；
+- 新页面保留在正常文档流中，退出页面仅在转场期间脱离文档流，避免页面高度相加；
+- 页面透明度只从 `0.98` 过渡到 `1`，不使用明显淡入淡出；
+- 底部导航始终位于页面场景上层，不跟随内容平移；
+- 转场期间不锁定滚动和点击，不人为阻塞主线程。
+
 ## 4. 动画参数
 
 ### 4.1 标准动态效果
@@ -89,6 +138,14 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 | 导航按压 | 160ms | `cubic-bezier(0.215, 0.61, 0.355, 1)` | `scale: 1 → 0.94 → 1` |
 
 一级页面使用横向位移作为主要提示，透明度只用于弱化重叠，不制造明显闪烁。内容区域必须裁切横向溢出，转场结束后不保留多余变换。
+
+三个动画共享同一个缓动常量：
+
+```text
+[0.215, 0.61, 0.355, 1]
+```
+
+胶囊比页面提前 20ms 到位，使导航先确认目标、页面随后完成落位。两者在同一帧开始，不添加人为延迟。
 
 ### 4.2 减少动态效果
 
@@ -112,11 +169,19 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 
 纯函数不读取 DOM，也不直接调用路由 API，便于覆盖相邻跳转、跨两项跳转和非一级路由。
 
-### 5.2 一级转场组件
+### 5.2 统一转场编排
 
-新增 `MobilePrimaryRouteTransition`，只负责一级页面转场。组件接收当前路径、导航方向和页面内容，使用 Framer Motion 执行进入与退出动画。
+保留 `MobileRouteTransition` 作为唯一的 `AnimatePresence` 所有者，并在其中根据“上一条路径 + 当前路径”选择动画变体：
 
-现有 `MobileRouteTransition` 继续负责二级流程；若为减少重复而共享动画常量，共享内容只包括时长和缓动，不混合两种路由语义。
+- 一级 → 一级：使用 100% 横向场景转场；
+- 一级 → 二级：从右侧 10px 进入、向左 10px 退出，时长 220ms；
+- 二级 → 二级：前进沿用右入左出 10px，返回沿用左入右出 10px，时长 220ms；
+- 二级 → 一级：从左侧 10px 进入、向右 10px 退出，时长 220ms；
+- 减少动态效果：所有情况取消横向位移。
+
+不能在 `MobileAppShell` 中按路由类型切换两个互不相关的 `AnimatePresence`，否则一级页进入二级流程时，旧页面会在退出动画执行前直接卸载。
+
+路由变体计算放在独立纯函数中；组件只负责读取路径、保存上一次已提交路径并把变体交给 Framer Motion。
 
 ### 5.3 浮动主导航组件
 
@@ -130,6 +195,26 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 
 `MobileAppShell` 仍负责一级/二级布局切换、流程页标题、退出提示和 Android 返回监听。
 
+### 5.4 明确文件边界
+
+计划中的代码边界为：
+
+```text
+src/mobile/
+├─ MobileAppShell.tsx
+├─ MobileAppShell.test.tsx
+├─ mobile.css
+└─ navigation/
+   ├─ MobileFloatingNavigation.tsx          # 新增：胶囊与四个主导航目标
+   ├─ MobileFloatingNavigation.test.tsx     # 新增：导航行为与无障碍测试
+   ├─ MobileRouteTransition.tsx             # 修改：统一编排一级/二级转场
+   ├─ MobileRouteTransition.test.tsx        # 修改：两类转场回归测试
+   ├─ mobilePrimaryNavigationMotion.ts      # 新增：索引、方向、动画参数纯函数
+   └─ mobilePrimaryNavigationMotion.test.ts # 新增：纯函数测试
+```
+
+本次不修改 `MobileNavigationProvider`、Android 原生代码或业务页面。一级方向由 `MobileRouteTransition` 保存的上一条已提交路径与当前路径计算。
+
 ## 6. 状态与异常处理
 
 - 当前路径不是一级页面时不计算胶囊索引，并按现有逻辑隐藏主导航；
@@ -138,6 +223,36 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 - 跨两项或三项跳转仍只执行一次 260ms 转场；
 - 页面卸载、系统返回或路由替换时不得留下计时器、指针捕获或全局事件监听；
 - 本方案不使用拖动手势，因此不引入手势阈值、吸附失败或指针取消状态。
+
+### 6.1 一级导航状态机
+
+```text
+idle
+  ├─ pointer/key press → pressed
+  └─ route changed externally → navigating
+
+pressed
+  ├─ same tab → idle
+  ├─ valid primary destination → navigating
+  └─ cancel/blur → idle
+
+navigating
+  ├─ location committed → settling
+  └─ newer primary destination → replace target, remain navigating
+
+settling
+  └─ page 260ms complete → idle
+```
+
+这里的状态只描述用户可见动画，不额外复制一份路由状态。当前目标始终来自 `location.pathname`；快速点击新的主导航时，新提交路径替换动画目标，不排队播放中间页面。
+
+### 6.2 焦点、滚动与返回
+
+- 点击底栏后，焦点仍保留在被激活的导航链接上，不强制移动到页面标题；
+- 本次不新增自动滚动，也不主动重置页面滚动位置；
+- Android 系统返回继续先处理覆盖层，再处理历史栈，最后执行首页二次返回退出；
+- 返回导致一级页面变化时，页面方向根据实际起止索引计算，不简单等同于 `POP` 或 `back`；
+- 刷新或直接打开某个一级 URL 时不播放首次进入动画，胶囊直接位于正确槽位。
 
 ## 7. 无障碍与响应式
 
@@ -169,6 +284,18 @@ Decision Lab 当前移动端使用 React Router 切换页面，所有路由共�
 - 减少动态效果；
 - 页面无横向溢出；
 - 控制台无错误和警告。
+
+自动化测试至少覆盖以下断言：
+
+- `/`、`/history`、`/statistics`、`/about` 分别映射到索引 0～3；
+- `/` → `/statistics` 返回向前方向，`/about` → `/history` 返回向后方向；
+- 非一级路径不返回一级方向；
+- 底栏只渲染一个装饰性胶囊；
+- 当前链接仍有 `aria-current="page"`；
+- 点击当前项不调用导航；
+- 一级页面使用 260ms 和 100% 位移，二级流程仍使用原有轻移；
+- 减少动态效果时页面位移、胶囊过渡和按压缩放均被关闭；
+- 首次直接渲染不执行页面进入动画。
 
 ## 9. 验证与交付
 
