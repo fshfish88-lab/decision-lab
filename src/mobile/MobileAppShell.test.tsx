@@ -64,4 +64,14 @@ describe('MobileAppShell', () => {
 
     expect(screen.getAllByRole('main')).toHaveLength(1)
   })
+
+  it('renders one indicator on primary routes and none on flow routes', () => {
+    const primary = renderShell('/statistics')
+    expect(screen.getAllByTestId('mobile-navigation-indicator')).toHaveLength(1)
+    expect(screen.getByRole('navigation', { name: 'App 主导航' })).toHaveClass('mobile-app__navigation')
+    primary.unmount()
+
+    renderShell('/science')
+    expect(screen.queryByTestId('mobile-navigation-indicator')).not.toBeInTheDocument()
+  })
 })

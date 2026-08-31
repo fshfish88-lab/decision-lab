@@ -1,12 +1,9 @@
 import { ArrowLeft } from 'lucide-react'
 import type { PropsWithChildren } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
-import {
-  mobileFlowRoutes,
-  mobileFlowTitles,
-  mobilePrimaryNavigation,
-} from '../navigation/navigationItems'
+import { mobileFlowRoutes, mobileFlowTitles } from '../navigation/navigationItems'
+import { MobileFloatingNavigation } from './navigation/MobileFloatingNavigation'
 import { useMobileNavigation } from './navigation/MobileNavigationContext'
 import { MobileNavigationProvider } from './navigation/MobileNavigationProvider'
 import { MobileRouteTransition } from './navigation/MobileRouteTransition'
@@ -22,7 +19,7 @@ export function MobileAppShell({ children }: PropsWithChildren): React.JSX.Eleme
 
 function MobileAppFrame({ children }: PropsWithChildren): React.JSX.Element {
   const { pathname } = useLocation()
-  const { exitPending, navigateBack, navigateForward } = useMobileNavigation()
+  const { exitPending, navigateBack } = useMobileNavigation()
   const isFlowRoute = mobileFlowRoutes.has(pathname)
   useNativeBackNavigation()
 
@@ -42,26 +39,7 @@ function MobileAppFrame({ children }: PropsWithChildren): React.JSX.Element {
         <MobileRouteTransition>{children}</MobileRouteTransition>
       </main>
 
-      {!isFlowRoute ? (
-        <nav className="mobile-app__navigation" aria-label="App 主导航">
-          {mobilePrimaryNavigation.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              aria-label={label}
-              onClick={(event) => {
-                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-                event.preventDefault()
-                navigateForward(to)
-              }}
-            >
-              <Icon size={21} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
-      ) : null}
+      {!isFlowRoute ? <MobileFloatingNavigation /> : null}
 
       {exitPending ? (
         <div className="mobile-app__exit-toast" role="status">再返回一次退出 Decision Lab</div>

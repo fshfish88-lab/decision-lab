@@ -27,10 +27,12 @@
 .mobile-app__content {
   width: 100%;
   min-height: 100dvh;
+  overflow-x: clip;
   padding: max(20px, env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom));
 }
 
 .mobile-route-transition {
+  width: 100%;
   min-height: 100%;
 }
 
@@ -87,24 +89,46 @@
 .mobile-app__navigation {
   position: fixed;
   z-index: 50;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  right: 12px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: 12px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 8px 8px max(8px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--mobile-border);
+  padding: 4px;
+  border: 1px solid var(--mobile-border);
+  border-radius: 20px;
   background: rgb(255 255 255 / 96%);
-  box-shadow: 0 -10px 30px rgb(17 21 39 / 6%);
+  box-shadow: 0 12px 32px rgb(17 21 39 / 12%);
   backdrop-filter: blur(18px);
+  isolation: isolate;
+}
+
+.mobile-app__navigation-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 4);
+  border-radius: 16px;
+  background: #f0f1f6;
+  pointer-events: none;
+}
+
+.mobile-app__navigation-target {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
 }
 
 .mobile-app__navigation a {
   display: grid;
+  width: 100%;
+  min-height: 52px;
   place-items: center;
   align-content: center;
   gap: 3px;
-  border-radius: 12px;
+  border-radius: 16px;
   color: var(--mobile-muted);
   font-size: 11px;
   font-weight: 700;
@@ -112,7 +136,12 @@
 
 .mobile-app__navigation a[aria-current='page'] {
   color: #111527;
-  background: #f0f1f6;
+  background: transparent;
+}
+
+.mobile-app__navigation a:focus-visible {
+  outline: 2px solid #7268f2;
+  outline-offset: -2px;
 }
 
 .mobile-page-header {
