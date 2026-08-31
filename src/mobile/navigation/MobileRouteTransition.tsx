@@ -1,26 +1,51 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import type { PropsWithChildren } from 'react'
+import { useLayoutEffect, useRef, type PropsWithChildren } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { useMobileNavigation } from './MobileNavigationContext'
+import { getMobileRouteMotion, type MobileRouteMotion } from './mobilePrimaryNavigationMotion'
+
+const pageVariants = {
+  enter: (routeMotion: MobileRouteMotion) => ({
+    opacity: routeMotion.enterOpacity,
+    x: routeMotion.enterX,
+  }),
+  center: { opacity: 1, x: 0 },
+  exit: (routeMotion: MobileRouteMotion) => ({
+    opacity: routeMotion.kind === 'primary' ? 0.98 : 0,
+    x: routeMotion.exitX,
+  }),
+}
 
 export function MobileRouteTransition({ children }: PropsWithChildren): React.JSX.Element {
   const location = useLocation()
   const { direction } = useMobileNavigation()
   const reducedMotion = Boolean(useReducedMotion())
-  const initialX = reducedMotion ? 0 : direction === 'back' ? -10 : 10
-  const exitX = reducedMotion ? 0 : direction === 'back' ? 10 : -10
+  const previousPathnameRef = useRef(location.pathname)
+  const routeMotion = getMobileRouteMotion(
+    previousPathnameRef.current,
+    location.pathname,
+    direction,
+    reducedMotion,
+  )
+
+  useLayoutEffect(() => {
+    previousPathnameRef.current = location.pathname
+  }, [location.pathname])
 
   return (
-    <AnimatePresence mode="sync" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false} custom={routeMotion}>
       <motion.div
         key={location.key}
         className="mobile-route-transition"
+        data-motion-kind={routeMotion.kind}
         data-route-key={location.key}
-        initial={{ opacity: 0, x: initialX }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: exitX }}
-        transition={{ duration: reducedMotion ? 0.08 : 0.22, ease: 'easeOut' }}
+        custom={routeMotion}
+        variants={pageVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        transition={{ duration: routeMotion.duration, ease: routeMotion.ease }}
       >
         {children}
       </motion.div>

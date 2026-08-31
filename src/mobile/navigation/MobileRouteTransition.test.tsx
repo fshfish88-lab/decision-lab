@@ -1,38 +1,65 @@
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import type { HTMLAttributes, ReactNode } from 'react'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MobileNavigationContext, type MobileNavigationValue } from './MobileNavigationContext'
+import type { MobileRouteMotion } from './mobilePrimaryNavigationMotion'
 import { MobileRouteTransition } from './MobileRouteTransition'
 
 const motionSettings = vi.hoisted(() => ({ reduced: false }))
 
 vi.mock('framer-motion', () => ({
-  AnimatePresence: ({ children, mode }: { children: React.ReactNode; mode: string }) => (
-    <div data-testid="presence" data-mode={mode}>{children}</div>
+  AnimatePresence: ({ children, mode, initial }: {
+    children: ReactNode
+    mode: string
+    initial: boolean
+    custom?: MobileRouteMotion
+  }) => (
+    <div data-testid="presence" data-mode={mode} data-initial={String(initial)}>{children}</div>
   ),
   motion: {
     div: ({
       children,
+      custom,
+      variants,
       initial,
       exit,
       transition,
       ...props
-    }: React.HTMLAttributes<HTMLDivElement> & {
-      initial: { x: number }
-      exit: { x: number }
+    }: HTMLAttributes<HTMLDivElement> & {
+      children?: ReactNode
+      custom?: MobileRouteMotion
+      variants?: {
+        enter: (motion: MobileRouteMotion) => { x: number | string }
+        exit: (motion: MobileRouteMotion) => { x: number | string }
+      }
+      initial: unknown
+      exit: unknown
       transition: { duration: number }
-    }) => (
-      <div
-        {...props}
-        data-testid="motion-page"
-        data-initial-x={initial.x}
-        data-exit-x={exit.x}
-        data-duration={transition.duration}
-      >
-        {children}
-      </div>
-    ),
+    }) => {
+      const initialX = custom && variants && initial === 'enter'
+        ? variants.enter(custom).x
+        : typeof initial === 'object' && initial && 'x' in initial
+          ? String(initial.x)
+          : undefined
+      const exitX = custom && variants && exit === 'exit'
+        ? variants.exit(custom).x
+        : typeof exit === 'object' && exit && 'x' in exit
+          ? String(exit.x)
+          : undefined
+      return (
+        <div
+          {...props}
+          data-testid="motion-page"
+          data-initial-x={initialX}
+          data-exit-x={exitX}
+          data-duration={transition.duration}
+        >
+          {children}
+        </div>
+      )
+    },
   },
   useReducedMotion: () => motionSettings.reduced,
 }))
@@ -52,37 +79,69 @@ function navigationValue(direction: 'forward' | 'back'): MobileNavigationValue {
   }
 }
 
-function renderTransition(direction: 'forward' | 'back') {
+function Harness({ target }: { target: string }): React.JSX.Element {
+  const location = useLocation()
+  const navigate = useNavigate()
+  return (
+    <>
+      <button type="button" onClick={() => navigate(target)}>切换</button>
+      <MobileRouteTransition><p>{location.pathname}</p></MobileRouteTransition>
+    </>
+  )
+}
+
+function renderTransition(from: string, to: string, direction: 'forward' | 'back' = 'forward') {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[from]}>
       <MobileNavigationContext.Provider value={navigationValue(direction)}>
-        <MobileRouteTransition><p>页面内容</p></MobileRouteTransition>
+        <Harness target={to} />
       </MobileNavigationContext.Provider>
     </MemoryRouter>,
   )
 }
 
+afterEach(() => {
+  motionSettings.reduced = false
+})
+
 describe('MobileRouteTransition', () => {
-  it('uses sync presence and opposite subtle offsets for forward and back', () => {
-    motionSettings.reduced = false
-    const forward = renderTransition('forward')
-    expect(screen.getByTestId('presence')).toHaveAttribute('data-mode', 'sync')
+  it('uses a forward full-width scene for later primary destinations', () => {
+    renderTransition('/', '/statistics')
+    expect(screen.getByTestId('presence')).toHaveAttribute('data-initial', 'false')
+    fireEvent.click(screen.getByRole('button', { name: '切换' }))
+    expect(screen.getByTestId('presence')).toHaveAttribute('data-mode', 'popLayout')
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-initial-x', '100%')
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-exit-x', '-100%')
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-duration', '0.26')
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-motion-kind', 'primary')
+  })
+
+  it('uses a backward full-width scene for earlier primary destinations', () => {
+    renderTransition('/about', '/history')
+    fireEvent.click(screen.getByRole('button', { name: '切换' }))
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-initial-x', '-100%')
+    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-exit-x', '100%')
+  })
+
+  it('keeps the subtle forward and back motion for flow boundaries', () => {
+    const forward = renderTransition('/', '/science')
+    fireEvent.click(screen.getByRole('button', { name: '切换' }))
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-initial-x', '10')
-    expect(screen.getByTestId('motion-page')).toHaveAttribute('data-exit-x', '-10')
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-duration', '0.22')
     forward.unmount()
 
-    renderTransition('back')
+    renderTransition('/science', '/', 'back')
+    fireEvent.click(screen.getByRole('button', { name: '切换' }))
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-initial-x', '-10')
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-exit-x', '10')
   })
 
   it('removes horizontal motion when reduced motion is requested', () => {
     motionSettings.reduced = true
-    renderTransition('forward')
+    renderTransition('/', '/statistics')
+    fireEvent.click(screen.getByRole('button', { name: '切换' }))
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-initial-x', '0')
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-exit-x', '0')
     expect(screen.getByTestId('motion-page')).toHaveAttribute('data-duration', '0.08')
-    motionSettings.reduced = false
   })
 })
