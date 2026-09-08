@@ -21,8 +21,8 @@ export class AiApiError extends Error {
 }
 
 export interface AiApiClient {
-  deepAnalyze(content: string): Promise<AiDeepAnalysisData>
-  decide(content: string): Promise<AiDecisionData>
+  deepAnalyze(content: string, signal?: AbortSignal): Promise<AiDeepAnalysisData>
+  decide(content: string, signal?: AbortSignal): Promise<AiDecisionData>
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -143,8 +143,12 @@ async function request<T>(
   content: string,
   fetcher: typeof fetch,
   normalize: (value: unknown) => T | null,
+  signal?: AbortSignal,
 ): Promise<T> {
   const controller = new AbortController()
+  const cancel = (): void => controller.abort()
+  signal?.addEventListener('abort', cancel, { once: true })
+  if (signal?.aborted) controller.abort()
   const timeout = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS)
 
   try {
@@ -171,6 +175,7 @@ async function request<T>(
     }
     return normalized
   } catch (error) {
+    if (signal?.aborted) throw new DOMException('请求已取消', 'AbortError')
     if (error instanceof AiApiError) throw error
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new AiApiError('timeout', 'AI 请求超时')
@@ -178,22 +183,24 @@ async function request<T>(
     throw new AiApiError('network', '无法连接 AI 服务')
   } finally {
     window.clearTimeout(timeout)
+    signal?.removeEventListener('abort', cancel)
   }
 }
 
 export function createAiApiClient(fetcher: typeof fetch = fetch): AiApiClient {
   return {
-    deepAnalyze(content) {
+    deepAnalyze(content, signal) {
       return request(
         AI_ENDPOINTS.deepAnalysis,
         'deep-analysis',
         content,
         fetcher,
         normalizeDeepAnalysis,
+        signal,
       )
     },
-    decide(content) {
-      return request(AI_ENDPOINTS.decision, 'decision', content, fetcher, normalizeDecision)
+    decide(content, signal) {
+      return request(AI_ENDPOINTS.decision, 'decision', content, fetcher, normalizeDecision, signal)
     },
   }
 }

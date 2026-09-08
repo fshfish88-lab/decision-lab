@@ -12,6 +12,7 @@ export interface DecisionState {
   mode: DecisionMode | null
   criteria: Criterion[]
   scores: ScientificScoreMap
+  aiContext: string
   result: DecisionResult | null
 }
 
@@ -22,10 +23,12 @@ export type DecisionAction =
   | { type: 'remove-option'; id: string }
   | { type: 'set-mode'; mode: DecisionMode }
   | { type: 'set-criteria'; criteria: Criterion[] }
+  | { type: 'add-criterion' }
   | { type: 'set-score'; optionId: string; criterionId: string; score: number }
   | { type: 'set-result'; result: DecisionResult }
   | { type: 'clear-result' }
   | { type: 'prepare-mode-selection' }
+  | { type: 'restore-result-draft'; result: DecisionResult; selectMode?: boolean }
   | {
       type: 'restore-draft'
       draft: Pick<DecisionState, 'question' | 'options' | 'mode'>
@@ -48,6 +51,7 @@ export const initialDecisionState: DecisionState = {
   mode: null,
   criteria: DEFAULT_CRITERIA,
   scores: {},
+  aiContext: '',
   result: null,
 }
 
@@ -86,7 +90,20 @@ export function decisionReducer(
     case 'set-mode':
       return { ...state, mode: action.mode }
     case 'set-criteria':
-      return { ...state, criteria: action.criteria }
+      return {
+        ...state,
+        criteria: action.criteria,
+        scores: Object.fromEntries(Object.entries(state.scores).map(([optionId, scores]) => [
+          optionId,
+          Object.fromEntries(Object.entries(scores).filter(([id]) => action.criteria.some((criterion) => criterion.id === id))),
+        ])),
+      }
+    case 'add-criterion': {
+      if (state.criteria.length >= 6) return state
+      let index = 1
+      while (state.criteria.some((criterion) => criterion.id === `criterion-${index}`)) index += 1
+      return { ...state, criteria: [...state.criteria, { id: `criterion-${index}`, name: '新指标', weight: 0 }] }
+    }
     case 'set-score':
       return {
         ...state,
@@ -104,6 +121,19 @@ export function decisionReducer(
       return { ...state, result: null }
     case 'prepare-mode-selection':
       return { ...state, mode: null, result: null }
+    case 'restore-result-draft': {
+      const { result } = action
+      const scientific = result.details?.type === 'scientific' ? result.details : undefined
+      return {
+        ...initialDecisionState,
+        question: result.question,
+        options: result.options.map((option) => ({ ...option })),
+        mode: action.selectMode ? null : result.mode,
+        criteria: (scientific?.criteria ?? DEFAULT_CRITERIA).map((criterion) => ({ ...criterion })),
+        scores: Object.fromEntries(Object.entries(scientific?.scores ?? {}).map(([id, scores]) => [id, { ...scores }])),
+        aiContext: result.details?.type === 'ai' ? result.details.context : '',
+      }
+    }
     case 'restore-draft':
       return {
         ...initialDecisionState,

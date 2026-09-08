@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AiApiError, type AiApiClient } from '../ai/aiApiClient'
 import { useDecision } from '../state/DecisionContext'
@@ -48,6 +48,44 @@ async function enterAiMode(user: ReturnType<typeof userEvent.setup>): Promise<vo
 }
 
 describe('AiPage', () => {
+  afterEach(() => vi.restoreAllMocks())
+  it('cancels a departed request and ignores even a client that resolves after cancellation', async () => {
+    localStorage.clear()
+    const user = userEvent.setup()
+    let resolveDecision!: (value: AiDecisionData) => void
+    const decide = vi.fn<(content: string, signal?: AbortSignal) => Promise<AiDecisionData>>(() => new Promise<AiDecisionData>((resolve) => {
+      resolveDecision = resolve
+    }))
+    renderFlow({ decide, deepAnalyze: vi.fn() })
+    await enterAiMode(user)
+    await user.type(screen.getByLabelText('补充你的真实情况'), '测试请求')
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+    const signal = decide.mock.calls[0][1]
+    await user.click(screen.getByRole('link', { name: '返回模式选择' }))
+    await act(async () => resolveDecision(advice))
+    expect(screen.getByLabelText('选项 1')).toHaveValue('火锅')
+    expect(readHistory()).toHaveLength(0)
+    expect(signal?.aborted).toBe(true)
+  })
+
+  it('shows offline status, prevents submitting, and enables retry after reconnecting', async () => {
+    const user = userEvent.setup()
+    const decide = vi.fn()
+    renderFlow({ decide, deepAnalyze: vi.fn() })
+    await enterAiMode(user)
+    await user.type(screen.getByLabelText('补充你的真实情况'), '保留这段背景')
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    fireEvent(window, new Event('offline'))
+    expect(screen.getByRole('heading', { name: '当前离线' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '让 AI 替我决定' })).toBeDisabled()
+    expect(decide).not.toHaveBeenCalled()
+    online.mockReturnValue(true)
+    fireEvent(window, new Event('online'))
+    expect(screen.getByRole('button', { name: '让 AI 替我决定' })).toBeEnabled()
+    expect(screen.getByLabelText('补充你的真实情况')).toHaveValue('保留这段背景')
+    expect(screen.queryByText('AI 顾问在线')).not.toBeInTheDocument()
+  })
+
   it('requests direct advice, prevents duplicate submission, and saves the result', async () => {
     localStorage.clear()
     const user = userEvent.setup()

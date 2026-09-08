@@ -29,15 +29,7 @@ export function MobileSciencePage(): React.JSX.Element {
   }
 
   function addCriterion(): void {
-    if (state.criteria.length >= 6) return
-    dispatch({
-      type: 'set-criteria',
-      criteria: [...state.criteria, {
-        id: `criterion-${state.criteria.length + 1}`,
-        name: '新指标',
-        weight: 0,
-      }],
-    })
+    dispatch({ type: 'add-criterion' })
   }
 
   function removeCriterion(id: string): void {

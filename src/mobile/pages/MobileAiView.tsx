@@ -34,7 +34,7 @@ export function MobileAiView({
       <div className={`mobile-ai__network${online ? ' is-online' : ' is-offline'}`} role="status">
         {online ? <Wifi size={18} aria-hidden="true" /> : <WifiOff size={18} aria-hidden="true" />}
         <div>
-          <strong>{online ? '服务在线' : '当前离线'}</strong>
+          <strong>{online ? '网络已连接' : '当前离线'}</strong>
           <span>{online ? '可以发送本次决策背景' : 'AI 需要联网，本地决策模式仍可正常使用'}</span>
         </div>
       </div>

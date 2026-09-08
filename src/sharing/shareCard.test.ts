@@ -25,7 +25,7 @@ describe('share card service', () => {
       '今晚吃什么？',
       '系统最终决定：火锅',
       '决策模式：随机模式',
-      '可信度：100.0%',
+      '等概率抽取，每项 50.00%',
       '不要再纠结了。',
       '结果仅供个人决策参考。',
     ].join('\n'))
@@ -34,6 +34,14 @@ describe('share card service', () => {
   it('labels AI confidence as recommendation strength', () => {
     expect(buildShareText({ ...result, mode: 'ai', confidence: 89 })).toContain('推荐强度：89.0%')
     expect(buildShareText({ ...result, mode: 'ai', confidence: 89 })).not.toContain('可信度：')
+  })
+
+  it('shares scientific scores and entertainment labels instead of confidence', () => {
+    const science: DecisionResult = { ...result, mode: 'scientific', confidence: 83,
+      ranking: [{ optionId: 'hotpot', label: '火锅', score: 8.25, rank: 1 }] }
+    expect(buildShareText(science)).toContain('加权得分：8.25 / 10')
+    expect(buildShareText({ ...result, mode: 'mystic' })).toContain('仅供娱乐')
+    expect(buildShareText({ ...result, mode: 'mystic' })).not.toContain('100.0%')
   })
 
   it('renders a 1080 by 1350 PNG blob', async () => {
@@ -56,6 +64,7 @@ describe('share card service', () => {
     expect(canvas.height).toBe(1350)
     expect(blob.type).toBe('image/png')
     expect(context.fillText).toHaveBeenCalledWith('火锅', 540, 720)
+    expect(context.fillText).toHaveBeenCalledWith('随机模式 · 等概率抽取，每项 50.00%', 540, 850)
   })
 
   it('reports unavailable canvas creation instead of hiding the failure', async () => {

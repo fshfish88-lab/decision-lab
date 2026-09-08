@@ -32,6 +32,22 @@ const decisionPayload = {
 describe('createAiApiClient', () => {
   afterEach(() => vi.useRealTimers())
 
+  it('forwards caller cancellation and clears the timeout without reporting a timeout error', async () => {
+    vi.useFakeTimers()
+    const controller = new AbortController()
+    let fetchSignal: AbortSignal | null | undefined
+    const fetcher = vi.fn((_input: URL | RequestInfo, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      fetchSignal = init?.signal
+      fetchSignal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+    }))
+    const pending = createAiApiClient(fetcher).decide('取消的请求', controller.signal)
+    const rejection = expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    controller.abort()
+    await rejection
+    expect(fetchSignal?.aborted).toBe(true)
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
   it('posts content to the deep-analysis endpoint', async () => {
     const fetcher = vi.fn().mockResolvedValue({
       ok: true,

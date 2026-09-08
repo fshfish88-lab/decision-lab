@@ -18,6 +18,20 @@ const criteria: Criterion[] = [
 ]
 
 describe('rankScientificOptions', () => {
+  it.each([-30, 130, NaN, Infinity, -Infinity])('rejects invalid individual weight %s', (weight) => {
+    expect(() => rankScientificOptions(options, [
+      { ...criteria[0], weight },
+      { ...criteria[1], weight: 100 - weight },
+    ], { hotpot: { taste: 10, price: 1 }, sushi: { taste: 1, price: 1 } }))
+      .toThrow('每项权重必须是 0 到 100 之间的有限数值')
+  })
+
+  it('rejects duplicated criterion ids before scoring', () => {
+    expect(() => rankScientificOptions(options, [criteria[0], { ...criteria[1], id: 'taste' }], {
+      hotpot: { taste: 8 }, sushi: { taste: 7 },
+    })).toThrow('评价指标不能重复')
+  })
+
   it('computes exact weighted scores and ranks them from high to low', () => {
     const scores: ScientificScoreMap = {
       hotpot: { taste: 8, price: 7 },

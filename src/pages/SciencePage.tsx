@@ -36,12 +36,7 @@ function WebSciencePage(): React.JSX.Element {
   }
 
   function addCriterion(): void {
-    if (state.criteria.length >= 6) return
-    const id = `criterion-${state.criteria.length + 1}`
-    dispatch({
-      type: 'set-criteria',
-      criteria: [...state.criteria, { id, name: '新指标', weight: 0 }],
-    })
+    dispatch({ type: 'add-criterion' })
   }
 
   function removeCriterion(id: string): void {
@@ -136,7 +131,7 @@ function WebSciencePage(): React.JSX.Element {
               </label>
               <label className="weight-input">
                 <span className="sr-only">{criterion.name}权重数值</span>
-                <input type="number" min="0" max="100" value={criterion.weight} onChange={(event) => updateCriterion(criterion.id, 'weight', event.target.value)} />
+                <input type="number" min="0" max="100" aria-invalid={!Number.isFinite(criterion.weight) || criterion.weight < 0 || criterion.weight > 100} value={criterion.weight} onChange={(event) => updateCriterion(criterion.id, 'weight', event.target.value)} />
                 <span>%</span>
               </label>
               <button className="icon-button" type="button" aria-label={`删除指标 ${criterion.name}`} disabled={state.criteria.length <= 2} onClick={() => removeCriterion(criterion.id)}>

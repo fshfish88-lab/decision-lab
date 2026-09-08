@@ -43,6 +43,6 @@ describe('MobileAiView', () => {
 
     fireEvent.change(screen.getByLabelText('补充你的真实情况'), { target: { value: '今天很累' } })
     expect(onContextChange).toHaveBeenCalledWith('今天很累')
-    expect(screen.getByText('服务在线')).toBeInTheDocument()
+    expect(screen.getByText('网络已连接')).toBeInTheDocument()
   })
 })

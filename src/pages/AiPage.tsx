@@ -5,9 +5,10 @@ import {
   CheckCircle2,
   LockKeyhole,
   Sparkles,
+  WifiOff,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
   AiApiError,
@@ -43,6 +44,7 @@ const THINKING_STEPS = [
 
 export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX.Element {
   const navigate = useNavigate()
+  const location = useLocation()
   const platform = usePlatform()
   const online = useOnlineStatus()
   const { state, dispatch } = useDecision()
@@ -50,10 +52,18 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
     () => state.options.filter((option) => option.label.trim()),
     [state.options],
   )
-  const [context, setContext] = useState('')
+  const [context, setContext] = useState(state.aiContext)
   const [status, setStatus] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [thinkingIndex, setThinkingIndex] = useState(0)
+  const requestRef = useRef<AbortController | null>(null)
+
+  // In the App, exit animations can keep this page mounted after navigation.
+  // Cancel on route changes as well as unmount so old responses cannot navigate.
+  useLayoutEffect(() => () => {
+    requestRef.current?.abort()
+    requestRef.current = null
+  }, [location.key])
 
   useEffect(() => {
     if (!submitting) {
@@ -82,7 +92,9 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
 
   async function submit(event: React.FormEvent): Promise<void> {
     event.preventDefault()
-    if (submitting || !context.trim() || !online) return
+    if (requestRef.current || submitting || !context.trim() || !online) return
+    const controller = new AbortController()
+    requestRef.current = controller
     setSubmitting(true)
     setStatus('')
     try {
@@ -90,7 +102,8 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
         question: state.question,
         options,
         context,
-      }))
+      }), controller.signal)
+      if (controller.signal.aborted || requestRef.current !== controller) return
       const result = createAiResult({
         question: state.question,
         options,
@@ -101,6 +114,7 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
       saveHistoryItem(result)
       navigate('/result')
     } catch (error) {
+      if (controller.signal.aborted || requestRef.current !== controller) return
       const code = error instanceof AiApiError
         ? error.code
         : error instanceof Error && error.message === 'AI 推荐项无法映射到候选项'
@@ -108,7 +122,10 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
           : 'network'
       setStatus(ERROR_COPY[code])
     } finally {
-      setSubmitting(false)
+      if (requestRef.current === controller) {
+        requestRef.current = null
+        setSubmitting(false)
+      }
     }
   }
 
@@ -166,7 +183,7 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
           <button
             className="primary-action"
             type="submit"
-            disabled={!context.trim() || submitting}
+            disabled={!context.trim() || submitting || !online}
           >
             {submitting ? <BrainCircuit size={18} /> : <Sparkles size={18} />}
             <span>{submitting ? THINKING_STEPS[thinkingIndex] : '让 AI 替我决定'}</span>
@@ -178,15 +195,15 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
               <i aria-hidden="true"><b /><b /><b /></i>
             </div>
           ) : (
-            <p className="ai-form-status" aria-live="polite">{status}</p>
+            <p className="ai-form-status" aria-live="polite">{online ? status : '当前离线，AI 需要联网。本地决策模式仍可正常使用。'}</p>
           )}
         </form>
 
         <aside className="ai-status-card">
-          <span className="ai-status-card__icon is-ready"><CheckCircle2 size={22} /></span>
-          <small>SERVICE STATUS</small>
-          <h2>AI 顾问在线</h2>
-          <p>它会直接给建议，但不会假装拥有宇宙唯一真理。</p>
+          <span className={`ai-status-card__icon${online ? ' is-ready' : ''}`}>{online ? <CheckCircle2 size={22} /> : <WifiOff size={22} />}</span>
+          <small>NETWORK STATUS</small>
+          <h2>{online ? '网络已连接' : '当前离线'}</h2>
+          <p>{online ? '可以尝试发送请求，AI 服务是否可用以请求结果为准。' : '联网后可以继续提交，已填写的背景会保留。'}</p>
           <div><LockKeyhole size={17} /><span>浏览器不保存 API Key</span></div>
           <div><Bot size={17} /><span>结果保存于当前浏览器</span></div>
           <Link to="/">改用本地决策模式</Link>

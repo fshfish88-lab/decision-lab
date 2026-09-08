@@ -35,6 +35,13 @@ export function rankScientificOptions(
     throw new Error('至少需要两个评价指标')
   }
 
+  if (criteria.some(({ weight }) => !Number.isFinite(weight) || weight < 0 || weight > 100)) {
+    throw new Error('每项权重必须是 0 到 100 之间的有限数值')
+  }
+  if (new Set(criteria.map(({ id }) => id)).size !== criteria.length) {
+    throw new Error('评价指标不能重复')
+  }
+
   const totalWeight = criteria.reduce(
     (total, criterion) => total + criterion.weight,
     0,

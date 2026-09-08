@@ -55,17 +55,17 @@ export function ResultPage(): React.JSX.Element {
       : '/analysis'
 
   function rerun(): void {
-    dispatch({ type: 'clear-result' })
+    dispatch({ type: 'restore-result-draft', result: decisionResult })
     navigate(rerunPath)
   }
 
   function changeMode(): void {
-    dispatch({ type: 'prepare-mode-selection' })
+    dispatch({ type: 'restore-result-draft', result: decisionResult, selectMode: true })
     navigate('/', { state: { focusTarget: 'mode' } })
   }
 
   function editOptions(): void {
-    dispatch({ type: 'clear-result' })
+    dispatch({ type: 'restore-result-draft', result: decisionResult })
     navigate('/', { state: { focusTarget: 'input' } })
   }
 

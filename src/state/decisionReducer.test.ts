@@ -1,8 +1,41 @@
 import { describe, expect, it } from 'vitest'
 
 import { decisionReducer, initialDecisionState } from './decisionReducer'
+import { createAiResult, createScientificResult } from '../services/decisionEngine'
 
 describe('decisionReducer', () => {
+  it('restores scientific history with independent weights and scores', () => {
+    const result = createScientificResult({
+      question: '旧的科学问题',
+      options: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+      criteria: [{ id: 'one', name: '预算', weight: 70 }, { id: 'two', name: '距离', weight: 30 }],
+      scores: { a: { one: 8, two: 4 }, b: { one: 5, two: 9 } },
+    })
+    const restored = decisionReducer(initialDecisionState, { type: 'restore-result-draft', result })
+    expect(restored.mode).toBe('scientific')
+    expect(restored.criteria[0].weight).toBe(70)
+    expect(restored.scores.a).toEqual({ one: 8, two: 4 })
+    restored.criteria[0].weight = 20
+    restored.scores.a.one = 1
+    expect(result.details?.type === 'scientific' && result.details.criteria[0].weight).toBe(70)
+    expect(result.details?.type === 'scientific' && result.details.scores.a.one).toBe(8)
+  })
+
+  it('restores the AI context from the displayed result', () => {
+    const result = createAiResult({ question: 'AI 问题', options: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }], context: '预算有限',
+      advice: { recommended_option: 'A', confidence: 70, verdict: '选择 A', core_reasons: [], main_tradeoff: '', conditions_to_reconsider: [], action_plan: [] } })
+    expect(decisionReducer(initialDecisionState, { type: 'restore-result-draft', result }).aiContext).toBe('预算有限')
+  })
+
+  it('does not revive removed criterion scores when an id is reused', () => {
+    let state = decisionReducer(initialDecisionState, { type: 'add-criterion' })
+    const id = state.criteria.at(-1)!.id
+    state = decisionReducer(state, { type: 'set-score', optionId: 'option-1', criterionId: id, score: 9 })
+    state = decisionReducer(state, { type: 'set-criteria', criteria: state.criteria.filter(criterion => criterion.id !== id) })
+    state = decisionReducer(state, { type: 'add-criterion' })
+    expect(state.scores['option-1'][state.criteria.at(-1)!.id]).toBeUndefined()
+  })
+
   it('edits options and enforces the ten-option limit', () => {
     let state = decisionReducer(initialDecisionState, {
       type: 'set-option',

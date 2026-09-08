@@ -39,14 +39,7 @@ export function HistoryPage(): React.JSX.Element {
   }
 
   function reuse(item: DecisionHistoryItem): void {
-    dispatch({
-      type: 'restore-draft',
-      draft: {
-        question: item.question,
-        options: item.options,
-        mode: item.mode,
-      },
-    })
+    dispatch({ type: 'restore-result-draft', result: item })
     navigate('/')
   }
 

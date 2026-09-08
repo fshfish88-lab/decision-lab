@@ -7,14 +7,28 @@ const MODE_LABELS: Record<DecisionMode, string> = {
   ai: 'AI 模式',
 }
 
+function shareMetric(result: DecisionResult): string {
+  switch (result.mode) {
+    case 'random':
+      return `等概率抽取，每项 ${(100 / result.options.length).toFixed(2)}%`
+    case 'scientific': {
+      const score = result.ranking?.find((item) => item.optionId === result.winner.id)?.score
+      return score === undefined ? '加权评分结果' : `加权得分：${score.toFixed(2)} / 10`
+    }
+    case 'mystic':
+      return '塔罗解读仅供娱乐'
+    case 'ai':
+      return `推荐强度：${result.confidence.toFixed(1)}%`
+  }
+}
+
 export function buildShareText(result: DecisionResult): string {
-  const confidenceLabel = result.mode === 'ai' ? '推荐强度' : '可信度'
   return [
     'DECISION LAB',
     result.question,
     `系统最终决定：${result.winner.label}`,
     `决策模式：${MODE_LABELS[result.mode]}`,
-    `${confidenceLabel}：${result.confidence.toFixed(1)}%`,
+    shareMetric(result),
     '不要再纠结了。',
     '结果仅供个人决策参考。',
   ].join('\n')
@@ -60,8 +74,7 @@ export function renderShareCardBlob(
 
   context.fillStyle = '#111527'
   context.font = '600 30px sans-serif'
-  const confidenceLabel = result.mode === 'ai' ? '推荐强度' : '可信度'
-  context.fillText(`${MODE_LABELS[result.mode]} · ${confidenceLabel} ${result.confidence.toFixed(1)}%`, 540, 850)
+  context.fillText(`${MODE_LABELS[result.mode]} · ${shareMetric(result)}`, 540, 850)
 
   context.fillStyle = '#747782'
   context.font = '400 34px sans-serif'
