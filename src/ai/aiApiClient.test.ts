@@ -146,6 +146,77 @@ describe('createAiApiClient', () => {
       .rejects.toEqual(expect.objectContaining<Partial<AiApiError>>({ code: 'invalid_response' }))
   })
 
+  it('recovers once from malformed deep-analysis data without exposing it', async () => {
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ success: true, type: 'deep-analysis', overview: '只有摘要，其他字段缺失' }) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => deepPayload })
+    await expect(createAiApiClient(fetcher).deepAnalyze('原始决策')).resolves.toEqual(deepPayload.data)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    const retryBody = JSON.parse(fetcher.mock.calls[1][1].body as string) as { content: string }
+    expect(retryBody.content).toContain('原始决策')
+    expect(retryBody.content).toContain('格式修正')
+    expect(retryBody.content).not.toContain('只有摘要，其他字段缺失')
+  })
+
+  it('recovers from invalid JSON but caps format recovery at one retry', async () => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => { throw new SyntaxError('truncated JSON') } })
+    await expect(createAiApiClient(fetcher).deepAnalyze('内容')).rejects.toMatchObject({ code: 'invalid_response' })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it('uses one 40-second deadline for the original request and format retry', async () => {
+    vi.useFakeTimers()
+    const fetcher = vi.fn()
+      .mockImplementationOnce(() => new Promise<Response>(resolve => setTimeout(() => resolve({ ok: true, status: 200, json: async () => ({}) } as Response), 12_000)))
+      .mockImplementationOnce((_input: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      }))
+    const pending = createAiApiClient(fetcher).deepAnalyze('内容')
+    const rejection = expect(pending).rejects.toMatchObject({ code: 'timeout' })
+    await vi.advanceTimersByTimeAsync(12_000)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(28_000)
+    await rejection
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('does not retry network errors, limits or direct decisions', async () => {
+    for (const status of [429, 500]) {
+      const fetcher = vi.fn().mockResolvedValue({ ok: false, status })
+      await expect(createAiApiClient(fetcher).deepAnalyze('内容')).rejects.toBeInstanceOf(AiApiError)
+      expect(fetcher).toHaveBeenCalledTimes(1)
+    }
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+    await expect(createAiApiClient(fetcher).decide('内容')).rejects.toMatchObject({ code: 'invalid_response' })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not start format recovery when less than ten seconds remain', async () => {
+    vi.useFakeTimers()
+    const fetcher = vi.fn(() => new Promise<Response>(resolve => setTimeout(() => resolve({ ok: true, status: 200, json: async () => ({}) } as Response), 31_000)))
+    const rejection = expect(createAiApiClient(fetcher).deepAnalyze('内容')).rejects.toMatchObject({ code: 'invalid_response' })
+    await vi.advanceTimersByTimeAsync(31_000)
+    await rejection
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('cancels the format retry with the original caller signal', async () => {
+    vi.useFakeTimers()
+    const controller = new AbortController()
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) })
+      .mockImplementationOnce((_input: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      }))
+    const rejection = expect(createAiApiClient(fetcher).deepAnalyze('内容', controller.signal)).rejects.toMatchObject({ name: 'AbortError' })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    controller.abort()
+    await rejection
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
   it('keeps a request alive through 39,999 ms and aborts at 40 seconds', async () => {
     vi.useFakeTimers()
     const requestSignals: AbortSignal[] = []

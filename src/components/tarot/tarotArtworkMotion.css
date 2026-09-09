@@ -1,0 +1,30 @@
+/* Start when the front face becomes visible. Normalized lengths support all
+   22 compositions without measuring the SVG or touching the card mapping. */
+.tarot-artwork--reveal [pathLength] {
+  stroke-dasharray: 1;
+  animation: tarot-ink-draw 440ms ease-out 200ms both;
+}
+.tarot-artwork--reveal [pathLength]:nth-child(2n) { animation-delay: 230ms; }
+.tarot-artwork--reveal [pathLength]:nth-child(3n) { animation-delay: 260ms; }
+
+.tarot-card.is-selected .tarot-card__face > strong,
+.tarot-card.is-selected .tarot-card__face > span {
+  animation: tarot-ink-caption 200ms ease-out 500ms both;
+}
+
+@keyframes tarot-ink-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes tarot-ink-caption {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarot-artwork--reveal [pathLength],
+  .tarot-card.is-selected .tarot-card__face > strong,
+  .tarot-card.is-selected .tarot-card__face > span {
+    animation: none;
+  }
+}

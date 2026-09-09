@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 import type { DecisionResult } from '../../types/decision'
 
@@ -9,6 +9,7 @@ interface TarotRevealProps {
 }
 
 export function TarotReveal({ result, onContinue }: TarotRevealProps): React.JSX.Element {
+  const reducedMotion = useReducedMotion()
   const tarot = result.details?.type === 'mystic' ? result.details.tarot : undefined
   if (!tarot) return <></>
 
@@ -18,7 +19,7 @@ export function TarotReveal({ result, onContinue }: TarotRevealProps): React.JSX
     <motion.section
       className="tarot-reveal"
       aria-labelledby="tarot-reveal-heading"
-      initial={{ opacity: 0, y: 18 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.42 }}
     >

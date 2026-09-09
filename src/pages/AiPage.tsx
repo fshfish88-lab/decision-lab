@@ -58,7 +58,6 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
   const [thinkingIndex, setThinkingIndex] = useState(0)
   const requestRef = useRef<AbortController | null>(null)
 
-  // In the App, exit animations can keep this page mounted after navigation.
   // Cancel on route changes as well as unmount so old responses cannot navigate.
   useLayoutEffect(() => () => {
     requestRef.current?.abort()

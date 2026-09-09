@@ -1,15 +1,14 @@
 import { mobilePrimaryNavigation } from '../../navigation/navigationItems'
 import type { MobileNavigationDirection } from './mobileNavigationState'
 
-export const EASE_OUT_CUBIC = [0.215, 0.61, 0.355, 1] as const
+export const EASE_OUT_CUBIC = 'cubic-bezier(0.215, 0.61, 0.355, 1)'
 
 export interface MobileRouteMotion {
   kind: 'primary' | 'flow'
-  enterX: number | string
-  exitX: number | string
+  enterX: number
   enterOpacity: number
   duration: number
-  ease: typeof EASE_OUT_CUBIC | 'easeOut'
+  ease: typeof EASE_OUT_CUBIC
 }
 
 const primaryPaths: readonly string[] = mobilePrimaryNavigation.map(({ to }) => to)
@@ -39,20 +38,18 @@ export function getMobileRouteMotion(
     return {
       kind: primaryDirection === null ? 'flow' : 'primary',
       enterX: 0,
-      exitX: 0,
-      enterOpacity: 0,
-      duration: 0.08,
-      ease: 'easeOut',
+      enterOpacity: 1,
+      duration: 0,
+      ease: EASE_OUT_CUBIC,
     }
   }
 
   if (primaryDirection === 1) {
     return {
       kind: 'primary',
-      enterX: '100%',
-      exitX: '-100%',
-      enterOpacity: 0.98,
-      duration: 0.26,
+      enterX: 24,
+      enterOpacity: 0.88,
+      duration: 0.22,
       ease: EASE_OUT_CUBIC,
     }
   }
@@ -60,10 +57,9 @@ export function getMobileRouteMotion(
   if (primaryDirection === -1) {
     return {
       kind: 'primary',
-      enterX: '-100%',
-      exitX: '100%',
-      enterOpacity: 0.98,
-      duration: 0.26,
+      enterX: -24,
+      enterOpacity: 0.88,
+      duration: 0.22,
       ease: EASE_OUT_CUBIC,
     }
   }
@@ -72,9 +68,8 @@ export function getMobileRouteMotion(
   return {
     kind: 'flow',
     enterX: flowDirection * 10,
-    exitX: flowDirection * -10,
-    enterOpacity: 0,
-    duration: 0.22,
-    ease: 'easeOut',
+    enterOpacity: 0.88,
+    duration: 0.18,
+    ease: EASE_OUT_CUBIC,
   }
 }

@@ -1,3 +1,5 @@
+import { ArrowRight } from 'lucide-react'
+
 interface MobileStickyActionProps {
   label: string
   disabled?: boolean
@@ -15,7 +17,7 @@ export function MobileStickyAction({
     <div className="mobile-sticky-action">
       {helperText ? <p>{helperText}</p> : null}
       <button type="button" disabled={disabled} onClick={onClick}>
-        {label}
+        <span>{label}</span><ArrowRight size={18} aria-hidden="true" />
       </button>
     </div>
   )

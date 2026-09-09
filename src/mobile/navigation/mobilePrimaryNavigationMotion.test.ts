@@ -22,18 +22,16 @@ describe('mobile primary navigation motion', () => {
     expect(getPrimaryRouteDirection('/science', '/')).toBeNull()
   })
 
-  it('uses a full-width 260ms scene for primary-to-primary navigation', () => {
+  it('uses a short 220ms scene for primary-to-primary navigation', () => {
     expect(getMobileRouteMotion('/', '/statistics', 'forward', false)).toMatchObject({
       kind: 'primary',
-      enterX: '100%',
-      exitX: '-100%',
-      enterOpacity: 0.98,
-      duration: 0.26,
+      enterX: 24,
+      enterOpacity: 0.88,
+      duration: 0.22,
     })
     expect(getMobileRouteMotion('/about', '/history', 'forward', false)).toMatchObject({
       kind: 'primary',
-      enterX: '-100%',
-      exitX: '100%',
+      enterX: -24,
     })
   })
 
@@ -41,19 +39,16 @@ describe('mobile primary navigation motion', () => {
     expect(getMobileRouteMotion('/', '/science', 'forward', false)).toMatchObject({
       kind: 'flow',
       enterX: 10,
-      exitX: -10,
-      duration: 0.22,
+      duration: 0.18,
     })
     expect(getMobileRouteMotion('/science', '/', 'back', false)).toMatchObject({
       kind: 'flow',
       enterX: -10,
-      exitX: 10,
     })
     expect(getMobileRouteMotion('/', '/statistics', 'forward', true)).toMatchObject({
       kind: 'primary',
       enterX: 0,
-      exitX: 0,
-      duration: 0.08,
+      duration: 0,
     })
   })
 })

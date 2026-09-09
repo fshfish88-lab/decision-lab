@@ -1,6 +1,9 @@
+import './tarotArtworkMotion.css'
+
 interface TarotCardArtworkProps {
   cardId: string
   className?: string
+  reveal?: boolean
 }
 
 interface ArtworkRecipe {
@@ -141,10 +144,10 @@ function Stars(): React.JSX.Element {
 function Artwork({ recipe }: { recipe: ArtworkRecipe }): React.JSX.Element {
   return (
     <g>
-      {recipe.paths.map((d) => <path d={d} key={d} />)}
-      {recipe.circles?.map(([cx, cy, r]) => <circle cx={cx} cy={cy} key={`${cx}-${cy}-${r}`} r={r} />)}
-      {recipe.lines?.map(([x1, y1, x2, y2]) => <line key={`${x1}-${y1}-${x2}-${y2}`} x1={x1} x2={x2} y1={y1} y2={y2} />)}
-      {recipe.polygons?.map((points) => <polygon key={points} points={points} />)}
+      {recipe.paths.map((d) => <path pathLength={1} d={d} key={d} />)}
+      {recipe.circles?.map(([cx, cy, r]) => <circle pathLength={1} cx={cx} cy={cy} key={`${cx}-${cy}-${r}`} r={r} />)}
+      {recipe.lines?.map(([x1, y1, x2, y2]) => <line pathLength={1} key={`${x1}-${y1}-${x2}-${y2}`} x1={x1} x2={x2} y1={y1} y2={y2} />)}
+      {recipe.polygons?.map((points) => <polygon pathLength={1} key={points} points={points} />)}
     </g>
   )
 }
@@ -159,12 +162,12 @@ function FallbackArtwork(): React.JSX.Element {
   )
 }
 
-export function TarotCardArtwork({ cardId, className }: TarotCardArtworkProps): React.JSX.Element {
+export function TarotCardArtwork({ cardId, className, reveal = false }: TarotCardArtworkProps): React.JSX.Element {
   const known = TAROT_ARTWORK_IDS.includes(cardId as ArtworkId)
   return (
     <svg
       aria-hidden="true"
-      className={className}
+      className={[className, reveal ? 'tarot-artwork--reveal' : ''].filter(Boolean).join(' ')}
       data-testid={`tarot-artwork-${known ? cardId : 'fallback'}`}
       fill="none"
       focusable="false"

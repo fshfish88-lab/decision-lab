@@ -1,4 +1,5 @@
 import { BarChart3, Bot, Check, Dices, LoaderCircle, Sparkles } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import type { DecisionMode } from '../../types/decision'
 
@@ -8,6 +9,8 @@ interface MobileAnalysisViewProps {
   description: string
   steps: readonly string[]
   conclusion: string
+  visual?: ReactNode
+  completedSteps?: number
 }
 
 export function MobileAnalysisView({
@@ -16,6 +19,8 @@ export function MobileAnalysisView({
   description,
   steps,
   conclusion,
+  visual,
+  completedSteps = 2,
 }: MobileAnalysisViewProps): React.JSX.Element {
   const MarkIcon = mode === 'random'
     ? Dices
@@ -33,22 +38,23 @@ export function MobileAnalysisView({
         <h1>{title}</h1>
         <p>{description}</p>
       </header>
+      {visual}
       <div
         className="mobile-analysis__progress"
         role="progressbar"
         aria-label="决策分析进度"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={65}
+        aria-valuetext="正在准备决策结果"
       >
         <span />
       </div>
       <div className="mobile-analysis__steps">
         {steps.map((step, index) => (
           <div key={step}>
-            <span>{index < 2 ? <Check size={14} /> : <LoaderCircle size={14} />}</span>
+            <span>{index < completedSteps ? <Check size={14} /> : <LoaderCircle size={14} />}</span>
             <p>{step}</p>
-            <small>{index < 2 ? '已完成' : '处理中'}</small>
+            <small>{index < completedSteps ? '已完成' : '处理中'}</small>
           </div>
         ))}
       </div>

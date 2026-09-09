@@ -1,0 +1,79 @@
+.random-draw {
+  width: 100%;
+  margin: 16px auto;
+  overflow: hidden;
+}
+
+.random-draw__stage {
+  position: relative;
+  width: min(100%, 300px);
+  height: 156px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.random-draw__ticket {
+  position: absolute;
+  box-sizing: border-box;
+  width: 178px;
+  height: 106px;
+  padding: 13px 12px;
+  border: 1px solid var(--random, #7268f2);
+  border-radius: 14px;
+  background: var(--random-soft);
+  text-align: center;
+}
+
+.random-draw__ticket > span {
+  display: block;
+  color: #554ab8;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.random-draw__ticket--back > i {
+  display: block;
+  height: 1px;
+  margin: 16px 22px;
+  background: #c7c1f5;
+}
+
+.random-draw__ticket--front {
+  background: var(--surface);
+  box-shadow: 0 6px 18px rgb(61 48 131 / 8%);
+}
+
+.random-draw__seal,
+.random-draw__answer {
+  position: absolute;
+  inset: 31px 12px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.random-draw__seal > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--random, #7268f2);
+}
+
+.random-draw__answer { inset: 30px 12px 8px; flex-direction: column; gap: 3px; }
+.random-draw__answer strong {
+  flex-shrink: 0;
+  max-width: 100%;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.random-draw__answer small { color: #554ab8; font-size: 10px; line-height: 1.2; }
+.mobile-analysis .random-draw { margin: 0; }

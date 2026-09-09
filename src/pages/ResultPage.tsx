@@ -95,7 +95,7 @@ export function ResultPage(): React.JSX.Element {
       ) : (
         <AiResult result={decisionResult} />
       )}
-      {decisionResult.mode !== 'ai' ? <AiDeepAnalysisPanel result={decisionResult} /> : null}
+      {decisionResult.mode !== 'ai' ? <AiDeepAnalysisPanel key={decisionResult.id} result={decisionResult} /> : null}
     </>
   )
 

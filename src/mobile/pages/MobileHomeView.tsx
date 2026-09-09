@@ -22,7 +22,7 @@ export function MobileHomeView({
   return (
     <section className="mobile-home" aria-labelledby="mobile-home-title">
       <header className="mobile-home__header">
-        <span className="mobile-home__brand"><FlaskConical size={16} /> DECISION LAB</span>
+        <span className="mobile-home__brand"><FlaskConical size={15} aria-hidden="true" /> DECISION LAB <span>选择实验室</span></span>
         <h1 id="mobile-home-title">今天想决定什么？</h1>
         <p>把纠结写下来，剩下的交给我们。</p>
       </header>
@@ -32,11 +32,11 @@ export function MobileHomeView({
           <span>01</span>
           <div>
             <h2 id="mobile-input-title">写下你的选项</h2>
-            <p>至少 2 项，最多 10 项</p>
+            <p>2–10 个选项</p>
           </div>
         </div>
         <label className="mobile-home__question">
-          <span>这次要决定的问题</span>
+          <span className="sr-only">这次要决定的问题</span>
           <input
             value={question}
             maxLength={40}
@@ -57,14 +57,14 @@ export function MobileHomeView({
           <span>02</span>
           <div>
             <h2 id="mobile-mode-title">选择决策方式</h2>
-            <p>每种方式都认真，只是认真得不一样</p>
+            <p>选一种就好</p>
           </div>
         </div>
         <div className="mobile-home__mode-grid" role="group" aria-label="选择决策方式">
           <MobileModeCard
             mode="random"
             title="随机模式"
-            description="公平掷骰，快速结束纠结。"
+            description="等概率，交给命运"
             icon={Dices}
             tone="random"
             selected={selectedMode === 'random'}
@@ -73,7 +73,7 @@ export function MobileHomeView({
           <MobileModeCard
             mode="scientific"
             title="科学模式"
-            description="设置权重，再认真算一遍。"
+            description="按权重，认真算一遍"
             icon={BarChart3}
             tone="scientific"
             selected={selectedMode === 'scientific'}
@@ -82,7 +82,7 @@ export function MobileHomeView({
           <MobileModeCard
             mode="mystic"
             title="塔罗模式"
-            description="抽一张牌，听听象征怎么说。"
+            description="抽张牌，听一点灵感"
             icon={Orbit}
             tone="mystic"
             selected={selectedMode === 'mystic'}
@@ -91,7 +91,7 @@ export function MobileHomeView({
           <MobileModeCard
             mode="ai"
             title="AI 模式"
-            description="补充背景，获得直接建议。"
+            description="说背景，给直接建议"
             icon={Bot}
             tone="ai"
             selected={selectedMode === 'ai'}

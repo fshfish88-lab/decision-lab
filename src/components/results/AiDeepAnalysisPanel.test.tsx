@@ -43,6 +43,22 @@ function client(deepAnalyze: AiApiClient['deepAnalyze']): AiApiClient {
 }
 
 describe('AiDeepAnalysisPanel', () => {
+  it('cancels pending analysis when leaving the result page', async () => {
+    const user = userEvent.setup()
+    let requestSignal: AbortSignal | undefined
+    const deepAnalyze = vi.fn((_content: string, signal?: AbortSignal) => {
+      requestSignal = signal
+      return new Promise<typeof analysis>((_resolve, reject) => {
+        signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      })
+    })
+    const { unmount } = render(<AiDeepAnalysisPanel result={result} client={client(deepAnalyze)} />)
+    await user.click(screen.getByRole('button', { name: 'AI 深度分析' }))
+    expect(requestSignal?.aborted).toBe(false)
+    unmount()
+    expect(requestSignal?.aborted).toBe(true)
+  })
+
   it('waits for an explicit click and renders a structured Bento result', async () => {
     const user = userEvent.setup()
     let resolveRequest: (value: typeof analysis) => void = () => undefined

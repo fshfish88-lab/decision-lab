@@ -1,4 +1,5 @@
 import type { DecisionMode, DecisionOption, DecisionResult } from '../types/decision'
+import { DEEP_ANALYSIS_FORMAT_RULES } from './aiResponseContract'
 
 const VOICE_RULES = [
   '表达风格：果断、聪明、略带调侃，符合 DECISION LAB 的冷幽默。',
@@ -251,6 +252,7 @@ export function buildDeepAnalysisContent(result: DecisionResult): string {
     '任务类型：AI 深度分析',
     analysisRules(result),
     VOICE_RULES,
+    DEEP_ANALYSIS_FORMAT_RULES,
     ANALYSIS_DATA_RULES,
     decisionDataBlock([
       '决策问题：' + result.question,

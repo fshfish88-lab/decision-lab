@@ -1,11 +1,15 @@
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { act, render, screen } from '@testing-library/react'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DecisionContext } from '../state/DecisionContext'
 import { initialDecisionState } from '../state/decisionReducer'
 import type { DecisionMode, DecisionResult } from '../types/decision'
 import { AnalysisPage } from './AnalysisPage'
+import { PlatformContext, type AppPlatform } from '../platform/PlatformContext'
+import { saveHistoryItem } from '../storage/history'
+
+vi.mock('../storage/history', () => ({ saveHistoryItem: vi.fn() }))
 
 function makeResult(mode: DecisionMode): DecisionResult {
   const options = [
@@ -41,9 +45,66 @@ function renderAnalysis(mode: DecisionMode): void {
   )
 }
 
-afterEach(() => vi.useRealTimers())
+afterEach(() => {
+  vi.useRealTimers()
+  vi.restoreAllMocks()
+  vi.clearAllMocks()
+})
+
+function RouteProbe(): React.JSX.Element {
+  return <output data-testid="route">{useLocation().pathname}</output>
+}
 
 describe('AnalysisPage mode experiences', () => {
+  it.each<[AppPlatform, boolean]>([['web', false], ['app', false], ['web', true], ['app', true]])(
+    'reveals and saves the same prepared winner once on %s (reduced motion: %s)',
+    (platform, reducedMotion) => {
+      vi.useFakeTimers()
+      const originalMatchMedia = window.matchMedia
+      vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+        ...originalMatchMedia(query), matches: reducedMotion,
+      }))
+      const result = makeResult('random')
+      const dispatch = vi.fn()
+      const view = (
+        <MemoryRouter initialEntries={['/analysis']}>
+          <PlatformContext.Provider value={platform}>
+            <DecisionContext.Provider value={{ state: { ...initialDecisionState, mode: 'random', result }, dispatch }}>
+              <AnalysisPage /><RouteProbe />
+            </DecisionContext.Provider>
+          </PlatformContext.Provider>
+        </MemoryRouter>
+      )
+      const { container, rerender } = render(view)
+      expect(container.querySelector('.random-draw__answer strong')).toHaveTextContent(result.winner.label)
+      act(() => vi.advanceTimersByTime(reducedMotion ? 249 : 1999))
+      expect(screen.getByTestId('route')).toHaveTextContent('/analysis')
+      expect(saveHistoryItem).not.toHaveBeenCalled()
+      rerender(view)
+      act(() => vi.advanceTimersByTime(1))
+      expect(screen.getByTestId('route')).toHaveTextContent('/result')
+      expect(dispatch).toHaveBeenCalledWith({ type: 'set-result', result })
+      expect(saveHistoryItem).toHaveBeenCalledExactlyOnceWith(result)
+    },
+  )
+
+  it('cancels the pending reveal when leaving analysis early', () => {
+    vi.useFakeTimers()
+    const dispatch = vi.fn()
+    const { unmount } = render(
+      <MemoryRouter>
+        <DecisionContext.Provider value={{ state: { ...initialDecisionState, mode: 'random', result: makeResult('random') }, dispatch }}>
+          <AnalysisPage />
+        </DecisionContext.Provider>
+      </MemoryRouter>,
+    )
+    act(() => vi.advanceTimersByTime(800))
+    unmount()
+    act(() => vi.advanceTimersByTime(3000))
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(saveHistoryItem).not.toHaveBeenCalled()
+  })
+
   it('shows random draw language', () => {
     vi.useFakeTimers()
     renderAnalysis('random')

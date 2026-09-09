@@ -1,4 +1,5 @@
 import type { AiDecisionData, AiDeepAnalysisData } from '../types/decision'
+import { DEEP_ANALYSIS_FORMAT_RULES } from './aiResponseContract'
 
 export const AI_ENDPOINTS = {
   deepAnalysis: 'https://api.fshfish.com/api/ai/deep-analysis',
@@ -83,7 +84,7 @@ function formatScenario(item: Record<string, unknown>): string | null {
 }
 
 function normalizeDeepAnalysis(value: unknown): AiDeepAnalysisData | null {
-  if (!isRecord(value) || typeof value.overview !== 'string') return null
+  if (!isRecord(value) || typeof value.overview !== 'string' || !value.overview.trim()) return null
   const keyFactors = normalizeList(
     readAlias(value, 'key_factors', 'keyFactors'),
     formatKeyFactor,
@@ -149,31 +150,44 @@ async function request<T>(
   const cancel = (): void => controller.abort()
   signal?.addEventListener('abort', cancel, { once: true })
   if (signal?.aborted) controller.abort()
+  const startedAt = Date.now()
   const timeout = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS)
 
   try {
-    const response = await fetcher(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
-      signal: controller.signal,
-    })
-    if (response.status === 429) {
-      throw new AiApiError('rate_limited', '请求有点太密集，请稍后再试')
-    }
-    if (!response.ok) {
-      throw new AiApiError('network', 'AI 服务暂时无法连接')
-    }
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
+      const requestContent = attempt === 0
+        ? content
+        : `${content}\n\n格式修正：上一次返回未通过结构校验，请重新完整生成。\n${DEEP_ANALYSIS_FORMAT_RULES}`
+      const response = await fetcher(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: requestContent }),
+        signal: controller.signal,
+      })
+      if (response.status === 429) {
+        throw new AiApiError('rate_limited', '请求有点太密集，请稍后再试')
+      }
+      if (!response.ok) {
+        throw new AiApiError('network', 'AI 服务暂时无法连接')
+      }
 
-    const payload: unknown = await response.json()
-    if (!isRecord(payload) || payload.success !== true || payload.type !== expectedType) {
-      throw new AiApiError('invalid_response', 'AI 返回内容未通过格式检查')
+      let payload: unknown = null
+      try {
+        payload = await response.json()
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) throw error
+      }
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
+      if (isRecord(payload) && payload.success === true && payload.type === expectedType) {
+        const normalized = normalize(payload.data) ?? normalize(payload)
+        if (normalized) return normalized
+      }
+      // Retry format failures only, within the original deadline and with at
+      // least 10 seconds left. Never feed the invalid model response back in.
+      if (expectedType !== 'deep-analysis' || attempt > 0 || Date.now() - startedAt > AI_REQUEST_TIMEOUT_MS - 10_000) break
     }
-    const normalized = normalize(payload.data) ?? normalize(payload)
-    if (!normalized) {
-      throw new AiApiError('invalid_response', 'AI 返回内容未通过格式检查')
-    }
-    return normalized
+    throw new AiApiError('invalid_response', 'AI 返回内容未通过格式检查')
   } catch (error) {
     if (signal?.aborted) throw new DOMException('请求已取消', 'AbortError')
     if (error instanceof AiApiError) throw error

@@ -1,9 +1,10 @@
 import { BarChart3, Bot, Check, Dices, LoaderCircle, Orbit, Sparkles } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { createRandomResult } from '../services/decisionEngine'
+import { RandomDrawVisual } from '../components/RandomDrawVisual'
 import { MobileAnalysisView } from '../mobile/pages/MobileAnalysisView'
 import { usePlatform } from '../platform/PlatformContext'
 import { saveHistoryItem } from '../storage/history'
@@ -48,16 +49,6 @@ const ANALYSIS_CONFIG: Record<DecisionMode, {
 }
 
 function AnalysisVisual({ mode }: { mode: DecisionMode }): React.JSX.Element {
-  if (mode === 'random') {
-    return (
-      <div className="analysis-mode-visual analysis-mode-visual--random" aria-hidden="true">
-        <i className="analysis-shuffle-card" />
-        <i className="analysis-shuffle-card" />
-        <i className="analysis-shuffle-card" />
-      </div>
-    )
-  }
-
   if (mode === 'scientific') {
     return (
       <div className="analysis-mode-visual analysis-mode-visual--scientific" aria-hidden="true">
@@ -81,8 +72,10 @@ function AnalysisVisual({ mode }: { mode: DecisionMode }): React.JSX.Element {
 export function AnalysisPage(): React.JSX.Element {
   const navigate = useNavigate()
   const platform = usePlatform()
+  const reducedMotion = useReducedMotion()
   const { state, dispatch } = useDecision()
   const preparedResult = useRef<DecisionResult | null>(state.result)
+  const [completedSteps, setCompletedSteps] = useState(0)
 
   if (!preparedResult.current && state.mode === 'random') {
     const options = state.options.filter((option) => option.label.trim())
@@ -94,6 +87,11 @@ export function AnalysisPage(): React.JSX.Element {
     if (!result) return
 
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const stepTimers = result.mode === 'random'
+      ? [650, 1050, 1400, 1750].map((delay, index) => window.setTimeout(
+          () => setCompletedSteps(index + 1), reducedMotion ? 0 : delay,
+        ))
+      : []
     const timer = window.setTimeout(
       () => {
         dispatch({ type: 'set-result', result })
@@ -103,7 +101,10 @@ export function AnalysisPage(): React.JSX.Element {
       reducedMotion ? 250 : 2000,
     )
 
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(timer)
+      stepTimers.forEach((stepTimer) => window.clearTimeout(stepTimer))
+    }
   }, [dispatch, navigate])
 
   if (!preparedResult.current) {
@@ -132,6 +133,9 @@ export function AnalysisPage(): React.JSX.Element {
   const mode = preparedResult.current.mode
   const config = ANALYSIS_CONFIG[mode]
   const MarkIcon = mode === 'random' ? Dices : mode === 'scientific' ? BarChart3 : mode === 'mystic' ? Sparkles : Bot
+  const randomVisual = mode === 'random' ? <RandomDrawVisual winner={preparedResult.current.winner.label} /> : undefined
+  const visibleCompletedSteps = mode === 'random' ? completedSteps : 2
+  const conclusion = mode === 'random' && completedSteps < 4 ? '每个选项，机会相同。' : config.conclusion
 
   if (platform === 'app') {
     return (
@@ -140,7 +144,9 @@ export function AnalysisPage(): React.JSX.Element {
         title={config.title}
         description={config.description}
         steps={config.steps}
-        conclusion={config.conclusion}
+        conclusion={conclusion}
+        completedSteps={visibleCompletedSteps}
+        visual={randomVisual}
       />
     )
   }
@@ -149,7 +155,7 @@ export function AnalysisPage(): React.JSX.Element {
     <main className="analysis-page">
       <motion.div
         className={`analysis-console analysis-console--${mode}`}
-        initial={{ opacity: 0, scale: 0.98 }}
+        initial={reducedMotion ? false : { opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.35 }}
       >
@@ -158,7 +164,7 @@ export function AnalysisPage(): React.JSX.Element {
         <h1>{config.title}</h1>
         <p>{config.description}</p>
 
-        <AnalysisVisual mode={mode} />
+        {randomVisual ?? <AnalysisVisual mode={mode} />}
 
         <div className="analysis-progress" aria-label="决策分析进度">
           <span />
@@ -167,15 +173,15 @@ export function AnalysisPage(): React.JSX.Element {
         <div className="analysis-steps">
           {config.steps.map((step, index) => (
             <div key={step}>
-              <span className={index < 2 ? 'is-complete' : ''}>
-                {index < 2 ? <Check size={14} /> : <LoaderCircle size={14} />}
+              <span className={index < visibleCompletedSteps ? 'is-complete' : ''}>
+                {index < visibleCompletedSteps ? <Check size={14} /> : <LoaderCircle size={14} />}
               </span>
               <p>{step}</p>
-              <small>{index < 2 ? 'DONE' : 'PROCESSING'}</small>
+              <small>{index < visibleCompletedSteps ? 'DONE' : 'PROCESSING'}</small>
             </div>
           ))}
         </div>
-        <p className="analysis-conclusion">{config.conclusion}</p>
+        <p className="analysis-conclusion">{conclusion}</p>
       </motion.div>
     </main>
   )

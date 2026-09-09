@@ -31,18 +31,18 @@ export function MobileModeCard({
       disabled={disabled}
       onClick={() => onSelect(mode)}
     >
-      <span className="mobile-mode-card__body">
+      <span className="mobile-mode-card__top">
         <span className="mobile-mode-card__icon" aria-hidden="true">
-          <Icon size={22} strokeWidth={1.8} />
+          <Icon size={20} strokeWidth={1.8} />
         </span>
-        <span className="mobile-mode-card__copy">
-          <strong>{title}</strong>
-          <span>{description}</span>
+        <span className="mobile-mode-card__state">
+          {selected ? <Check size={13} aria-hidden="true" /> : null}
+          <span className="mobile-mode-card__state-label">{selected ? '已选择' : '选择'}</span>
         </span>
       </span>
-      <span className="mobile-mode-card__state">
-        {selected ? <Check size={15} aria-hidden="true" /> : null}
-        <span className="mobile-mode-card__state-label">{selected ? '已选择' : '选择'}</span>
+      <span className="mobile-mode-card__copy">
+        <strong>{title}</strong>
+        <span>{description}</span>
       </span>
     </button>
   )

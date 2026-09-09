@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import type { HTMLAttributes, ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -8,32 +7,7 @@ import { MobileNavigationContext, type MobileNavigationValue } from './MobileNav
 
 const motionSettings = vi.hoisted(() => ({ reduced: false }))
 
-vi.mock('framer-motion', () => ({
-  motion: {
-    span: ({
-      children,
-      animate,
-      transition,
-      whileTap,
-      ...props
-    }: HTMLAttributes<HTMLSpanElement> & {
-      children?: ReactNode
-      animate?: { x?: string }
-      transition?: { duration?: number }
-      whileTap?: { scale?: number }
-    }) => (
-      <span
-        {...props}
-        data-animate-x={animate?.x}
-        data-duration={transition?.duration}
-        data-while-tap-scale={whileTap?.scale}
-      >
-        {children}
-      </span>
-    ),
-  },
-  useReducedMotion: () => motionSettings.reduced,
-}))
+vi.mock('framer-motion', () => ({ useReducedMotion: () => motionSettings.reduced }))
 
 function navigationValue(navigateForward = vi.fn()): MobileNavigationValue {
   return {
@@ -71,9 +45,9 @@ describe('MobileFloatingNavigation', () => {
     expect(screen.getByRole('navigation', { name: 'App 主导航' })).toBeInTheDocument()
     expect(screen.getAllByTestId('mobile-navigation-indicator')).toHaveLength(1)
     expect(screen.getByTestId('mobile-navigation-indicator')).toHaveAttribute('data-active-index', '2')
-    expect(screen.getByTestId('mobile-navigation-indicator')).toHaveAttribute('data-animate-x', '200%')
+    expect(screen.getByTestId('mobile-navigation-indicator')).toHaveStyle({ transform: 'translateX(200%)' })
     expect(screen.getByRole('link', { name: '统计' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByTestId('mobile-navigation-target-统计')).toHaveAttribute('data-while-tap-scale', '0.94')
+
   })
 
   it('does not navigate when the current destination is clicked', () => {
@@ -89,7 +63,7 @@ describe('MobileFloatingNavigation', () => {
     motionSettings.reduced = true
     renderNavigation('/')
 
-    expect(screen.getByTestId('mobile-navigation-indicator')).toHaveAttribute('data-duration', '0')
+    expect(screen.getByTestId('mobile-navigation-indicator')).toHaveStyle({ transition: 'none' })
     expect(screen.getByTestId('mobile-navigation-target-决策')).not.toHaveAttribute('data-while-tap-scale')
   })
 })

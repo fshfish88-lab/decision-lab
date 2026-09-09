@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { mobilePrimaryNavigation } from '../../navigation/navigationItems'
@@ -15,21 +15,21 @@ export function MobileFloatingNavigation(): React.JSX.Element | null {
 
   return (
     <nav className="mobile-app__navigation" aria-label="App 主导航">
-      <motion.span
+      <span
         aria-hidden="true"
         className="mobile-app__navigation-indicator"
         data-active-index={activeIndex}
         data-testid="mobile-navigation-indicator"
-        animate={{ x: `${activeIndex * 100}%` }}
-        transition={{ duration: reducedMotion ? 0 : 0.24, ease: EASE_OUT_CUBIC }}
+        style={{
+          transform: `translateX(${activeIndex * 100}%)`,
+          transition: reducedMotion ? 'none' : `transform 220ms ${EASE_OUT_CUBIC}`,
+        }}
       />
       {mobilePrimaryNavigation.map(({ to, label, icon: Icon }) => (
-        <motion.span
+        <span
           key={to}
           className="mobile-app__navigation-target"
           data-testid={`mobile-navigation-target-${label}`}
-          whileTap={reducedMotion ? undefined : { scale: 0.94 }}
-          transition={{ duration: reducedMotion ? 0 : 0.16, ease: EASE_OUT_CUBIC }}
         >
           <NavLink
             to={to}
@@ -45,7 +45,7 @@ export function MobileFloatingNavigation(): React.JSX.Element | null {
             <Icon size={21} aria-hidden="true" />
             <span>{label}</span>
           </NavLink>
-        </motion.span>
+        </span>
       ))}
     </nav>
   )

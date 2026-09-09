@@ -72,7 +72,10 @@ export function MobileResultShell({
   return (
     <section className={`mobile-result mobile-result--${result.mode}`}>
       <header className="mobile-result__heading">
-        <span>{MODE_LABELS[result.mode]} · {new Date(result.createdAt).toLocaleDateString('zh-CN')}</span>
+        <div className="mobile-result__meta">
+          <span>{MODE_LABELS[result.mode]}</span>
+          <time dateTime={result.createdAt}>{new Date(result.createdAt).toLocaleDateString('zh-CN')}</time>
+        </div>
         <h1>决策结果</h1>
         <p>{result.question}</p>
       </header>

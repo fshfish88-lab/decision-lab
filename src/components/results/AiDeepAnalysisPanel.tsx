@@ -11,7 +11,7 @@ import {
   Sparkles,
   TriangleAlert,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   AiApiError,
@@ -27,7 +27,7 @@ const ERROR_COPY: Record<AiApiErrorCode, string> = {
   network: 'AI 服务暂时无法连接，原来的决策结果仍然有效。',
   timeout: 'AI 思考得有点久，本次分析已安全停止，可以重试。',
   rate_limited: '请求有点太密集，请稍后再试。',
-  invalid_response: 'AI 返回内容未通过格式检查，系统没有擅自展示。',
+  invalid_response: '这次解读没能完整生成，请重试。原来的决策结果仍然保留。',
 }
 
 interface AiDeepAnalysisPanelProps {
@@ -171,19 +171,32 @@ export function AiDeepAnalysisPanel({ result, client = createAiApiClient() }: Ai
   const [analysis, setAnalysis] = useState<AiDeepAnalysisData | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState('')
+  const requestRef = useRef<AbortController | null>(null)
   const copy = panelCopy(result)
 
+  useEffect(() => () => {
+    requestRef.current?.abort()
+    requestRef.current = null
+  }, [result.id])
+
   async function analyze(): Promise<void> {
-    if (submitting) return
+    if (submitting || requestRef.current) return
+    const controller = new AbortController()
+    requestRef.current = controller
     setSubmitting(true)
     setStatus('')
     try {
-      setAnalysis(await client.deepAnalyze(buildDeepAnalysisContent(result)))
+      const response = await client.deepAnalyze(buildDeepAnalysisContent(result), controller.signal)
+      if (requestRef.current === controller && !controller.signal.aborted) setAnalysis(response)
     } catch (error) {
+      if (controller.signal.aborted || requestRef.current !== controller) return
       const code = error instanceof AiApiError ? error.code : 'network'
       setStatus(ERROR_COPY[code])
     } finally {
-      setSubmitting(false)
+      if (requestRef.current === controller) {
+        requestRef.current = null
+        setSubmitting(false)
+      }
     }
   }
 

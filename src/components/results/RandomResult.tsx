@@ -1,6 +1,7 @@
 import { Dices, Fingerprint, Hash, ListChecks } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
+import { usePlatform } from '../../platform/PlatformContext'
 import type { DecisionResult } from '../../types/decision'
 
 interface RandomResultProps {
@@ -8,6 +9,8 @@ interface RandomResultProps {
 }
 
 export function RandomResult({ result }: RandomResultProps): React.JSX.Element {
+  const platform = usePlatform()
+  const reducedMotion = useReducedMotion()
   const details = result.details?.type === 'random' ? result.details : undefined
   const probability = details?.probability ?? 1 / result.options.length
   const probabilityLabel = `${(probability * 100).toFixed(2)}%`
@@ -27,7 +30,7 @@ export function RandomResult({ result }: RandomResultProps): React.JSX.Element {
     <div className="mode-result random-result">
       <motion.section
         className="random-result__hero"
-        initial={{ opacity: 0, y: 14 }}
+        initial={platform === 'app' || reducedMotion ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
       >

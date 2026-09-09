@@ -17,6 +17,7 @@ describe('MobileAnalysisView', () => {
 
     expect(screen.getByRole('heading', { name: '正在启动命运抽签' })).toBeInTheDocument()
     expect(screen.getByRole('progressbar', { name: '决策分析进度' })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow')
     expect(screen.getByText('命运确认。')).toBeInTheDocument()
     expect(screen.queryByText('PROCESSING')).not.toBeInTheDocument()
   })
