@@ -36,7 +36,7 @@ export function MobileModeCard({
           <Icon size={20} strokeWidth={1.8} />
         </span>
         <span className="mobile-mode-card__state">
-          {selected ? <Check size={13} aria-hidden="true" /> : null}
+          <span className="mobile-mode-card__check" aria-hidden="true"><Check size={13} aria-hidden="true" /></span>
           <span className="mobile-mode-card__state-label">{selected ? '已选择' : '选择'}</span>
         </span>
       </span>

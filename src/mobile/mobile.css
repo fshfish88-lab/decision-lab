@@ -214,6 +214,8 @@
   border-radius: 16px;
   color: var(--mobile-text);
   background: var(--mode-soft);
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .mobile-mode-card--random { --mode-soft: var(--random-soft); --mode-accent: var(--random); --mode-ink: #5144ad; }
@@ -277,15 +279,33 @@
   font-size: 10px;
   line-height: 1.4;
   font-weight: 700;
+  background: transparent;
+  transition: background-color 180ms ease;
 }
 
 .mobile-mode-card.is-selected .mobile-mode-card__state { background: rgb(255 255 255 / 85%); }
+
+.mobile-mode-card__check {
+  display: grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  opacity: 0;
+  transform: scale(0.65);
+  transition: opacity 180ms ease, transform 180ms var(--ease-out);
+}
+
+.mobile-mode-card.is-selected .mobile-mode-card__check { opacity: 1; transform: scale(1); }
+
+.mobile-mode-card__state-label { min-width: 3em; text-align: center; }
 
 .mobile-option-editor,
 .mobile-option-editor__list {
   display: grid;
   gap: 10px;
 }
+
+.mobile-option-editor__list { gap: 0; }
 
 .mobile-option-row {
   display: grid;
@@ -807,11 +827,12 @@
 }
 
 .mobile-tarot-spread__slot {
+  position: relative;
   width: clamp(62px, 19vw, 82px);
   min-width: 0;
-  transform: translateY(var(--mobile-tarot-offset-y)) rotate(var(--mobile-tarot-rotation));
-  transform-origin: 50% 115%;
-  transition: opacity 180ms ease, filter 180ms ease, transform 220ms var(--ease-out);
+  transform: translate(var(--mobile-tarot-focus-x, 0px), calc(var(--mobile-tarot-offset-y) + var(--mobile-tarot-focus-y, 0px))) rotate(var(--mobile-tarot-rotation)) scale(var(--mobile-tarot-focus-scale, 1));
+  transform-origin: center;
+  transition: opacity 180ms ease, filter 180ms ease, transform 440ms var(--ease-out);
 }
 
 .mobile-tarot-spread__slot .tarot-card {
@@ -819,15 +840,20 @@
   min-height: 44px;
 }
 
-.mobile-tarot-spread[data-phase='focusing'] .mobile-tarot-spread__slot.is-focused,
-.mobile-tarot-spread[data-phase='revealed'] .mobile-tarot-spread__slot.is-focused {
-  position: absolute;
+.mobile-tarot-spread__slot.is-focused {
   z-index: 3;
-  top: 50%;
-  left: 50%;
-  width: clamp(108px, 31vw, 132px);
-  transform: translate(-50%, -50%) rotate(0) scale(1.03);
 }
+
+.mobile-tarot-spread .tarot-card:not(:disabled):hover .tarot-card__inner { translate: none; }
+.mobile-tarot-spread .tarot-card__inner { transition: transform 600ms var(--ease-out), box-shadow 220ms ease; }
+
+.mobile-tarot-spread .tarot-card__face { padding: 6px; }
+
+.mobile-tarot-spread .tarot-card__artwork { min-height: 0; flex: 1; margin: 3px 0; }
+.mobile-tarot-spread .tarot-card__face > small,
+.mobile-tarot-spread .tarot-card__face > strong,
+.mobile-tarot-spread .tarot-card__face > span { flex-shrink: 0; line-height: 1.1; }
+.mobile-tarot-spread .tarot-card__face > span { font-size: 8px; letter-spacing: 0; }
 
 .mobile-tarot-spread__slot.is-dimmed {
   opacity: 0.1;
@@ -849,14 +875,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mobile-mode-card,
+  .mobile-mode-card__state,
+  .mobile-mode-card__check { transition: none; }
+
   .mobile-tarot-spread__slot,
   .mobile-tarot-spread[data-phase] .mobile-tarot-spread__slot.is-focused {
     transition-duration: 1ms;
-  }
-
-  .mobile-tarot-spread[data-phase='focusing'] .mobile-tarot-spread__slot.is-focused,
-  .mobile-tarot-spread[data-phase='revealed'] .mobile-tarot-spread__slot.is-focused {
-    transform: translate(-50%, -50%);
   }
 
   .mobile-tarot-spread .tarot-card__inner {

@@ -7,6 +7,8 @@ interface TarotCardProps {
   entry: TarotSpreadCard
   selected: boolean
   dimmed: boolean
+  revealInPlace?: boolean
+  onFlipComplete?: () => void
   onSelect: (position: number) => void
 }
 
@@ -14,6 +16,8 @@ export function TarotCard({
   entry,
   selected,
   dimmed,
+  revealInPlace = false,
+  onFlipComplete,
   onSelect,
 }: TarotCardProps): React.JSX.Element {
   const reducedMotion = useReducedMotion()
@@ -29,10 +33,17 @@ export function TarotCard({
       disabled={dimmed}
       onClick={() => onSelect(entry.position)}
       initial={reducedMotion ? false : { opacity: 0, y: 24 }}
-      animate={{ opacity: dimmed ? 0.25 : 1, y: selected && !reducedMotion ? -20 : 0 }}
+      animate={{ opacity: dimmed ? 0.25 : 1, y: selected && !reducedMotion && !revealInPlace ? -20 : 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.36, delay: selected || reducedMotion ? 0 : entry.position * 0.045 }}
     >
-      <span className="tarot-card__inner">
+      <span
+        className="tarot-card__inner"
+        onTransitionEnd={(event) => {
+          if (selected && event.target === event.currentTarget && event.propertyName === 'transform') {
+            onFlipComplete?.()
+          }
+        }}
+      >
         <span className="tarot-card__back" aria-hidden={selected}>
           <i className="tarot-card__sun" />
           <i className="tarot-card__diamond" />

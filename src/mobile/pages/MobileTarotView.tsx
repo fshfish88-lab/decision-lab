@@ -45,7 +45,7 @@ export function MobileTarotView({
         <TarotReveal result={revealedResult} onContinue={onContinue} />
       ) : (
         <p className="mobile-tarot__prompt">
-          {phase === 'focusing' ? '牌面正在回应你的第一感觉…' : '轻点一张牌，答案会在原地翻开。'}
+          {phase === 'flipping' || phase === 'focusing' ? '牌面正在回应你的第一感觉…' : '轻点一张牌，原地翻开后放大揭晓。'}
         </p>
       )}
     </section>

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -52,6 +52,16 @@ describe('TarotPage', () => {
     expect(localStorage.getItem(HISTORY_STORAGE_KEY)).toBeNull()
 
     await user.click(cards[0])
+
+    expect(screen.queryByRole('heading', { name: '你的牌已翻开' })).not.toBeInTheDocument()
+    const finish = (element: Element): void => {
+      const event = new Event('transitionend', { bubbles: true })
+      Object.defineProperty(event, 'propertyName', { value: 'transform' })
+      fireEvent(element, event)
+    }
+    finish(cards[0].querySelector('.tarot-card__inner')!)
+    expect(screen.queryByRole('heading', { name: '你的牌已翻开' })).not.toBeInTheDocument()
+    finish(cards[0].parentElement!)
 
     expect(screen.getByRole('heading', { name: '你的牌已翻开' })).toBeInTheDocument()
     expect(screen.getAllByText('正位').length).toBeGreaterThan(0)

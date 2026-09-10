@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { BarChart3, CheckCircle2, FlaskConical } from 'lucide-react'
 
 import type { DecisionResult, ScientificResultDetails } from '../../types/decision'
@@ -11,6 +12,7 @@ function getDetails(result: DecisionResult): ScientificResultDetails | undefined
 }
 
 export function ScientificResult({ result }: ScientificResultProps): React.JSX.Element {
+  const reducedMotion = useReducedMotion()
   const details = getDetails(result)
   const ranking = result.ranking ?? []
   const leader = ranking[0]
@@ -31,11 +33,16 @@ export function ScientificResult({ result }: ScientificResultProps): React.JSX.E
           <h3>{result.winner.label}</h3>
           <p>每一分都有出处，这次不是拍脑袋。</p>
         </div>
-        <div className="scientific-result__score" aria-label={`综合得分 ${winningScore.toFixed(2)} 分`}>
+        <motion.div
+          className="scientific-result__score"
+          aria-label={`综合得分 ${winningScore.toFixed(2)} 分`}
+          animate={{ scale: reducedMotion ? 1 : [1, 1.025, 1] }}
+          transition={{ duration: reducedMotion ? 0 : 0.45 }}
+        >
           <span>综合得分</span>
           <strong>{winningScore.toFixed(2)} <small>/ 10</small></strong>
           {scoreGap !== undefined && <p>领先第二名 {scoreGap.toFixed(2)} 分</p>}
-        </div>
+        </motion.div>
       </section>
 
       <section className="mode-result__section" aria-labelledby="scientific-ranking-heading">
@@ -44,13 +51,20 @@ export function ScientificResult({ result }: ScientificResultProps): React.JSX.E
           <small>按加权总分降序</small>
         </div>
         <ol className="scientific-ranking">
-          {ranking.map((item) => (
-            <li key={item.optionId} className={item.rank === 1 ? 'is-winner' : undefined}>
+          {ranking.map((item, index) => (
+            <motion.li
+              key={item.optionId}
+              className={item.rank === 1 ? 'is-winner' : undefined}
+              initial={reducedMotion ? false : { opacity: 0, y: 6 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: reducedMotion ? 0 : 0.24, delay: reducedMotion ? 0 : index * 0.04 }}
+            >
               <span>{String(item.rank).padStart(2, '0')}</span>
               <strong>{item.label}</strong>
               <b>{item.score.toFixed(2)}</b>
               {item.rank === 1 && <CheckCircle2 size={18} aria-label="推荐方案" />}
-            </li>
+            </motion.li>
           ))}
         </ol>
       </section>
@@ -67,7 +81,13 @@ export function ScientificResult({ result }: ScientificResultProps): React.JSX.E
                 <article key={item.criterionId}>
                   <div><strong>{item.name}</strong><span>权重 {item.weight}% · 评分 {item.score}</span></div>
                   <div className="scientific-contributions__track" aria-hidden="true">
-                    <span style={{ width: `${(item.contribution / maxContribution) * 100}%` }} />
+                    <motion.span
+                      style={{ width: `${(item.contribution / maxContribution) * 100}%`, transformOrigin: 'left' }}
+                      initial={reducedMotion ? false : { scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: reducedMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    />
                   </div>
                   <b>+{item.contribution.toFixed(2)}</b>
                 </article>

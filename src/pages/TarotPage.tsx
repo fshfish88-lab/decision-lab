@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { TarotDeck } from '../components/tarot/TarotDeck'
 import { TarotReveal } from '../components/tarot/TarotReveal'
+import type { TarotPhase } from '../components/tarot/useTarotReveal'
 import { MobileTarotView } from '../mobile/pages/MobileTarotView'
 import { usePlatform } from '../platform/PlatformContext'
 import { createTarotResult } from '../services/decisionEngine'
@@ -25,6 +26,7 @@ export function TarotPage(): React.JSX.Element {
   const selectionLockRef = useRef(false)
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null)
   const [revealedResult, setRevealedResult] = useState<DecisionResult | null>(null)
+  const [phase, setPhase] = useState<TarotPhase>('idle')
 
   if (ready && !spreadRef.current) {
     spreadRef.current = createTarotSpread(validOptions)
@@ -73,7 +75,7 @@ export function TarotPage(): React.JSX.Element {
   }
 
   return (
-    <main className="tarot-page">
+    <main className="tarot-page" data-phase={phase}>
       <button className="back-button" type="button" onClick={() => navigate('/')}>
         <ArrowLeft size={17} />返回修改选项
       </button>
@@ -90,12 +92,13 @@ export function TarotPage(): React.JSX.Element {
         spread={spreadRef.current}
         selectedPosition={selectedPosition}
         onSelect={reveal}
+        onPhaseChange={setPhase}
       />
 
-      {revealedResult ? (
+      {revealedResult && phase === 'revealed' ? (
         <TarotReveal result={revealedResult} onContinue={() => navigate('/result')} />
       ) : (
-        <p className="tarot-prompt">不要分析牌背。第一眼想点哪张，就点哪张。</p>
+        <p className="tarot-prompt">{phase === 'idle' ? '凭第一感觉选一张，原地翻开后放大揭晓。' : '牌面正在回应你的第一感觉…'}</p>
       )}
     </main>
   )
