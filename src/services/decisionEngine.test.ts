@@ -210,3 +210,101 @@ describe('decisionEngine', () => {
     ).toBeCloseTo(result.ranking?.[0].score ?? 0, 8)
   })
 })
+
+describe('decisionEngine option mapping', () => {
+  const advice = {
+    recommended_option: '火锅', confidence: 80, verdict: '测试', core_reasons: [],
+    main_tradeoff: '', conditions_to_reconsider: [], action_plan: [],
+  }
+
+  it.each([['火锅', '火锅', '火锅'], [' 火  锅 ', '火\t锅', '火 锅']])(
+    'rejects an ambiguous AI recommendation for %s / %s', (first, second, recommendation) => {
+      expect(() => createAiResult({ ...metadata, context: '',
+        options: [{ id: 'first', label: first }, { id: 'second', label: second }],
+        advice: { ...advice, recommended_option: recommendation },
+      })).toThrow('AI 推荐项无法映射到候选项')
+    },
+  )
+
+  it('maps a normalized AI recommendation to the unique original option', () => {
+    const result = createAiResult({ ...metadata, context: '',
+      options: [{ id: 'first', label: '火  锅' }, { id: 'second', label: '烧烤' }],
+      advice: { ...advice, recommended_option: ' 火 锅 ' },
+    })
+    expect(result.winner).toEqual({ id: 'first', label: '火  锅' })
+  })
+
+  it.each([createRandomResult, createMysticResult])('preserves duplicate identity after filtering blank options: %s', make => {
+    expect(make({ ...metadata, random: () => 0.7, options: [
+      { id: 'blank', label: '  ' }, { id: 'first', label: '火锅' }, { id: 'second', label: '火锅' },
+    ] }).winner.id).toBe('second')
+  })
+  // 回归：清理阶段会折叠选项内部的连续空格，而回查阶段过去只做 trim，
+  // 两边规则不一致会让合法选项直接映射失败。
+  it('maps a random draw back to an option whose label contains inner whitespace', () => {
+    const spaced: DecisionOption[] = [
+      { id: 'hotpot', label: '火  锅' },
+      { id: 'bbq', label: '烧烤' },
+    ]
+
+    const result = createRandomResult({ ...metadata, options: spaced, random: () => 0 })
+
+    expect(result.winner.id).toBe('hotpot')
+  })
+
+  it('maps a mystic draw back to an option whose label contains inner whitespace', () => {
+    const spaced: DecisionOption[] = [
+      { id: 'hotpot', label: '火  锅' },
+      { id: 'bbq', label: '烧烤' },
+    ]
+
+    const result = createMysticResult({ ...metadata, options: spaced, random: () => 0 })
+
+    expect(result.winner.id).toBe('hotpot')
+  })
+
+  // 回归：过去用 Array.find 按文本回查，重名选项永远命中第一个，
+  // 抽取真正落到的那个选项的信息被丢弃。
+  it('returns the drawn duplicate rather than the first option with that label', () => {
+    const duplicated: DecisionOption[] = [
+      { id: 'first', label: '火锅' },
+      { id: 'second', label: '火锅' },
+    ]
+
+    const result = createRandomResult({
+      ...metadata,
+      options: duplicated,
+      random: () => 0.7,
+    })
+
+    expect(result.winner.id).toBe('second')
+  })
+
+  it('returns the drawn duplicate in mystic mode as well', () => {
+    const duplicated: DecisionOption[] = [
+      { id: 'first', label: '火锅' },
+      { id: 'second', label: '火锅' },
+    ]
+
+    const result = createMysticResult({
+      ...metadata,
+      options: duplicated,
+      random: () => 0.7,
+    })
+
+    expect(result.winner.id).toBe('second')
+  })
+
+  it('excludes blank options from the draw and the reported candidate count', () => {
+    const withBlank: DecisionOption[] = [
+      { id: 'hotpot', label: '火锅' },
+      { id: 'blank', label: '   ' },
+      { id: 'sushi', label: '日料' },
+    ]
+
+    const result = createRandomResult({ ...metadata, options: withBlank, random: () => 0 })
+
+    expect(result.winner.id).toBe('hotpot')
+    expect(result.explanation).toContain('2 个候选项')
+  })
+})

@@ -4,6 +4,7 @@ import { cleanOptions } from './random'
 
 export interface MysticDecision {
   winner: string
+  winningIndex: number
   explanation: string
   confidence: number
   metrics: DecisionMetric[]
@@ -39,7 +40,8 @@ export function createMysticDecision(
     throw new Error('至少需要两个有效选项')
   }
 
-  const winner = validOptions[sampleIndex(validOptions.length, random)]
+  const winningIndex = sampleIndex(validOptions.length, random)
+  const winner = validOptions[winningIndex]
   const confidence = clamp(Math.round(78 + random() * 19), 60, 99)
   const template = MYSTIC_TEMPLATES[sampleIndex(MYSTIC_TEMPLATES.length, random)]
   const metricCount = 3 + sampleIndex(3, random)
@@ -62,6 +64,7 @@ export function createMysticDecision(
 
   return {
     winner,
+    winningIndex,
     explanation: template.replaceAll('{choice}', winner),
     confidence,
     metrics: [...positiveMetrics, regret],

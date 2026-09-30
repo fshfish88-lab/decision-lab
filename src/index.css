@@ -2630,6 +2630,53 @@ select:focus-visible {
   color: var(--muted);
 }
 
+/* ErrorBoundary 的兜底界面：不依赖平台分支，Web 与移动端共用。 */
+.error-fallback {
+  min-height: calc(100vh - 210px);
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.error-fallback__icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--mystic);
+  background: var(--mystic-soft);
+}
+
+.error-fallback h1 {
+  margin: 0 0 10px;
+  font-size: clamp(26px, 5vw, 40px);
+}
+
+.error-fallback p {
+  margin: 0 0 22px;
+  max-width: 46ch;
+  color: var(--muted);
+}
+
+.error-fallback__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.error-fallback__actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 @media (max-width: 960px) {
   .site-header__inner {
     grid-template-columns: 1fr auto;

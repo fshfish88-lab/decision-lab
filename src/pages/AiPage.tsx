@@ -22,6 +22,7 @@ import { MobileAiView } from '../mobile/pages/MobileAiView'
 import { usePlatform } from '../platform/PlatformContext'
 import { createAiResult } from '../services/decisionEngine'
 import { useDecision } from '../state/DecisionContext'
+import { hasDuplicateOptionLabels, selectValidOptions } from '../utils/optionLabels'
 import { saveHistoryItem } from '../storage/history'
 
 interface AiPageProps {
@@ -49,7 +50,7 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
   const online = useOnlineStatus()
   const { state, dispatch } = useDecision()
   const options = useMemo(
-    () => state.options.filter((option) => option.label.trim()),
+    () => selectValidOptions(state.options),
     [state.options],
   )
   const [context, setContext] = useState(state.aiContext)
@@ -85,6 +86,18 @@ export function AiPage({ client = createAiApiClient() }: AiPageProps): React.JSX
         <h1>AI 还没有可理解的选项</h1>
         <p>请先输入至少两个有效选项。</p>
         <Link className="secondary-action" to="/">返回首页</Link>
+      </EmptyStateElement>
+    )
+  }
+
+  if (hasDuplicateOptionLabels(options)) {
+    const EmptyStateElement = platform === 'app' ? 'section' : 'main'
+    return (
+      <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'} role="alert">
+        <span className="empty-state__icon"><Bot size={24} aria-hidden="true" /></span>
+        <h1>请先区分重名选项</h1>
+        <p>候选项名称重复，请添加区别（如「火锅·店 A」「火锅·店 B」）后再提交。</p>
+        <Link className="secondary-action" to="/">返回修改选项</Link>
       </EmptyStateElement>
     )
   }

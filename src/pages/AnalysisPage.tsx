@@ -1,6 +1,6 @@
-import { BarChart3, Bot, Check, Dices, LoaderCircle, Orbit, Sparkles } from 'lucide-react'
+import { BarChart3, Bot, Check, Dices, LoaderCircle, Orbit, Sparkles, TriangleAlert } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { createRandomResult } from '../services/decisionEngine'
@@ -10,6 +10,8 @@ import { usePlatform } from '../platform/PlatformContext'
 import { saveHistoryItem } from '../storage/history'
 import { useDecision } from '../state/DecisionContext'
 import type { DecisionMode, DecisionResult } from '../types/decision'
+import type { DecisionState } from '../state/decisionReducer'
+import { selectValidOptions } from '../utils/optionLabels'
 
 const ANALYSIS_CONFIG: Record<DecisionMode, {
   eyebrow: string
@@ -69,46 +71,80 @@ function AnalysisVisual({ mode }: { mode: DecisionMode }): React.JSX.Element {
   )
 }
 
+interface PreparedAnalysis {
+  result: DecisionResult | null
+  failure: string | null
+}
+
+/**
+ * 随机结果必须在首帧就绪，否则动画没有可播的内容。
+ * 因此这里同步构造，并把可能的失败一并收敛成状态，而不是让它冒泡成白屏。
+ */
+function prepareRandomResult(state: DecisionState): PreparedAnalysis {
+  if (state.result) return { result: state.result, failure: null }
+  if (state.mode !== 'random') return { result: null, failure: null }
+
+  try {
+    const options = selectValidOptions(state.options)
+    return {
+      result: createRandomResult({ question: state.question, options }),
+      failure: null,
+    }
+  } catch (error) {
+    console.error('随机结果生成失败', error)
+    return {
+      result: null,
+      failure: error instanceof Error ? error.message : '随机结果生成失败',
+    }
+  }
+}
+
 export function AnalysisPage(): React.JSX.Element {
   const navigate = useNavigate()
   const platform = usePlatform()
   const reducedMotion = useReducedMotion()
   const { state, dispatch } = useDecision()
-  const preparedResult = useRef<DecisionResult | null>(state.result)
+  const [{ result: preparedResult, failure }] = useState(() => prepareRandomResult(state))
   const [completedSteps, setCompletedSteps] = useState(0)
 
-  if (!preparedResult.current && state.mode === 'random') {
-    const options = state.options.filter((option) => option.label.trim())
-    preparedResult.current = createRandomResult({ question: state.question, options })
-  }
-
   useEffect(() => {
-    const result = preparedResult.current
-    if (!result) return
+    if (!preparedResult) return
 
-    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    const stepTimers = result.mode === 'random'
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const stepTimers = preparedResult.mode === 'random'
       ? [650, 1050, 1400, 1750].map((delay, index) => window.setTimeout(
-          () => setCompletedSteps(index + 1), reducedMotion ? 0 : delay,
+          () => setCompletedSteps(index + 1), prefersReduced ? 0 : delay,
         ))
       : []
     const timer = window.setTimeout(
       () => {
-        dispatch({ type: 'set-result', result })
-        saveHistoryItem(result)
+        dispatch({ type: 'set-result', result: preparedResult })
+        saveHistoryItem(preparedResult)
         navigate('/result', { replace: true })
       },
-      reducedMotion ? 250 : 2000,
+      prefersReduced ? 250 : 2000,
     )
 
     return () => {
       window.clearTimeout(timer)
       stepTimers.forEach((stepTimer) => window.clearTimeout(stepTimer))
     }
-  }, [dispatch, navigate])
+  }, [dispatch, navigate, preparedResult])
 
-  if (!preparedResult.current) {
+  if (!preparedResult) {
     const EmptyStateElement = platform === 'app' ? 'section' : 'main'
+
+    if (failure) {
+      return (
+        <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'} role="alert">
+          <span className="empty-state__icon"><TriangleAlert size={24} aria-hidden="true" /></span>
+          <h1>这次分析没能完成</h1>
+          <p>{failure}</p>
+          <button className="secondary-action" type="button" onClick={() => navigate('/')}>返回首页</button>
+        </EmptyStateElement>
+      )
+    }
+
     if (state.mode === 'mystic') {
       return (
         <EmptyStateElement className={platform === 'app' ? 'mobile-empty-state' : 'empty-state'}>
@@ -130,10 +166,10 @@ export function AnalysisPage(): React.JSX.Element {
     )
   }
 
-  const mode = preparedResult.current.mode
+  const mode = preparedResult.mode
   const config = ANALYSIS_CONFIG[mode]
   const MarkIcon = mode === 'random' ? Dices : mode === 'scientific' ? BarChart3 : mode === 'mystic' ? Sparkles : Bot
-  const randomVisual = mode === 'random' ? <RandomDrawVisual winner={preparedResult.current.winner.label} /> : undefined
+  const randomVisual = mode === 'random' ? <RandomDrawVisual winner={preparedResult.winner.label} /> : undefined
   const visibleCompletedSteps = mode === 'random' ? completedSteps : 2
   const conclusion = mode === 'random' && completedSteps < 4 ? '每个选项，机会相同。' : config.conclusion
 

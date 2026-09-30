@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -56,6 +56,52 @@ function RouteProbe(): React.JSX.Element {
 }
 
 describe('AnalysisPage mode experiences', () => {
+  it.each<AppPlatform>(['web', 'app'])('contains result preparation failures on %s without saving or navigating', (platform) => {
+    vi.useFakeTimers()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const dispatch = vi.fn()
+    render(
+      <MemoryRouter initialEntries={['/analysis']}>
+        <PlatformContext.Provider value={platform}>
+          <DecisionContext.Provider value={{ state: {
+            ...initialDecisionState, mode: 'random', result: null,
+            options: [{ id: 'only', label: '火锅' }],
+          }, dispatch }}>
+            <AnalysisPage /><RouteProbe />
+          </DecisionContext.Provider>
+        </PlatformContext.Provider>
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('alert')).toHaveTextContent('至少需要两个有效选项')
+    act(() => vi.advanceTimersByTime(3000))
+    expect(saveHistoryItem).not.toHaveBeenCalled()
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(screen.getByTestId('route')).toHaveTextContent('/analysis')
+    fireEvent.click(screen.getByRole('button', { name: '返回首页' }))
+    expect(screen.getByTestId('route').textContent).toBe('/')
+  })
+
+  it.each<AppPlatform>(['web', 'app'])('generates and persists the selected duplicate ID on %s', (platform) => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0.7)
+    const dispatch = vi.fn()
+    render(
+      <MemoryRouter initialEntries={['/analysis']}>
+        <PlatformContext.Provider value={platform}>
+          <DecisionContext.Provider value={{ state: {
+            ...initialDecisionState, mode: 'random', result: null,
+            options: [{ id: 'first', label: '火  锅' }, { id: 'second', label: '火  锅' }],
+          }, dispatch }}>
+            <AnalysisPage /><RouteProbe />
+          </DecisionContext.Provider>
+        </PlatformContext.Provider>
+      </MemoryRouter>,
+    )
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(2000))
+    expect(saveHistoryItem).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ winner: { id: 'second', label: '火  锅' } }))
+    expect(screen.getByTestId('route')).toHaveTextContent('/result')
+  })
   it.each<[AppPlatform, boolean]>([['web', false], ['app', false], ['web', true], ['app', true]])(
     'reveals and saves the same prepared winner once on %s (reduced motion: %s)',
     (platform, reducedMotion) => {

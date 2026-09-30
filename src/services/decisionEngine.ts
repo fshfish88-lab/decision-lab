@@ -2,6 +2,7 @@ import { createMysticDecision } from '../algorithms/mystic'
 import { drawRandomOption } from '../algorithms/random'
 import { rankScientificOptions } from '../algorithms/scientific'
 import type { TarotSpreadCard } from '../tarot/tarotEngine'
+import { cleanDecisionOptions, matchOptionsByLabel } from '../utils/optionLabels'
 import type {
   AiDecisionData,
   Criterion,
@@ -109,18 +110,20 @@ function buildMysticEvidence(
 }
 
 export function createRandomResult(input: RandomResultInput): DecisionResult {
+  const candidates = cleanDecisionOptions(input.options)
   const draw = drawRandomOption(
-    input.options.map((option) => option.label),
+    candidates.map((entry) => entry.label),
     input.random,
   )
-  const winner = input.options.find((option) => option.label.trim() === draw.winner)
-  if (!winner) throw new Error('随机结果无法映射到候选项')
+  const candidate = candidates[draw.winningIndex]
+  if (!candidate) throw new Error('随机结果无法映射到候选项')
+  const winner = candidate.option
 
   return {
     ...baseResult(input),
     mode: 'random',
     winner,
-    explanation: `系统对 ${input.options.length} 个候选项执行了等概率抽取，「${winner.label}」在本轮随机序列中胜出。`,
+    explanation: `系统对 ${candidates.length} 个候选项执行了等概率抽取，「${candidate.label}」在本轮随机序列中胜出。`,
     confidence: 100,
     metrics: [
       { key: 'equal-probability', label: '等概率执行', value: 100 },
@@ -140,11 +143,12 @@ export function createRandomResult(input: RandomResultInput): DecisionResult {
 
 export function createMysticResult(input: RandomResultInput): DecisionResult {
   const currentTime = (input.now ?? (() => new Date()))()
+  const candidates = cleanDecisionOptions(input.options)
   const mystic = createMysticDecision(
-    input.options.map((option) => option.label),
+    candidates.map((entry) => entry.label),
     input.random,
   )
-  const winner = input.options.find((option) => option.label.trim() === mystic.winner)
+  const winner = candidates[mystic.winningIndex]?.option
   if (!winner) throw new Error('玄学结果无法映射到候选项')
 
   return {
@@ -245,8 +249,10 @@ export function createTarotResult(input: TarotResultInput): DecisionResult {
 
 export function createAiResult(input: AiResultInput): DecisionResult {
   const recommendation = input.advice.recommended_option.trim()
-  const winner = input.options.find((option) => option.label.trim() === recommendation)
-  if (!winner) throw new Error('AI 推荐项无法映射到候选项')
+  // 文本协议只能唯一匹配；同名项无法确定 ID，必须拒绝而不是猜测。
+  const matches = matchOptionsByLabel(input.options, recommendation)
+  if (matches.length !== 1) throw new Error('AI 推荐项无法映射到候选项')
+  const [winner] = matches
 
   return {
     ...baseResult(input),

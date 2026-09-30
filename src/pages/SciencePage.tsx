@@ -7,6 +7,7 @@ import { createScientificResult } from '../services/decisionEngine'
 import { MobileSciencePage } from '../mobile/pages/MobileSciencePage'
 import { usePlatform } from '../platform/PlatformContext'
 import { useDecision } from '../state/DecisionContext'
+import { selectValidOptions } from '../utils/optionLabels'
 
 export function SciencePage(): React.JSX.Element {
   const platform = usePlatform()
@@ -19,7 +20,7 @@ function WebSciencePage(): React.JSX.Element {
   const [error, setError] = useState('')
   const [hasRandomizedScores, setHasRandomizedScores] = useState(false)
   const options = useMemo(
-    () => state.options.filter((option) => option.label.trim()),
+    () => selectValidOptions(state.options),
     [state.options],
   )
   const totalWeight = state.criteria.reduce((sum, criterion) => sum + criterion.weight, 0)

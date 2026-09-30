@@ -10,6 +10,7 @@ import { readHistory } from '../storage/history'
 import type { AiDecisionData } from '../types/decision'
 import { AiPage } from './AiPage'
 import { HomePage } from './HomePage'
+import { PlatformContext, type AppPlatform } from '../platform/PlatformContext'
 
 const advice: AiDecisionData = {
   recommended_option: '火锅',
@@ -26,15 +27,17 @@ function ResultProbe(): React.JSX.Element {
   return <div>AI 结果：{state.result?.winner.label}</div>
 }
 
-function renderFlow(client: AiApiClient): void {
+function renderFlow(client: AiApiClient, platform: AppPlatform = 'web'): void {
   render(
     <MemoryRouter initialEntries={['/']}>
       <DecisionProvider>
+        <PlatformContext.Provider value={platform}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/ai" element={<AiPage client={client} />} />
           <Route path="/result" element={<ResultProbe />} />
         </Routes>
+        </PlatformContext.Provider>
       </DecisionProvider>
     </MemoryRouter>,
   )
@@ -49,6 +52,29 @@ async function enterAiMode(user: ReturnType<typeof userEvent.setup>): Promise<vo
 
 describe('AiPage', () => {
   afterEach(() => vi.restoreAllMocks())
+  it.each<AppPlatform>(['web', 'app'])('blocks normalized duplicates before a request on %s and allows correction', async (platform) => {
+    localStorage.clear()
+    const user = userEvent.setup()
+    const decide = vi.fn().mockResolvedValue({ ...advice, recommended_option: '烧烤' })
+    renderFlow({ decide, deepAnalyze: vi.fn() }, platform)
+    await user.type(screen.getByLabelText('选项 1'), ' 火  锅 ')
+    await user.type(screen.getByLabelText('选项 2'), '火 锅')
+    await user.click(screen.getByRole('button', { name: /AI 模式/ }))
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('请先区分重名选项')
+    expect(decide).not.toHaveBeenCalled()
+    expect(readHistory()).toHaveLength(0)
+    await user.click(screen.getByRole('link', { name: '返回修改选项' }))
+    expect(screen.getByLabelText('选项 1')).toHaveValue(' 火  锅 ')
+    await user.clear(screen.getByLabelText('选项 2'))
+    await user.type(screen.getByLabelText('选项 2'), '烧烤')
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+    await user.type(screen.getByLabelText('补充你的真实情况'), '想吃肉')
+    await user.click(screen.getByRole('button', { name: '让 AI 替我决定' }))
+    expect(await screen.findByText('AI 结果：烧烤')).toBeInTheDocument()
+    expect(decide).toHaveBeenCalledTimes(1)
+    expect(readHistory()[0].winner).toMatchObject({ id: 'option-2', label: '烧烤' })
+  })
   it('cancels a departed request and ignores even a client that resolves after cancellation', async () => {
     localStorage.clear()
     const user = userEvent.setup()

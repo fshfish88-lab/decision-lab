@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 
 import { AppShell } from './components/AppShell'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { ScrollToTop } from './components/ScrollToTop'
 import { AboutPage } from './pages/AboutPage'
 import { AiPage } from './pages/AiPage'
@@ -17,18 +18,20 @@ export function AppRoutes(): React.JSX.Element {
   return (
     <AppShell>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/science" element={<SciencePage />} />
-        <Route path="/tarot" element={<TarotPage />} />
-        <Route path="/ai" element={<AiPage />} />
-        <Route path="/analysis" element={<AnalysisPage />} />
-        <Route path="/result" element={<ResultPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/statistics" element={<StatisticsPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/science" element={<SciencePage />} />
+          <Route path="/tarot" element={<TarotPage />} />
+          <Route path="/ai" element={<AiPage />} />
+          <Route path="/analysis" element={<AnalysisPage />} />
+          <Route path="/result" element={<ResultPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </ErrorBoundary>
     </AppShell>
   )
 }

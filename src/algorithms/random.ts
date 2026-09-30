@@ -1,7 +1,7 @@
+import { normalizeOptionLabel } from '../utils/optionLabels'
+
 export function cleanOptions(options: string[]): string[] {
-  return options
-    .map((option) => option.trim().replace(/\s+/g, ' '))
-    .filter(Boolean)
+  return options.map(normalizeOptionLabel).filter(Boolean)
 }
 
 export interface RandomDraw {

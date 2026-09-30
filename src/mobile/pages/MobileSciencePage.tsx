@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { createRandomScientificScores } from '../../algorithms/scientific'
 import { createScientificResult } from '../../services/decisionEngine'
 import { useDecision } from '../../state/DecisionContext'
+import { selectValidOptions } from '../../utils/optionLabels'
 import { MobileStickyAction } from '../components/MobileStickyAction'
 
 export function MobileSciencePage(): React.JSX.Element {
@@ -14,7 +15,7 @@ export function MobileSciencePage(): React.JSX.Element {
   const [error, setError] = useState('')
   const [randomized, setRandomized] = useState(false)
   const options = useMemo(
-    () => state.options.filter((option) => option.label.trim()),
+    () => selectValidOptions(state.options),
     [state.options],
   )
   const totalWeight = state.criteria.reduce((sum, criterion) => sum + criterion.weight, 0)
